@@ -84,7 +84,7 @@ GitHub = (config) ->
       createOrUpdate: ({ base, body, head, title }) ->
         _fetchGitHub('pullRequests.getAll')(
           base: base
-          head: head
+          head: "#{config.owner}:#{head}"
         )
           .then (prs) ->
             _.chain(prs)
