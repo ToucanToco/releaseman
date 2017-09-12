@@ -1,0 +1,4 @@
+.DS_Store
+auth.json
+bin/
+node_modules/
