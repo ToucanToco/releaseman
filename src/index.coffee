@@ -105,7 +105,7 @@ _chainPullRequestsGet = ({ isNext = true, number } = {}) ->
     .get({ number: number })
 _chainPullRequestsMerge = ({
   base, isNext = true, method = 'merge', pr, prefix
-}) ->
+} = {}) ->
   if isNext
     _logDone()
 
@@ -134,7 +134,7 @@ _chainPullRequestsMerge = ({
     )
 _chainReleasesCreate = ({
   changelog, isBeta = false, isFix = false, isNext = true, release
-}) ->
+} = {}) ->
   if isNext
     _logDone()
 
@@ -204,7 +204,7 @@ _chainReleasesCreate = ({
     )
 _chainReleasesCreatePullRequest = ({
   changelog, isBeta = false, isNext = true
-}) ->
+} = {}) ->
   if isNext
     _logDone()
 
