@@ -3,10 +3,8 @@ Automatic releases script
 
 ## Installation
 - Copy `auth.json.dist` as `auth.json`
-- Generate a new presonal access token from GitHub
-  - Go to https://github.com/settings/tokens
-  - Select the repo scope
-- Write your access token in `auth.json` as `<your-token>`
+- Get ToucanTokar's access token from Lastpass
+- Write the access token in `auth.json` as `<your-token>`
 - Run `yarn`
 - You now have a executable file at `./bin/releaseman`
 
