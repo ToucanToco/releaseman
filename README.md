@@ -29,51 +29,51 @@ Automatic releases script
 ### Beta
 `beta <name>`
 
-Create a new beta
+Creating a new beta
 
-- Create or update the PR for `dev` into `next`
-- Merge the PR
-- Create a new release in Github (from `next` using `<name>`)
+- Creates or updates the PR for `dev` into `next`
+- Merges the PR
+- Creates a new release in Github (from `next` using `<name>`)
 
 ### Fix
 `fix <pr>`
 
-Apply a fix
+Applying a fix
 
-- Update the PR #`<pr>` (set labels to `['bug']`)
-- Squash merge the PR into `next`
-- Delete the branch
-- Create a new release in Github (from `next`)
-- Merge `next` into `dev`
+- Updates the PR #`<pr>` (sets labels to `['bug']`)
+- Squash merges the PR into `next`
+- Deletes the branch
+- Creates a new release in Github (from `next`)
+- Merges `next` into `dev`
 
 ### Help
 `help`
 
-Display the man
+Displaying the man
 
 ### Hotfix
 `hotfix <pr>`
 
-Apply a fix
+Applying a fix
 
-- Update the PR #`<pr>` (set labels to `['bug']`)
-- Squash merge the PR into `master`
-- Delete the branch
-- Create a new release in Github (from `master`)
-- Merge `master` into `next`
-- Create a new release in Github (from `next`)
-- Merge `next` into `dev`
+- Updates the PR #`<pr>` (sets labels to `['bug']`)
+- Squash merges the PR into `master`
+- Deletes the branch
+- Creates a new release in Github (from `master`)
+- Merges `master` into `next`
+- Creates a new release in Github (from `next`)
+- Merges `next` into `dev`
 
 ### Info
 `info <release>`
 
-Get the changelog for the next beta or release (depending on `<release>`, default is release)
+Getting the changelog for the next beta or release (depending on `<release>`, default is release)
 
 ### Release
 `release`
 
-Create a new release
+Creating a new release
 
-- Create or update the PR for `next` into `master`
-- Merge the PR
-- Create a new release in Github (from `master`)
+- Creates or update the PR for `next` into `master`
+- Merges the PR
+- Creates a new release in Github (from `master`)
