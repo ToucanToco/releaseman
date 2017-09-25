@@ -34,7 +34,7 @@ Config = (argv) ->
     owner: if _.isUndefined(argv.owner) then 'toucantoco' else argv.owner
     pr: secondArg
     release: if _.isUndefined(secondArg) then 'release' else secondArg
-    repo: if _.isUndefined(argv.repo) then 'tucana' else argv.repo
+    repo: argv.repo
     type: _.get(argv._, 0)
   )
 

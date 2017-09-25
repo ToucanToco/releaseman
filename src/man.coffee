@@ -1,6 +1,6 @@
 Man =
   """
-  Usage: releaseman <command> [--owner=<owner>] [--repo=<repo>]
+  Usage: releaseman <command> --repo=<repo> [--owner=<owner>]
 
   <command> Available commands (default: 'help')
     beta <name>
@@ -15,7 +15,7 @@ Man =
   <release> On which to get info (default: 'release')
     beta
     release
-  <repo> The repository's name (default: 'tucana')
+  <repo> The repository's name
 
   """
 
