@@ -9,7 +9,7 @@ Automatic releases script
 - You now have a executable file at `./bin/releaseman`
 
 ## Usage
-`releaseman <command> [--owner=<owner>] [--repo=<repo>]`
+`releaseman <command> --repo=<repo> [--owner=<owner>]`
 
 - `<command>` Available commands (default: 'help')
   - [`beta <name>`](#beta)
@@ -24,7 +24,7 @@ Automatic releases script
 - `<release>` On which to get info (default: 'release')
   - `beta`
   - `release`
-- `<repo>` The repository's name (default: 'tucana')
+- `<repo>` The repository's name
 
 ### Beta
 `beta <name>`

@@ -445,10 +445,15 @@ _runRelease = ({ isBeta = false } = {}) ->
     .then ->
       _chainEnd({ script: script })
 
+_log("#{Package.name} v#{Package.version}\n", 'hint')
+
+if _.isUndefined(args.repo)
+  _log(Errors.mandatoryArg('repo'), 'error')
+
+  throw 1
+
 config = Config(args)
 github = GitHub(config)
-
-_log("#{Package.name} v#{Package.version}\n", 'hint')
 
 (
   switch config.type
@@ -462,5 +467,5 @@ _log("#{Package.name} v#{Package.version}\n", 'hint')
   setTimeout(->
     _log(e, 'error')
 
-    throw e
+    throw 1
   , 0)
