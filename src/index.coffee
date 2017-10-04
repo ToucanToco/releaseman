@@ -447,13 +447,19 @@ _runRelease = ({ isBeta = false } = {}) ->
 
 _log("#{Package.name} v#{Package.version}\n", 'hint')
 
-if _.isUndefined(args.repo)
+config = Config(args)
+github = GitHub(config)
+
+if _.isUndefined(args.repo) and _.includes([
+  'beta'
+  'fix'
+  'hotfix'
+  'info'
+  'release'
+], config.type)
   _log(Errors.mandatoryArg('repo'), 'error')
 
   throw 1
-
-config = Config(args)
-github = GitHub(config)
 
 (
   switch config.type
