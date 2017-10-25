@@ -104,7 +104,7 @@ _chainPullRequestsGet = ({ isNext = true, number } = {}) ->
     .pullRequests
     .get({ number: number })
 _chainPullRequestsMerge = ({
-  base, isNext = true, method = 'merge', pr, prefix
+  base, isNext = true, method = 'merge', pr, prefixes
 } = {}) ->
   if isNext
     _logDone()
@@ -114,10 +114,8 @@ _chainPullRequestsMerge = ({
   if (
     not _.isUndefined(base) and not _.isEqual(pr.base.ref, base)
   ) or (
-    not _.isUndefined(prefix) and not (
-      if _.isArray(prefix)
-      then _.some(prefix, (p) -> _.startsWith(pr.head.ref, p))
-      else _.startsWith(pr.head.ref, prefix)
+    not _.isUndefined(prefixes) and not (
+      _.some(prefixes, (prefix) -> _.startsWith(pr.head.ref, prefix))
     )
   )
     throw Errors.mergeApocalypse(pr.head.ref, pr.base.ref)
@@ -288,7 +286,7 @@ _runFix = ({ isHot = false } = {}) ->
   if isHot
     base = 'master'
     backportTo = 'next'
-    prefix = [
+    prefixes = [
       'doc/'
       'hotfix/'
     ]
@@ -296,7 +294,10 @@ _runFix = ({ isHot = false } = {}) ->
   else
     base = 'next'
     backportTo = 'dev'
-    prefix = 'fix/'
+    prefixes = [
+      'doc/'
+      'fix/'
+    ]
     script = 'fix'
 
   _logScript({ script: script })
@@ -316,7 +317,7 @@ _runFix = ({ isHot = false } = {}) ->
         base: base
         method: 'squash'
         pr: pr
-        prefix: prefix
+        prefixes: prefixes
       )
         .then ->
           pr
