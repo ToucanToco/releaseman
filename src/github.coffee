@@ -53,6 +53,26 @@ GitHub = (config) ->
               changelog: "##{issue.number} #{issue.title}"
               labels: _.map(issue.labels, 'name')
             )
+            categoriesLabels = _.map(config.categories, 'label')
+
+            uncategorizedChangelogIssues =
+              _.reject(changelogIssues, (changlogIssue) ->
+                _.some(categoriesLabels, (categoryLabel) ->
+                  _.includes(changlogIssue.labels, categoryLabel)
+                )
+              )
+
+            unless _.isEmpty(uncategorizedChangelogIssues)
+              return Promise.reject("#{
+                if _.size(uncategorizedChangelogIssues) is 1
+                then 'This PR is missing a label'
+                else 'These PRs are missing a label'
+              }:\n#{
+                _.chain(uncategorizedChangelogIssues)
+                  .map('changelog')
+                  .join('\n')
+                  .value()
+              }")
 
             return _.chain(config.categories)
               .map (category) ->
