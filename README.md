@@ -8,6 +8,9 @@ Automatic releases script
 - Run `yarn`
 - You now have a executable file at `./bin/releaseman`
 
+> :warning: Each time `auth.json` is modified, you need to run `yarn` again to
+  update the binary
+
 ## Usage
 `releaseman <command> --repo=<repo> [--owner=<owner>]`
 
