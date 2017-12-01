@@ -54,6 +54,16 @@ _chainCommitsGetChangelog = ({ base, head, isNext = true } = {}) ->
       )
 
       return changelog
+_chainDelay = ({ isNext = true } = {}) ->
+  if isNext
+    _logDone()
+
+  _logTask('Wait 10s')
+
+  return new Promise (resolve) ->
+    setTimeout ->
+      resolve()
+    , 10000
 _chainEnd = ({ isNext = true, script } = {}) ->
   if isNext
     _logDone()
@@ -322,6 +332,10 @@ _runFix = ({ isHot = false } = {}) ->
         .then ->
           pr
     .then (pr) ->
+      _chainDelay()
+        .then ->
+          pr
+    .then (pr) ->
       _chainBranchesDelete({ branch: pr.head.ref })
     .then ->
       _chainReleasesGetLatest({ isBeta: not isHot })
@@ -344,33 +358,35 @@ _runFix = ({ isHot = false } = {}) ->
         base: backportTo
         head: base
       )
-    .then ->
-      if isHot
-      then (
-        _chainReleasesGetLatest({ isBeta: true })
-          .then (release) ->
-            _chainCommitsGetChangelog(
-              base: release.tag_name
-              head: backportTo
-            )
-              .then (changelog) ->
-                [release, changelog]
-          .then ([release, changelog]) ->
-            _chainReleasesCreate(
-              changelog: changelog
-              isBeta: true
-              isFix: true
-              release: release
-            )
-          .then ->
-            _chainBackport(
-              base: 'dev'
-              head: backportTo
-            )
-          .then ->
-            _chainEnd({ script: script })
-      )
-      else _chainEnd({ script: script })
+        .then ->
+          if isHot
+          then (
+            _chainDelay()
+              .then ->
+                _chainReleasesGetLatest({ isBeta: true })
+              .then (release) ->
+                _chainCommitsGetChangelog(
+                  base: release.tag_name
+                  head: backportTo
+                )
+                  .then (changelog) ->
+                    [release, changelog]
+              .then ([release, changelog]) ->
+                _chainReleasesCreate(
+                  changelog: changelog
+                  isBeta: true
+                  isFix: true
+                  release: release
+                )
+              .then ->
+                _chainBackport(
+                  base: 'dev'
+                  head: backportTo
+                )
+              .then ->
+                _chainEnd({ script: script })
+          )
+          else _chainEnd({ script: script })
 _runHelp = ->
   Promise.resolve(_log(Man, 'info'))
 _runInfo = ->
