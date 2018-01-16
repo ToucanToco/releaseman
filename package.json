@@ -1,18 +1,24 @@
 {
-  "description": "Automatic releases script",
-  "devDependencies": {
-    "coffee-script": "^1.12.7",
-    "github": "^11.0.0",
+  "dependencies": {
+    "del-cli": "^1.1.0",
     "lodash": "^4.17.4",
-    "rollup": "^0.49.3",
-    "rollup-plugin-coffee-script": "^1.1.0",
-    "rollup-plugin-commonjs": "^8.2.1",
+    "node-fetch": "^1.7.3",
+    "rollup": "^0.54.0",
+    "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-executable": "^1.1.0",
     "rollup-plugin-json": "^2.3.0",
-    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-node-resolve": "^3.0.2",
     "rollup-plugin-uglify": "^2.0.1",
-    "uglify-es": "^3.1.0",
-    "yargs": "^8.0.2"
+    "spawn-sync": "^1.0.15",
+    "uglify-es": "^3.3.7",
+    "yargs": "^10.1.1"
+  },
+  "description": "Git flow + GitHub PRs = <3",
+  "devDependencies": {
+    "eslint": "^4.15.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-import-resolver-node": "^0.3.2",
+    "eslint-plugin-import": "^2.8.0"
   },
   "license": "UNLICENSED",
   "main": "lib/releaseman",
@@ -23,7 +29,8 @@
     "url": "https://github.com/ToucanToco/releaseman.git"
   },
   "scripts": {
-    "postinstall": "rollup -c"
+    "lint": "eslint src/**.js",
+    "postinstall": "del bin && rollup -c"
   },
   "version": "0.4.2"
 }

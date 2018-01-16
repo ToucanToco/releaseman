@@ -1,0 +1,27 @@
+{
+  "branches": {
+    "develop": "develop",
+    "doc": "doc-",
+    "feature": "f-",
+    "fix": "fix-",
+    "hotfix": "hotfix-",
+    "master": "master",
+    "release": "release-"
+  },
+  "categories": [{
+    "label": "<label>",
+    "title": "<Title in changelog>"
+  }],
+  "labels": {
+    "breaking": "<label for breaking changes>",
+    "doc": "<label for documentation pull requests>",
+    "feature": "<label for features pull requests>",
+    "fix": "<label for fixes pull requests>",
+    "release": "<label for releases pull requests>",
+    "wip": "<label for in progress features>"
+  },
+  "owner": "<repository owner>",
+  "repo": "<repository name>",
+  "tag": "v",
+  "token": "<oauth token>"
+}

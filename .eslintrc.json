@@ -1,0 +1,32 @@
+{
+  "extends": "airbnb-base",
+  "globals": {},
+  "rules": {
+    "array-bracket-newline": [2, "consistent"],
+    "arrow-parens": [2, "always"],
+    "camelcase": 0,
+    "comma-dangle": [2, { "functions": "never" }],
+    "func-names": [2, "never"],
+    "function-paren-newline": [2, "consistent"],
+    "import/extensions": [2, { "js": "never", "json": "never" }],
+    "import/first": [2, { "absolute-first": false }],
+    "import/no-extraneous-dependencies": [2, { "devDependencies": false }],
+    "import/prefer-default-export": 0,
+    "max-len": [2, 80],
+    "multiline-ternary": [2, "always"],
+    "no-floating-decimal": 0,
+    "no-nested-ternary": 0,
+    "no-param-reassign": [2, { "props": true, "ignorePropertyModificationsFor": ["state"] }],
+    "no-shadow": 0,
+    "no-throw-literal": 0,
+    "no-underscore-dangle": 0,
+    "object-curly-newline": [2, { "consistent": true }],
+    "object-shorthand": [2, "never"],
+    "prefer-promise-reject-errors": 0,
+    "sort-keys": [2, "asc", { "caseSensitive": false, "natural": true }],
+    "space-before-function-paren": [2, "never"]
+  },
+  "settings": {
+    "import/resolver": "node"
+  }
+}

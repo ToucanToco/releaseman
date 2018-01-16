@@ -1,4 +1,5 @@
 .DS_Store
 auth.json
 bin/
+defaults.json
 node_modules/
