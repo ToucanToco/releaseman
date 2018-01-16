@@ -8,7 +8,11 @@ import { SET_CONFIG } from '../mutations';
 const START = 'START';
 
 const start = ({ commit, dispatch, state }, argv) => {
-  commit(SET_CONFIG, Config(argv));
+  try {
+    commit(SET_CONFIG, Config(argv));
+  } catch (e) {
+    return Promise.reject(e);
+  }
 
   if (
     !isEqual(state.config.action)(ACTIONS.CONTINUE) &&

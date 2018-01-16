@@ -14,7 +14,7 @@ const Config = (argv) => {
 
   if (!isUndefined(argv.defaults)) {
     if (!fs.existsSync(argv.defaults)) {
-      return Promise.reject('The <defaults> file doesn\'t exist!');
+      throw 'The <defaults> file doesn\'t exist!';
     }
 
     defaults = merge(defaults)(JSON.parse(fs.readFileSync(argv.defaults)));
