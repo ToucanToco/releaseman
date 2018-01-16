@@ -10,8 +10,6 @@ const START = 'START';
 const start = ({ commit, dispatch, state }, argv) => {
   commit(SET_CONFIG, Config(argv));
 
-  console.log(state.config);
-
   if (
     !isEqual(state.config.action)(ACTIONS.CONTINUE) &&
     fs.existsSync(STATE_FILE_PATH)
