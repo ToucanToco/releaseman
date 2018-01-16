@@ -7,8 +7,8 @@ import { logError, logHint } from './log';
 const { argv } = yargs
   .boolean('doc')
   .boolean('punk')
-  .coerce('categories', JSON.parse)
-  .help(false);
+  .help(false)
+  .version(Package.version);
 
 logHint(`${Package.name} v${Package.version}\n`);
 

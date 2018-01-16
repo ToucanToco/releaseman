@@ -4,6 +4,7 @@ import flow from 'lodash/fp/flow';
 import fs from 'fs';
 import get from 'lodash/fp/get';
 import gt from 'lodash/fp/gt';
+import identity from 'lodash/fp/identity';
 import isUndefined from 'lodash/fp/isUndefined';
 import join from 'lodash/fp/join';
 import merge from 'lodash/fp/merge';
@@ -20,13 +21,13 @@ const Config = (argv) => {
     defaults = merge(defaults)(JSON.parse(fs.readFileSync(argv.defaults)));
   }
 
-  const getArgOrDefault = (key) => {
+  const getArgOrDefault = (key, parseArg = identity) => {
     const value = get(key)(argv);
 
     return (
       isUndefined(value)
         ? get(key)(defaults)
-        : value
+        : parseArg(value)
     );
   };
   const secondArg = get(1)(argv._);
@@ -42,7 +43,7 @@ const Config = (argv) => {
       master: getArgOrDefault('branches.master'),
       release: getArgOrDefault('branches.release')
     },
-    categories: getArgOrDefault('categories'),
+    categories: getArgOrDefault('categories', JSON.parse),
     helpOn: secondArg,
     isDoc: argv.doc,
     isPunk: argv.punk,
