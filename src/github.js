@@ -1,4 +1,5 @@
 import assign from 'lodash/fp/assign';
+import concat from 'lodash/fp/concat';
 import fetch from 'node-fetch';
 import filter from 'lodash/fp/filter';
 import first from 'lodash/fp/first';
@@ -105,7 +106,10 @@ const GitHub = (config) => {
             )(commits));
           })
           .then((pullRequests) => {
-            const categoriesLabels = map('label')(config.categories);
+            const categoriesLabels = flow(
+              map('label'),
+              concat(config.labels.release)
+            )(config.categories);
 
             const uncategorizedPullRequests = reject(({ labels }) => (
               some((categoryLabel) => (

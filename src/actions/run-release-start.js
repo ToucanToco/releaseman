@@ -1,4 +1,3 @@
-import flow from 'lodash/fp/flow';
 import get from 'lodash/fp/get';
 import includes from 'lodash/fp/includes';
 import isEmpty from 'lodash/fp/isEmpty';

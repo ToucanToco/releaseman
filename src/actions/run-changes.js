@@ -17,7 +17,11 @@ const runChanges = ({ commit, getters, state }) => {
   }
 
   const isFinish = isEqual('finish')(state.config.position);
-  const mandatoryConfigParams = ['branches.master', 'categories'];
+  const mandatoryConfigParams = [
+    'branches.master',
+    'categories',
+    'labels.release'
+  ];
 
   const configError = getters.configError(...(
     isFinish

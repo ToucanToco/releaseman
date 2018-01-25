@@ -42,6 +42,7 @@ const runFixFinish = ({ commit, getters, state }) => {
         ? 'labels.doc'
         : 'labels.fix'
     ),
+    'labels.release',
     'number',
     'tag'
   );
