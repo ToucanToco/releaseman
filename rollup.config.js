@@ -1,4 +1,3 @@
-import coffeeScript from 'rollup-plugin-coffee-script';
 import commonjs from 'rollup-plugin-commonjs';
 import executable from 'rollup-plugin-executable';
 import json from 'rollup-plugin-json';
@@ -7,23 +6,23 @@ import uglify from 'rollup-plugin-uglify';
 import { minify } from 'uglify-es';
 
 export default {
-  banner: '#!/usr/bin/env node',
   external: [
-    'events', 'fs', 'http', 'https', 'net', 'path', 'tls', 'tty', 'url', 'util'
+    'assert', 'buffer', 'child_process', 'events', 'fs', 'http', 'https',
+    'path', 'spawn-sync', 'stream', 'string_decoder', 'url', 'util', 'zlib'
   ],
-  input: 'src/index.coffee',
+  input: 'src/index.js',
   output: {
+    banner: '#!/usr/bin/env node',
     file: 'bin/releaseman',
     format: 'cjs'
   },
   plugins: [
     json(),
-    coffeeScript(),
     nodeResolve({
-      extensions: [ '.js', '.json', '.coffee' ]
+      extensions: ['.js', '.json']
     }),
     commonjs({
-      extensions: [ '.js', '.json', '.coffee' ]
+      extensions: ['.js', '.json']
     }),
     uglify({}, minify),
     executable()

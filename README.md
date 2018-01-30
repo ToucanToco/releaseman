@@ -1,82 +1,119 @@
 # Releaseman
-Automatic releases script
+Git flow + GitHub PRs = <3
 
 ## Installation
-- Copy `auth.json.dist` as `auth.json`
-- Get ToucanTokar's access token from Lastpass
-- Write the access token in `auth.json` as `<your-token>`
+- Copy `src/defaults.json.dist` as `src/defaults.json`
+- Complete the new file with your defaults (See [options](#options))
 - Run `yarn`
-- You now have a executable file at `./bin/releaseman`
+- You now have an executable file at `./bin/releaseman`
 
-> :warning: Each time `auth.json` is modified, you need to run `yarn` again to
-  update the binary
+> :warning: Each time `defaults.json` is modified or `releaseman` updated, you need to run `yarn` again to update the binary
 
 ## Usage
-`releaseman <command> --repo=<repo> [--owner=<owner>]`
+`releaseman <command> [options]`
 
-- `<command>` Available commands (default: 'help')
-  - [`beta <name>`](#beta)
-  - [`fix <pr>`](#fix)
-  - [`help`](#help)
-  - [`hotfix <pr>`](#hotfix)
-  - [`info <release>`](#info)
-  - [`release`](#release)
-- `<name>` The release's name
-- `<owner>` The repository owner (default: 'toucantoco')
-- `<pr>` The Pull Request's number
-- `<release>` On which to get info (default: 'release')
-  - `beta`
-  - `release`
-- `<repo>` The repository's name
+### Options
+| CLI                          | Description                                                         |
+| ---------------------------- | ------------------------------------------------------------------- |
+| `--branches.develop <value>` | Develop branch                                                      |
+| `--branches.doc <value>`     | Documentation branches prefix                                       |
+| `--branches.feature <value>` | Feature branches prefix                                             |
+| `--branches.fix <value>`     | Fix branches prefix                                                 |
+| `--branches.hotfix <value>`  | Hotfix branches prefix                                              |
+| `--branches.master <value>`  | Master branch                                                       |
+| `--branches.release <value>` | Release branches prefix                                             |
+| `--categories <value>`       | JSON array of labels/titles from which the changelogs are generated |
+| `--defaults <path>`          | Path to a custom defaults JSON file                                 |
+| `--doc`                      | Enable documentation mode                                           |
+| `--labels.breaking <value>`  | Label triggering a breaking change in the version number            |
+| `--labels.doc <value>`       | Label for documentation pull requests                               |
+| `--labels.feature <value>`   | Label for features pull requests                                    |
+| `--labels.fix <value>`       | Label for fixes pull requests                                       |
+| `--labels.release <value>`   | Label for releases pull requests                                    |
+| `--labels.wip <value>`       | Label for unfinished pull requests                                  |
+| `--owner <value>`            | Repository owner                                                    |
+| `--repo <value>`             | Repository name                                                     |
+| `--tag <value>`              | Tags prefix                                                         |
+| `--token <value>`            | GitHub access token                                                 |
 
-### Beta
-`beta <name>`
+### Commands
+#### Changes
+Display the changelog for the next beta or stable release.
 
-Creating a new beta
+`releaseman changes start|finish [options]`
 
-- Creates or updates the PR for `dev` into `next`
-- Merges the PR
-- Creates a new release in Github (from `next` using `<name>`)
+| CLI      | Description                |
+| -------- | -------------------------- |
+| `finish` | Use latest beta and master |
+| `start`  | Use develop and master     |
 
-### Fix
-`fix <pr>`
+#### Continue
+Re-run the last command starting where it failed.
 
-Applying a fix
+`releaseman continue`
 
-- Updates the PR #`<pr>` (sets labels to `['bug']`)
-- Squash merges the PR into `next`
-- Deletes the branch
-- Creates a new release in Github (from `next`)
-- Merges `next` into `dev`
+#### Feature
+Start, publish or finish a feature.
 
-### Help
-`help`
+`releaseman feature ((start|publish) <name>)|(finish <number>) [options]`
 
-Displaying the man
+| CLI        | Description                      |
+| ---------- | -------------------------------- |
+| `finish`   | Merge the feature into develop   |
+| `publish`  | Create the pull request          |
+| `start`    | Create a new branch from develop |
+| `<name>`   | Feature name                     |
+| `<number>` | Feature pull request number      |
 
-### Hotfix
-`hotfix <pr>`
+#### Fix
+Start, publish or finish a fix.
 
-Applying a fix
+`releaseman fix ((start|publish) <name>)|(finish <number>) [options]`
 
-- Updates the PR #`<pr>` (sets labels to `['bug']`)
-- Squash merges the PR into `master`
-- Deletes the branch
-- Creates a new release in Github (from `master`)
-- Merges `master` into `next`
-- Creates a new release in Github (from `next`)
-- Merges `next` into `dev`
+| CLI        | Description                                           |
+| ---------- | ----------------------------------------------------- |
+| `finish`   | Merge the fix into the release branch and backport it |
+| `publish`  | Create the pull request                               |
+| `start`    | Create a new branch from the release branch           |
+| `<name>`   | Fix name                                              |
+| `<number>` | Fix pull request number                               |
 
-### Info
-`info <release>`
+#### Help
+Display help on `releaseman`'s usage.
 
-Getting the changelog for the next beta or release (depending on `<release>`, default is release)
+`releaseman help [<command>]`
 
-### Release
-`release`
+| CLI         | Description                                                                                      |
+| ----------- | ------------------------------------------------------------------------------------------------ |
+| `<command>` | Command on which to display help: changes, continue, feature, fix, help, hotfix, init or release |
 
-Creating a new release
+#### Hotfix
+Start, publish or finish a hotfix.
 
-- Creates or update the PR for `next` into `master`
-- Merges the PR
-- Creates a new release in Github (from `master`)
+`releaseman hotfix ((start|publish) <name>)|(finish <number>) [options]`
+
+| CLI        | Description                                  |
+| ---------- | -------------------------------------------- |
+| `finish`   | Merge the hotfix into master and backport it |
+| `publish`  | Create the pull request                      |
+| `start`    | Create a new branch from master              |
+| `<name>`   | Hotfix name                                  |
+| `<number>` | Hotfix pull request number                   |
+
+#### Init
+Make your repository ready for `releaseman` by creating the develop branch, an initial release and labels.
+
+`releaseman init`
+
+#### Release
+Create a new beta or stable release.
+The `<name>` param is used as the new release's name.
+It is used only when creating a new beta since the stable release will reuse it's beta name.
+
+`releaseman release (start <name>)|finish [options]`
+
+| CLI      | Description                 |
+| -------- | --------------------------- |
+| `finish` | Create a new stable release |
+| `start`  | Create a new beta release   |
+| `<name>` | Release name                |
