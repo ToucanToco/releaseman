@@ -46,7 +46,6 @@ const Config = (argv) => {
     categories: getArgOrDefault('categories', JSON.parse),
     helpOn: secondArg,
     isDoc: argv.doc,
-    isPunk: argv.punk,
     labels: {
       breaking: getArgOrDefault('labels.breaking'),
       doc: getArgOrDefault('labels.doc'),

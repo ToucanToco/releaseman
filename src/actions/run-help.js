@@ -30,7 +30,6 @@ Options:
   --labels.release <value>    Label for releases pull requests
   --labels.wip <value>        Label for unfinished pull requests
   --owner <value>             Repository owner
-  --punk                      Enable punk mode (cc @piotch)
   --repo <value>              Repository name
   --tag <value>               Tags prefix
   --token <value>             GitHub access token

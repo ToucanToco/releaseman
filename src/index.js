@@ -6,7 +6,6 @@ import { logError, logHint } from './log';
 
 const { argv } = yargs
   .boolean('doc')
-  .boolean('punk')
   .help(false)
   .version(Package.version);
 
