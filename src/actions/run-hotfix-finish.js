@@ -55,7 +55,7 @@ const runHotfixFinish = ({ commit, getters, state }) => {
   const fixLabel = (
     state.config.isDoc
       ? state.config.labels.doc
-      : state.config.labels.feature
+      : state.config.labels.fix
   );
 
   if (!isEmpty(configError)) {
