@@ -6,6 +6,8 @@ import { logError, logHint } from './log';
 
 const { argv } = yargs
   .boolean('doc')
+  .boolean('release')
+  .default('release', true)
   .help(false)
   .version(Package.version);
 
