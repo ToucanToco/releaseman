@@ -31,6 +31,7 @@ Git flow + GitHub PRs = <3
 | `--labels.fix <value>`       | Label for fixes pull requests                                       |
 | `--labels.release <value>`   | Label for releases pull requests                                    |
 | `--labels.wip <value>`       | Label for unfinished pull requests                                  |
+| `--no-release`               | Skip tag/release creation (for fixes/hotfixes)                      |
 | `--owner <value>`            | Repository owner                                                    |
 | `--repo <value>`             | Repository name                                                     |
 | `--tag <value>`              | Tags prefix                                                         |

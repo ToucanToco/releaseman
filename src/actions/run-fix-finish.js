@@ -135,59 +135,67 @@ const runFixFinish = ({ commit, getters, state }) => {
     })
     .then(() => getters.runOrSkip(5, 6)(DELETE_BRANCH))
     .then(() => {
+      if (state.config.isRelease) {
+        if (getters.isCurrentTaskIndex(6)) {
+          commit(ASSIGN_DATA, { isPrerelease: true });
+        }
+
+        return getters.runOrSkip(6, 7)(GET_LATEST_RELEASE_TAG)
+          .then(() => {
+            if (getters.isCurrentTaskIndex(7)) {
+              return commit(ASSIGN_DATA, {
+                base: state.data.tag,
+                head: state.data.base
+              });
+            }
+
+            return undefined;
+          })
+          .then(() => getters.runOrSkip(7, 8)(GET_CHANGELOG))
+          .then(() => {
+            if (getters.isCurrentTaskIndex(8)) {
+              return commit(ASSIGN_DATA, { isFix: true });
+            }
+
+            return undefined;
+          })
+          .then(() => getters.runOrSkip(8, 9)(GET_NEXT_RELEASE))
+          .then(() => {
+            if (getters.isCurrentTaskIndex(9)) {
+              return commit(ASSIGN_DATA, { branch: state.data.head });
+            }
+
+            return undefined;
+          })
+          .then(() => getters.runOrSkip(9, 10)(CREATE_RELEASE))
+          .then(() => {
+            if (getters.isCurrentTaskIndex(10)) {
+              return commit(ASSIGN_DATA, {
+                base: state.config.branches.master
+              });
+            }
+
+            return undefined;
+          })
+          .then(() => getters.runOrSkip(10, 11)(GET_CHANGELOG))
+          .then(() => getters.runOrSkip(11, 12)(FIND_RELEASE_PULL_REQUEST))
+          .then(() => {
+            if (getters.isCurrentTaskIndex(12)) {
+              return commit(ASSIGN_DATA, { name: undefined });
+            }
+
+            return undefined;
+          })
+          .then(() => getters.runOrSkip(12, 13)(UPDATE_PULL_REQUEST));
+      }
       if (getters.isCurrentTaskIndex(6)) {
-        return commit(ASSIGN_DATA, { isPrerelease: true });
+        return commit(ASSIGN_DATA, { head: state.data.base });
       }
 
       return undefined;
     })
-    .then(() => getters.runOrSkip(6, 7)(GET_LATEST_RELEASE_TAG))
     .then(() => {
-      if (getters.isCurrentTaskIndex(7)) {
-        return commit(ASSIGN_DATA, {
-          base: state.data.tag,
-          head: state.data.base
-        });
-      }
-
-      return undefined;
-    })
-    .then(() => getters.runOrSkip(7, 8)(GET_CHANGELOG))
-    .then(() => {
-      if (getters.isCurrentTaskIndex(8)) {
-        return commit(ASSIGN_DATA, { isFix: true });
-      }
-
-      return undefined;
-    })
-    .then(() => getters.runOrSkip(8, 9)(GET_NEXT_RELEASE))
-    .then(() => {
-      if (getters.isCurrentTaskIndex(9)) {
-        return commit(ASSIGN_DATA, { branch: state.data.head });
-      }
-
-      return undefined;
-    })
-    .then(() => getters.runOrSkip(9, 10)(CREATE_RELEASE))
-    .then(() => {
-      if (getters.isCurrentTaskIndex(10)) {
-        return commit(ASSIGN_DATA, { base: state.config.branches.master });
-      }
-
-      return undefined;
-    })
-    .then(() => getters.runOrSkip(10, 11)(GET_CHANGELOG))
-    .then(() => getters.runOrSkip(11, 12)(FIND_RELEASE_PULL_REQUEST))
-    .then(() => {
-      if (getters.isCurrentTaskIndex(12)) {
-        return commit(ASSIGN_DATA, { name: undefined });
-      }
-
-      return undefined;
-    })
-    .then(() => getters.runOrSkip(12, 13)(UPDATE_PULL_REQUEST))
-    .then(() => {
-      if (getters.isCurrentTaskIndex(13)) {
+      if (getters.isCurrentTaskIndex(6) || getters.isCurrentTaskIndex(13)) {
         return commit(ASSIGN_DATA, {
           base: state.config.branches.develop
         });
@@ -195,7 +203,7 @@ const runFixFinish = ({ commit, getters, state }) => {
 
       return undefined;
     })
-    .then(() => getters.runOrSkip(13, 14)(MERGE_BRANCHES))
+    .then(() => getters.runOrSkip(6, 13, 14)(MERGE_BRANCHES))
     .then(() => logActionEnd(RUN_FIX_FINISH));
 };
 

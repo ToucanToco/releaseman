@@ -128,41 +128,44 @@ const runHotfixFinish = ({ commit, getters, state }) => {
     })
     .then(() => getters.runOrSkip(4, 5)(DELETE_BRANCH))
     .then(() => {
-      if (getters.isCurrentTaskIndex(5)) {
-        return commit(ASSIGN_DATA, { isPrerelease: false });
+      if (state.config.isRelease) {
+        if (getters.isCurrentTaskIndex(5)) {
+          commit(ASSIGN_DATA, { isPrerelease: false });
+        }
+
+        return getters.runOrSkip(5, 6)(GET_LATEST_RELEASE_TAG)
+          .then(() => {
+            if (getters.isCurrentTaskIndex(6)) {
+              return commit(ASSIGN_DATA, {
+                base: state.data.tag,
+                head: state.data.base
+              });
+            }
+
+            return undefined;
+          })
+          .then(() => getters.runOrSkip(6, 7)(GET_CHANGELOG))
+          .then(() => {
+            if (getters.isCurrentTaskIndex(7)) {
+              return commit(ASSIGN_DATA, { isFix: true });
+            }
+
+            return undefined;
+          })
+          .then(() => getters.runOrSkip(7, 8)(GET_NEXT_RELEASE))
+          .then(() => {
+            if (getters.isCurrentTaskIndex(8)) {
+              return commit(ASSIGN_DATA, { branch: state.data.head });
+            }
+
+            return undefined;
+          })
+          .then(() => getters.runOrSkip(8, 9)(CREATE_RELEASE));
       }
 
       return undefined;
     })
-    .then(() => getters.runOrSkip(5, 6)(GET_LATEST_RELEASE_TAG))
-    .then(() => {
-      if (getters.isCurrentTaskIndex(6)) {
-        return commit(ASSIGN_DATA, {
-          base: state.data.tag,
-          head: state.data.base
-        });
-      }
-
-      return undefined;
-    })
-    .then(() => getters.runOrSkip(6, 7)(GET_CHANGELOG))
-    .then(() => {
-      if (getters.isCurrentTaskIndex(7)) {
-        return commit(ASSIGN_DATA, { isFix: true });
-      }
-
-      return undefined;
-    })
-    .then(() => getters.runOrSkip(7, 8)(GET_NEXT_RELEASE))
-    .then(() => {
-      if (getters.isCurrentTaskIndex(8)) {
-        return commit(ASSIGN_DATA, { branch: state.data.head });
-      }
-
-      return undefined;
-    })
-    .then(() => getters.runOrSkip(8, 9)(CREATE_RELEASE))
-    .then(() => getters.runOrSkip(9, 10)(GET_RELEASE_BRANCH))
+    .then(() => getters.runOrSkip(5, 9, 10)(GET_RELEASE_BRANCH))
     .then(() => {
       if (getters.isCurrentTaskIndex(10)) {
         const branchMatch = new RegExp(
@@ -193,35 +196,43 @@ const runHotfixFinish = ({ commit, getters, state }) => {
 
         return getters.runOrSkip(10, 11)(MERGE_BRANCHES)
           .then(() => {
+            if (state.config.isRelease) {
+              if (getters.isCurrentTaskIndex(11)) {
+                commit(ASSIGN_DATA, { isPrerelease: true });
+              }
+
+              return getters.runOrSkip(11, 12)(GET_LATEST_RELEASE_TAG)
+                .then(() => {
+                  if (getters.isCurrentTaskIndex(12)) {
+                    return commit(ASSIGN_DATA, {
+                      base: state.data.tag,
+                      head: state.data.base
+                    });
+                  }
+
+                  return undefined;
+                })
+                .then(() => getters.runOrSkip(12, 13)(GET_CHANGELOG))
+                .then(() => getters.runOrSkip(13, 14)(GET_NEXT_RELEASE))
+                .then(() => {
+                  if (getters.isCurrentTaskIndex(14)) {
+                    return commit(ASSIGN_DATA, { branch: state.data.head });
+                  }
+
+                  return undefined;
+                })
+                .then(() => getters.runOrSkip(14, 15)(CREATE_RELEASE));
+            }
             if (getters.isCurrentTaskIndex(11)) {
-              return commit(ASSIGN_DATA, { isPrerelease: true });
+              return commit(ASSIGN_DATA, { head: state.data.base });
             }
 
             return undefined;
           })
-          .then(() => getters.runOrSkip(11, 12)(GET_LATEST_RELEASE_TAG))
           .then(() => {
-            if (getters.isCurrentTaskIndex(12)) {
-              return commit(ASSIGN_DATA, {
-                base: state.data.tag,
-                head: state.data.base
-              });
-            }
-
-            return undefined;
-          })
-          .then(() => getters.runOrSkip(12, 13)(GET_CHANGELOG))
-          .then(() => getters.runOrSkip(13, 14)(GET_NEXT_RELEASE))
-          .then(() => {
-            if (getters.isCurrentTaskIndex(14)) {
-              return commit(ASSIGN_DATA, { branch: state.data.head });
-            }
-
-            return undefined;
-          })
-          .then(() => getters.runOrSkip(14, 15)(CREATE_RELEASE))
-          .then(() => {
-            if (getters.isCurrentTaskIndex(15)) {
+            if (
+              getters.isCurrentTaskIndex(11) || getters.isCurrentTaskIndex(15)
+            ) {
               return commit(ASSIGN_DATA, {
                 base: state.config.branches.develop
               });
@@ -229,7 +240,7 @@ const runHotfixFinish = ({ commit, getters, state }) => {
 
             return undefined;
           })
-          .then(() => getters.runOrSkip(15, 16)(MERGE_BRANCHES));
+          .then(() => getters.runOrSkip(11, 15, 16)(MERGE_BRANCHES));
       }
       if (getters.isCurrentTaskIndex(10)) {
         commit(ASSIGN_DATA, {
