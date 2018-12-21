@@ -13,6 +13,7 @@ import {
   CREATE_RELEASE,
   GET_BRANCH_EXISTENCE,
   GET_LABELS,
+  GET_LATEST_RELEASE,
   GET_RELEASES_EXISTENCE
 } from '../actions';
 import { logActionEnd, logActionStart, logWarn } from '../log';
@@ -66,7 +67,7 @@ const runInit = ({ commit, getters, state }) => {
     })
     .then(() => {
       if (getters.isCurrentTaskIndex(1) || getters.isCurrentTaskIndex(2)) {
-        return commit(ASSIGN_DATA, { isPrerelease: true });
+        return commit(ASSIGN_DATA, { isPrerelease: false });
       }
 
       return undefined;
@@ -74,33 +75,6 @@ const runInit = ({ commit, getters, state }) => {
     .then(() => getters.runOrSkip(1, 2, 3)(GET_RELEASES_EXISTENCE))
     .then(() => {
       if (getters.isCurrentTaskIndex(3)) {
-        if (state.data.isWithReleases) {
-          return logWarn('Prerelease already present.\n');
-        }
-
-        commit(ASSIGN_DATA, {
-          branch: state.config.branches.master,
-          changelog: {
-            labels: [],
-            text: 'Initial release beta'
-          },
-          name: 'Initial release beta',
-          tag: `${state.config.tag}0.0.0-beta`
-        });
-      }
-
-      return getters.runOrSkip(3, 4)(CREATE_RELEASE);
-    })
-    .then(() => {
-      if (getters.isCurrentTaskIndex(3) || getters.isCurrentTaskIndex(4)) {
-        return commit(ASSIGN_DATA, { isPrerelease: false });
-      }
-
-      return undefined;
-    })
-    .then(() => getters.runOrSkip(3, 4, 5)(GET_RELEASES_EXISTENCE))
-    .then(() => {
-      if (getters.isCurrentTaskIndex(5)) {
         if (state.data.isWithReleases) {
           return logWarn('Release already present.\n');
         }
@@ -116,11 +90,47 @@ const runInit = ({ commit, getters, state }) => {
         });
       }
 
-      return getters.runOrSkip(5, 6)(CREATE_RELEASE);
+      return getters.runOrSkip(3, 4)(CREATE_RELEASE);
     })
-    .then(() => getters.runOrSkip(5, 6, 7)(GET_LABELS))
     .then(() => {
-      if (getters.isCurrentTaskIndex(7)) {
+      if (getters.isCurrentTaskIndex(3) || getters.isCurrentTaskIndex(4)) {
+        return commit(ASSIGN_DATA, { isPrerelease: true });
+      }
+
+      return undefined;
+    })
+    .then(() => getters.runOrSkip(3, 4, 5)(GET_RELEASES_EXISTENCE))
+    .then(() => {
+      if (getters.isCurrentTaskIndex(5)) {
+        if (state.data.isWithReleases) {
+          return logWarn('Prerelease already present.\n');
+        }
+
+        commit(ASSIGN_DATA, { isPrerelease: false })
+      }
+
+      return getters.runOrSkip(5, 6)(GET_LATEST_RELEASE)
+        .then(() => {
+          if (getters.isCurrentTaskIndex(6)) {
+            return commit(ASSIGN_DATA, {
+              branch: state.config.branches.master,
+              changelog: {
+                labels: [],
+                text: `${state.data.name} beta`
+              },
+              isPrerelease: true,
+              name: `${state.data.name} beta`,
+              tag: `${state.data.tag}-beta`
+            });
+          }
+
+          return undefined
+        })
+        .then(() => getters.runOrSkip(6, 7)(CREATE_RELEASE));
+    })
+    .then(() => getters.runOrSkip(5, 7, 8)(GET_LABELS))
+    .then(() => {
+      if (getters.isCurrentTaskIndex(8)) {
         const labelsNames = map('name')(state.data.labels);
 
         const missingLabels = flow(
@@ -139,7 +149,7 @@ const runInit = ({ commit, getters, state }) => {
         commit(ASSIGN_DATA, { labels: missingLabels });
       }
 
-      return getters.runOrSkip(7, 8)(CREATE_LABELS);
+      return getters.runOrSkip(8, 9)(CREATE_LABELS);
     })
     .then(() => logActionEnd(RUN_INIT));
 };
