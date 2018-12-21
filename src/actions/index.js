@@ -49,6 +49,7 @@ import runTask, { RUN_TASK } from './run-task';
 import saveState, { SAVE_STATE } from './save-state';
 import skipTask, { SKIP_TASK } from './skip-task';
 import start, { START } from './start';
+import updateBranch, { UPDATE_BRANCH } from './update-branch';
 import updatePullRequest, { UPDATE_PULL_REQUEST } from './update-pull-request';
 import updatePullRequestLabels, {
   UPDATE_PULL_REQUEST_LABELS
@@ -96,6 +97,7 @@ const actions = {
   [SAVE_STATE]: saveState,
   [SKIP_TASK]: skipTask,
   [START]: start,
+  [UPDATE_BRANCH]: updateBranch,
   [UPDATE_PULL_REQUEST]: updatePullRequest,
   [UPDATE_PULL_REQUEST_LABELS]: updatePullRequestLabels
 };
@@ -142,6 +144,7 @@ export {
   SAVE_STATE,
   SKIP_TASK,
   START,
+  UPDATE_BRANCH,
   UPDATE_PULL_REQUEST,
   UPDATE_PULL_REQUEST_LABELS
 };

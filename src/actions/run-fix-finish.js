@@ -29,6 +29,7 @@ const runFixFinish = ({ commit, getters, state }) => {
   logActionStart(RUN_FIX_FINISH);
 
   const configError = getters.configError(
+    'branches.beta',
     'branches.develop',
     (
       state.config.isDoc
@@ -204,6 +205,16 @@ const runFixFinish = ({ commit, getters, state }) => {
       return undefined;
     })
     .then(() => getters.runOrSkip(6, 13, 14)(MERGE_BRANCHES))
+    .then(() => {
+      if (getters.isCurrentTaskIndex(14)) {
+        return commit(ASSIGN_DATA, {
+          base: state.config.branches.beta
+        })
+      }
+
+      return undefined;
+    })
+    .then(() => getters.runOrSkip(14, 15)(UPDATE_BRANCH))
     .then(() => logActionEnd(RUN_FIX_FINISH));
 };
 

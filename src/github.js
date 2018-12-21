@@ -89,6 +89,13 @@ const GitHub = (config) => {
             message: commit.message,
             url: html_url
           }))
+      ),
+      update: ({ base, head }) => (
+        fetchGitHub(`git/refs/heads/${head}`)
+          .then(({ object }) => fetchGitHub(`git/refs/heads/${base}`, 'PATCH', {
+            sha: object.sha
+          }))
+          .then(() => ({ url: `${baseUrl}tree/${base}` }))
       )
     },
     commits: {
