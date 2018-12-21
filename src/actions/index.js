@@ -11,9 +11,7 @@ import getBranchExistence, {
 } from './get-branch-existence';
 import getChangelog, { GET_CHANGELOG } from './get-changelog';
 import getLabels, { GET_LABELS } from './get-labels';
-import getLatestReleaseTag, {
-  GET_LATEST_RELEASE_TAG
-} from './get-latest-release-tag';
+import getLatestRelease, { GET_LATEST_RELEASE } from './get-latest-release';
 import getNextRelease, { GET_NEXT_RELEASE } from './get-next-release';
 import getPullRequest, { GET_PULL_REQUEST } from './get-pull-request';
 import getPullRequestLabels, {
@@ -64,7 +62,7 @@ const actions = {
   [GET_BRANCH_EXISTENCE]: getBranchExistence,
   [GET_CHANGELOG]: getChangelog,
   [GET_LABELS]: getLabels,
-  [GET_LATEST_RELEASE_TAG]: getLatestReleaseTag,
+  [GET_LATEST_RELEASE]: getLatestRelease,
   [GET_NEXT_RELEASE]: getNextRelease,
   [GET_PULL_REQUEST]: getPullRequest,
   [GET_PULL_REQUEST_LABELS]: getPullRequestLabels,
@@ -110,7 +108,7 @@ export {
   GET_BRANCH_EXISTENCE,
   GET_CHANGELOG,
   GET_LABELS,
-  GET_LATEST_RELEASE_TAG,
+  GET_LATEST_RELEASE,
   GET_NEXT_RELEASE,
   GET_PULL_REQUEST,
   GET_PULL_REQUEST_LABELS,

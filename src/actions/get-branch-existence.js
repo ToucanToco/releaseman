@@ -13,7 +13,7 @@ const getBranchExistence = ({ commit, getters, state }, isSkipped) => {
 
   logInfo(`Retrieving ${state.data.branch} existence...`);
 
-  return getters.github.branch.getExistence({
+  return getters.github.branches.getExistence({
     name: state.data.branch
   })
     .then((isBranchPresent) => {
