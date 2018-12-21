@@ -35,6 +35,7 @@ const Config = (argv) => {
   return {
     action: get(0)(argv._),
     branches: {
+      beta: getArgOrDefault('branches.beta'),
       develop: getArgOrDefault('branches.develop'),
       doc: getArgOrDefault('branches.doc'),
       feature: getArgOrDefault('branches.feature'),
