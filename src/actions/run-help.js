@@ -1,11 +1,11 @@
-import isEqual from 'lodash/fp/isEqual';
-import trim from 'lodash/fp/trim';
-import { ACTIONS } from '../store';
-import { log } from '../log';
+import isEqual from 'lodash/fp/isEqual'
+import trim from 'lodash/fp/trim'
+import { ACTIONS } from '../store'
+import { log } from '../log'
 
-const RUN_HELP = 'RUN_HELP';
+const RUN_HELP = 'RUN_HELP'
 
-const _logTrim = (value) => log(`${trim(value)}\n`);
+const _logTrim = (value) => log(`${trim(value)}\n`)
 
 const runHelp = ({ state }) => {
   const options = trim(`
@@ -35,7 +35,7 @@ Options:
   --repo <value>              Repository name
   --tag <value>               Tags prefix
   --token <value>             GitHub access token
-`);
+`)
 
   const helpDefault = trim(`
 Usage: releaseman <command> [options]
@@ -54,10 +54,10 @@ Commands:
   - release
 
 Run \`releaseman help <command>\` for more information on specific commands.
-`);
+`)
 
   if (!isEqual(ACTIONS.HELP)(state.config.action)) {
-    return Promise.reject(`${helpDefault}\n`);
+    return Promise.reject(`${helpDefault}\n`)
   }
 
   switch (state.config.helpOn) {
@@ -75,7 +75,7 @@ Command specific options:
   start                       Use develop and master
 
 ${options}
-`);
+`)
     case ACTIONS.CONTINUE:
       return _logTrim(`
 Usage: releaseman continue
@@ -83,7 +83,7 @@ Usage: releaseman continue
 Description:
 
   Re-run the last command starting where it failed.
-`);
+`)
     case ACTIONS.FEATURE:
       return _logTrim(`
 Usage: releaseman feature ((start|publish) <name>)|(finish <number>) [options]
@@ -101,7 +101,7 @@ Command specific options:
   <number>                    Feature pull request number
 
 ${options}
-`);
+`)
     case ACTIONS.FIX:
       return _logTrim(`
 Usage: releaseman fix ((start|publish) <name>)|(finish <number>) [options]
@@ -120,7 +120,7 @@ Command specific options:
   <number>                    Fix pull request number
 
 ${options}
-`);
+`)
     case ACTIONS.HELP:
       return _logTrim(`
 Usage: releaseman help [<command>]
@@ -134,7 +134,7 @@ Command specific option:
   <command>                   Command on which to display help: changes,
                               continue, feature, fix, help, hotfix, init or
                               release
-`);
+`)
     case ACTIONS.HOTFIX:
       return _logTrim(`
 Usage: releaseman hotfix ((start|publish) <name>)|(finish <number>) [options]
@@ -152,7 +152,7 @@ Command specific options:
   <number>                    Hotfix pull request number
 
 ${options}
-`);
+`)
     case ACTIONS.INIT:
       return _logTrim(`
 Usage: releaseman init
@@ -163,7 +163,7 @@ Description:
   latest-beta branches, an initial release and labels.
 
 ${options}
-`);
+`)
     case ACTIONS.RELEASE:
       return _logTrim(`
 Usage: releaseman release (start <name>)|finish [options]
@@ -181,13 +181,13 @@ Command specific options:
   <name>                      Release name
 
 ${options}
-`);
+`)
     case undefined:
-      return _logTrim(helpDefault);
+      return _logTrim(helpDefault)
     default:
-      return Promise.reject(`${helpDefault}\n`);
+      return Promise.reject(`${helpDefault}\n`)
   }
-};
+}
 
-export { RUN_HELP };
-export default runHelp;
+export { RUN_HELP }
+export default runHelp

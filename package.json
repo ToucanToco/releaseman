@@ -28,7 +28,7 @@
     "url": "https://github.com/ToucanToco/releaseman.git"
   },
   "scripts": {
-    "lint": "eslint src/**.js",
+    "lint": "eslint \"src/**/*.js\" \"*.js\"",
     "postinstall": "del bin && rollup -c"
   },
   "version": "0.7.1"
