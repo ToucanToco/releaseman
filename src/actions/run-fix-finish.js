@@ -11,7 +11,7 @@ import {
   DELETE_BRANCH,
   FIND_RELEASE_PULL_REQUEST,
   GET_CHANGELOG,
-  GET_LATEST_RELEASE_TAG,
+  GET_LATEST_RELEASE,
   GET_NEXT_RELEASE,
   GET_PULL_REQUEST,
   GET_PULL_REQUEST_LABELS,
@@ -140,7 +140,7 @@ const runFixFinish = ({ commit, getters, state }) => {
           commit(ASSIGN_DATA, { isPrerelease: true });
         }
 
-        return getters.runOrSkip(6, 7)(GET_LATEST_RELEASE_TAG)
+        return getters.runOrSkip(6, 7)(GET_LATEST_RELEASE)
           .then(() => {
             if (getters.isCurrentTaskIndex(7)) {
               return commit(ASSIGN_DATA, {

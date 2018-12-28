@@ -2,7 +2,7 @@ import includes from 'lodash/fp/includes';
 import isEmpty from 'lodash/fp/isEmpty';
 import isEqual from 'lodash/fp/isEqual';
 import { ASSIGN_DATA, SET_DATA } from '../mutations';
-import { GET_CHANGELOG, GET_LATEST_RELEASE_TAG } from '../actions';
+import { GET_CHANGELOG, GET_LATEST_RELEASE } from '../actions';
 import { logActionEnd, logActionStart } from '../log';
 
 const RUN_CHANGES = 'RUN_CHANGES';
@@ -40,7 +40,7 @@ const runChanges = ({ commit, getters, state }) => {
           commit(SET_DATA, { isPrerelease: true });
         }
 
-        return getters.runOrSkip(0, 1)(GET_LATEST_RELEASE_TAG)
+        return getters.runOrSkip(0, 1)(GET_LATEST_RELEASE)
           .then(() => {
             if (getters.isCurrentTaskIndex(1)) {
               return commit(ASSIGN_DATA, {

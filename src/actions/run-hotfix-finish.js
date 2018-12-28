@@ -12,7 +12,7 @@ import {
   CREATE_RELEASE,
   DELETE_BRANCH,
   GET_CHANGELOG,
-  GET_LATEST_RELEASE_TAG,
+  GET_LATEST_RELEASE,
   GET_NEXT_RELEASE,
   GET_PULL_REQUEST,
   GET_PULL_REQUEST_LABELS,
@@ -133,7 +133,7 @@ const runHotfixFinish = ({ commit, getters, state }) => {
           commit(ASSIGN_DATA, { isPrerelease: false });
         }
 
-        return getters.runOrSkip(5, 6)(GET_LATEST_RELEASE_TAG)
+        return getters.runOrSkip(5, 6)(GET_LATEST_RELEASE)
           .then(() => {
             if (getters.isCurrentTaskIndex(6)) {
               return commit(ASSIGN_DATA, {
@@ -201,7 +201,7 @@ const runHotfixFinish = ({ commit, getters, state }) => {
                 commit(ASSIGN_DATA, { isPrerelease: true });
               }
 
-              return getters.runOrSkip(11, 12)(GET_LATEST_RELEASE_TAG)
+              return getters.runOrSkip(11, 12)(GET_LATEST_RELEASE)
                 .then(() => {
                   if (getters.isCurrentTaskIndex(12)) {
                     return commit(ASSIGN_DATA, {
