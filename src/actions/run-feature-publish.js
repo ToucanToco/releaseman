@@ -1,13 +1,13 @@
-import isEmpty from 'lodash/fp/isEmpty';
-import kebabCase from 'lodash/fp/kebabCase';
-import { ASSIGN_DATA, SET_DATA } from '../mutations';
-import { CREATE_PULL_REQUEST, UPDATE_PULL_REQUEST_LABELS } from '../actions';
-import { logActionEnd, logActionStart } from '../log';
+import isEmpty from 'lodash/fp/isEmpty'
+import kebabCase from 'lodash/fp/kebabCase'
+import { ASSIGN_DATA, SET_DATA } from '../mutations'
+import { CREATE_PULL_REQUEST, UPDATE_PULL_REQUEST_LABELS } from '../actions'
+import { logActionEnd, logActionStart } from '../log'
 
-const RUN_FEATURE_PUBLISH = 'RUN_FEATURE_PUBLISH';
+const RUN_FEATURE_PUBLISH = 'RUN_FEATURE_PUBLISH'
 
 const runFeaturePublish = ({ commit, getters, state }) => {
-  logActionStart(RUN_FEATURE_PUBLISH);
+  logActionStart(RUN_FEATURE_PUBLISH)
 
   const configError = getters.configError(
     'branches.develop',
@@ -18,10 +18,10 @@ const runFeaturePublish = ({ commit, getters, state }) => {
     ),
     'labels.wip',
     'name'
-  );
+  )
 
   if (!isEmpty(configError)) {
-    return Promise.reject(configError);
+    return Promise.reject(configError)
   }
   if (getters.isCurrentTaskIndex(0)) {
     commit(SET_DATA, {
@@ -40,7 +40,7 @@ const runFeaturePublish = ({ commit, getters, state }) => {
           ? 'Doc'
           : 'Feature'
       } :: ${state.config.name}`
-    });
+    })
   }
 
   return getters.runOrSkip(0, 1)(CREATE_PULL_REQUEST)
@@ -55,14 +55,14 @@ const runFeaturePublish = ({ commit, getters, state }) => {
             ),
             state.config.labels.wip
           ]
-        });
+        })
       }
 
-      return undefined;
+      return undefined
     })
     .then(() => getters.runOrSkip(1, 2)(UPDATE_PULL_REQUEST_LABELS))
-    .then(() => logActionEnd(RUN_FEATURE_PUBLISH));
-};
+    .then(() => logActionEnd(RUN_FEATURE_PUBLISH))
+}
 
-export { RUN_FEATURE_PUBLISH };
-export default runFeaturePublish;
+export { RUN_FEATURE_PUBLISH }
+export default runFeaturePublish

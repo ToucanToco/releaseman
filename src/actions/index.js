@@ -1,59 +1,59 @@
-import createBranch, { CREATE_BRANCH } from './create-branch';
-import createLabels, { CREATE_LABELS } from './create-labels';
-import createPullRequest, { CREATE_PULL_REQUEST } from './create-pull-request';
-import createRelease, { CREATE_RELEASE } from './create-release';
-import deleteBranch, { DELETE_BRANCH } from './delete-branch';
+import createBranch, { CREATE_BRANCH } from './create-branch'
+import createLabels, { CREATE_LABELS } from './create-labels'
+import createPullRequest, { CREATE_PULL_REQUEST } from './create-pull-request'
+import createRelease, { CREATE_RELEASE } from './create-release'
+import deleteBranch, { DELETE_BRANCH } from './delete-branch'
 import findReleasePullRequest, {
   FIND_RELEASE_PULL_REQUEST
-} from './find-release-pull-request';
+} from './find-release-pull-request'
 import getBranchExistence, {
   GET_BRANCH_EXISTENCE
-} from './get-branch-existence';
-import getChangelog, { GET_CHANGELOG } from './get-changelog';
-import getLabels, { GET_LABELS } from './get-labels';
+} from './get-branch-existence'
+import getChangelog, { GET_CHANGELOG } from './get-changelog'
+import getLabels, { GET_LABELS } from './get-labels'
 import getLatestReleaseTag, {
   GET_LATEST_RELEASE_TAG
-} from './get-latest-release-tag';
-import getNextRelease, { GET_NEXT_RELEASE } from './get-next-release';
-import getPullRequest, { GET_PULL_REQUEST } from './get-pull-request';
+} from './get-latest-release-tag'
+import getNextRelease, { GET_NEXT_RELEASE } from './get-next-release'
+import getPullRequest, { GET_PULL_REQUEST } from './get-pull-request'
 import getPullRequestLabels, {
   GET_PULL_REQUEST_LABELS
-} from './get-pull-request-labels';
-import getReleaseBranch, { GET_RELEASE_BRANCH } from './get-release-branch';
+} from './get-pull-request-labels'
+import getReleaseBranch, { GET_RELEASE_BRANCH } from './get-release-branch'
 import getReleasesExistence, {
   GET_RELEASES_EXISTENCE
-} from './get-releases-existence';
-import mergeBranches, { MERGE_BRANCHES } from './merge-branches';
-import mergePullRequest, { MERGE_PULL_REQUEST } from './merge-pull-request';
-import run, { RUN } from './run';
-import runChanges, { RUN_CHANGES } from './run-changes';
-import runContinue, { RUN_CONTINUE } from './run-continue';
-import runFeature, { RUN_FEATURE } from './run-feature';
-import runFeatureFinish, { RUN_FEATURE_FINISH } from './run-feature-finish';
-import runFeaturePublish, { RUN_FEATURE_PUBLISH } from './run-feature-publish';
-import runFeatureStart, { RUN_FEATURE_START } from './run-feature-start';
-import runFix, { RUN_FIX } from './run-fix';
-import runFixFinish, { RUN_FIX_FINISH } from './run-fix-finish';
-import runFixPublish, { RUN_FIX_PUBLISH } from './run-fix-publish';
-import runFixStart, { RUN_FIX_START } from './run-fix-start';
-import runHelp, { RUN_HELP } from './run-help';
-import runHotfix, { RUN_HOTFIX } from './run-hotfix';
-import runHotfixFinish, { RUN_HOTFIX_FINISH } from './run-hotfix-finish';
-import runHotfixPublish, { RUN_HOTFIX_PUBLISH } from './run-hotfix-publish';
-import runHotfixStart, { RUN_HOTFIX_START } from './run-hotfix-start';
-import runInit, { RUN_INIT } from './run-init';
-import runRelease, { RUN_RELEASE } from './run-release';
-import runReleaseFinish, { RUN_RELEASE_FINISH } from './run-release-finish';
-import runReleaseStart, { RUN_RELEASE_START } from './run-release-start';
-import runTask, { RUN_TASK } from './run-task';
-import saveState, { SAVE_STATE } from './save-state';
-import skipTask, { SKIP_TASK } from './skip-task';
-import start, { START } from './start';
-import updateBranch, { UPDATE_BRANCH } from './update-branch';
-import updatePullRequest, { UPDATE_PULL_REQUEST } from './update-pull-request';
+} from './get-releases-existence'
+import mergeBranches, { MERGE_BRANCHES } from './merge-branches'
+import mergePullRequest, { MERGE_PULL_REQUEST } from './merge-pull-request'
+import run, { RUN } from './run'
+import runChanges, { RUN_CHANGES } from './run-changes'
+import runContinue, { RUN_CONTINUE } from './run-continue'
+import runFeature, { RUN_FEATURE } from './run-feature'
+import runFeatureFinish, { RUN_FEATURE_FINISH } from './run-feature-finish'
+import runFeaturePublish, { RUN_FEATURE_PUBLISH } from './run-feature-publish'
+import runFeatureStart, { RUN_FEATURE_START } from './run-feature-start'
+import runFix, { RUN_FIX } from './run-fix'
+import runFixFinish, { RUN_FIX_FINISH } from './run-fix-finish'
+import runFixPublish, { RUN_FIX_PUBLISH } from './run-fix-publish'
+import runFixStart, { RUN_FIX_START } from './run-fix-start'
+import runHelp, { RUN_HELP } from './run-help'
+import runHotfix, { RUN_HOTFIX } from './run-hotfix'
+import runHotfixFinish, { RUN_HOTFIX_FINISH } from './run-hotfix-finish'
+import runHotfixPublish, { RUN_HOTFIX_PUBLISH } from './run-hotfix-publish'
+import runHotfixStart, { RUN_HOTFIX_START } from './run-hotfix-start'
+import runInit, { RUN_INIT } from './run-init'
+import runRelease, { RUN_RELEASE } from './run-release'
+import runReleaseFinish, { RUN_RELEASE_FINISH } from './run-release-finish'
+import runReleaseStart, { RUN_RELEASE_START } from './run-release-start'
+import runTask, { RUN_TASK } from './run-task'
+import saveState, { SAVE_STATE } from './save-state'
+import skipTask, { SKIP_TASK } from './skip-task'
+import start, { START } from './start'
+import updateBranch, { UPDATE_BRANCH } from './update-branch'
+import updatePullRequest, { UPDATE_PULL_REQUEST } from './update-pull-request'
 import updatePullRequestLabels, {
   UPDATE_PULL_REQUEST_LABELS
-} from './update-pull-request-labels';
+} from './update-pull-request-labels'
 
 const actions = {
   [CREATE_BRANCH]: createBranch,
@@ -100,7 +100,7 @@ const actions = {
   [UPDATE_BRANCH]: updateBranch,
   [UPDATE_PULL_REQUEST]: updatePullRequest,
   [UPDATE_PULL_REQUEST_LABELS]: updatePullRequestLabels
-};
+}
 
 export {
   CREATE_BRANCH,
@@ -147,5 +147,5 @@ export {
   UPDATE_BRANCH,
   UPDATE_PULL_REQUEST,
   UPDATE_PULL_REQUEST_LABELS
-};
-export default actions;
+}
+export default actions

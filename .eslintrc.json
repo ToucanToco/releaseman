@@ -23,6 +23,7 @@
     "object-curly-newline": [2, { "consistent": true }],
     "object-shorthand": [2, "never"],
     "prefer-promise-reject-errors": 0,
+    "semi": [2, "never", { "beforeStatementContinuationChars": "always" }],
     "sort-keys": [2, "asc", { "caseSensitive": false, "natural": true }],
     "space-before-function-paren": [2, "never"]
   },

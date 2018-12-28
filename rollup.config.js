@@ -1,9 +1,9 @@
-import commonjs from 'rollup-plugin-commonjs';
-import executable from 'rollup-plugin-executable';
-import json from 'rollup-plugin-json';
-import nodeResolve from 'rollup-plugin-node-resolve';
-import uglify from 'rollup-plugin-uglify';
-import { minify } from 'uglify-es';
+import commonjs from 'rollup-plugin-commonjs'
+import executable from 'rollup-plugin-executable'
+import json from 'rollup-plugin-json'
+import nodeResolve from 'rollup-plugin-node-resolve'
+import uglify from 'rollup-plugin-uglify'
+import { minify } from 'uglify-es'
 
 export default {
   external: [
@@ -27,4 +27,4 @@ export default {
     uglify({}, minify),
     executable()
   ]
-};
+}

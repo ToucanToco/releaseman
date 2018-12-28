@@ -1,13 +1,13 @@
-import isEmpty from 'lodash/fp/isEmpty';
-import kebabCase from 'lodash/fp/kebabCase';
-import { SET_DATA } from '../mutations';
-import { CREATE_BRANCH } from '../actions';
-import { logActionEnd, logActionStart } from '../log';
+import isEmpty from 'lodash/fp/isEmpty'
+import kebabCase from 'lodash/fp/kebabCase'
+import { SET_DATA } from '../mutations'
+import { CREATE_BRANCH } from '../actions'
+import { logActionEnd, logActionStart } from '../log'
 
-const RUN_HOTFIX_START = 'RUN_HOTFIX_START';
+const RUN_HOTFIX_START = 'RUN_HOTFIX_START'
 
 const runHotfixStart = ({ commit, getters, state }) => {
-  logActionStart(RUN_HOTFIX_START);
+  logActionStart(RUN_HOTFIX_START)
 
   const configError = getters.configError(
     (
@@ -17,10 +17,10 @@ const runHotfixStart = ({ commit, getters, state }) => {
     ),
     'branches.master',
     'name'
-  );
+  )
 
   if (!isEmpty(configError)) {
-    return Promise.reject(configError);
+    return Promise.reject(configError)
   }
   if (getters.isCurrentTaskIndex(0)) {
     commit(SET_DATA, {
@@ -30,12 +30,12 @@ const runHotfixStart = ({ commit, getters, state }) => {
           ? state.config.branches.doc
           : state.config.branches.hotfix
       }${kebabCase(state.config.name)}`
-    });
+    })
   }
 
   return getters.runOrSkip(0, 1)(CREATE_BRANCH)
-    .then(() => logActionEnd(RUN_HOTFIX_START));
-};
+    .then(() => logActionEnd(RUN_HOTFIX_START))
+}
 
-export { RUN_HOTFIX_START };
-export default runHotfixStart;
+export { RUN_HOTFIX_START }
+export default runHotfixStart

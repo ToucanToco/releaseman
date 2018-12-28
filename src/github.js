@@ -1,26 +1,26 @@
-import assign from 'lodash/fp/assign';
-import concat from 'lodash/fp/concat';
-import fetch from 'node-fetch';
-import filter from 'lodash/fp/filter';
-import first from 'lodash/fp/first';
-import flow from 'lodash/fp/flow';
-import get from 'lodash/fp/get';
-import includes from 'lodash/fp/includes';
-import isEmpty from 'lodash/fp/isEmpty';
-import isEqual from 'lodash/fp/isEqual';
-import isUndefined from 'lodash/fp/isUndefined';
-import join from 'lodash/fp/join';
-import map from 'lodash/fp/map';
-import reject from 'lodash/fp/reject';
-import size from 'lodash/fp/size';
-import some from 'lodash/fp/some';
+import assign from 'lodash/fp/assign'
+import concat from 'lodash/fp/concat'
+import fetch from 'node-fetch'
+import filter from 'lodash/fp/filter'
+import first from 'lodash/fp/first'
+import flow from 'lodash/fp/flow'
+import get from 'lodash/fp/get'
+import includes from 'lodash/fp/includes'
+import isEmpty from 'lodash/fp/isEmpty'
+import isEqual from 'lodash/fp/isEqual'
+import isUndefined from 'lodash/fp/isUndefined'
+import join from 'lodash/fp/join'
+import map from 'lodash/fp/map'
+import reject from 'lodash/fp/reject'
+import size from 'lodash/fp/size'
+import some from 'lodash/fp/some'
 
 const GitHub = (config) => {
-  const baseUrl = `https://github.com/${config.owner}/${config.repo}/`;
+  const baseUrl = `https://github.com/${config.owner}/${config.repo}/`
   const headers = {
     Authorization: `token ${config.token}`,
     'content-type': 'application/json'
-  };
+  }
 
   const fetchGitHub = (path, method = 'GET', body) => fetch(
     `https://api.github.com/repos/${config.owner}/${config.repo}/${path}`,
@@ -35,22 +35,22 @@ const GitHub = (config) => {
         return {
           data: {},
           isSuccess: true
-        };
+        }
       }
 
       return res.json()
         .then((data) => ({
           data: data,
           isSuccess: res.ok
-        }));
+        }))
     })
     .then(({ data, isSuccess }) => {
       if (isSuccess) {
-        return data;
+        return data
       }
 
-      return Promise.reject(data.message);
-    });
+      return Promise.reject(data.message)
+    })
 
   const github = {
     branches: {
@@ -74,10 +74,10 @@ const GitHub = (config) => {
           .then(() => true)
           .catch((message) => {
             if (isEqual('Not Found')(message)) {
-              return false;
+              return false
             }
 
-            return Promise.reject(message);
+            return Promise.reject(message)
           })
       ),
       merge: ({ base, head }) => (
@@ -102,7 +102,7 @@ const GitHub = (config) => {
       getChangelog: ({ base, head }) => (
         fetchGitHub(`compare/${base}...${head}`)
           .then(({ commits }) => {
-            const matchPRNumber = new RegExp('^.*?\\(#(\\d+)\\)');
+            const matchPRNumber = new RegExp('^.*?\\(#(\\d+)\\)')
 
             return Promise.all(flow(
               map(({ commit }) => get(1)(matchPRNumber.exec(commit.message))),
@@ -110,19 +110,19 @@ const GitHub = (config) => {
               map((number) => github.pullRequests.getChangelog({
                 number: number
               }))
-            )(commits));
+            )(commits))
           })
           .then((pullRequests) => {
             const categoriesLabels = flow(
               map('label'),
               concat(config.labels.release)
-            )(config.categories);
+            )(config.categories)
 
             const uncategorizedPullRequests = reject(({ labels }) => (
               some((categoryLabel) => (
                 includes(categoryLabel)(labels)
               ))(categoriesLabels)
-            ))(pullRequests);
+            ))(pullRequests)
 
             if (isEmpty(uncategorizedPullRequests)) {
               return flow(
@@ -148,7 +148,7 @@ const GitHub = (config) => {
                       )(categories)
                   )
                 })
-              )(config.categories);
+              )(config.categories)
             }
 
             return Promise.reject(`${
@@ -158,7 +158,7 @@ const GitHub = (config) => {
             }:\n${flow(
               map('text'),
               join('\n')
-            )(uncategorizedPullRequests)}`);
+            )(uncategorizedPullRequests)}`)
           })
       )
     },
@@ -285,9 +285,9 @@ const GitHub = (config) => {
           ))
       )
     }
-  };
+  }
 
-  return github;
-};
+  return github
+}
 
-export default GitHub;
+export default GitHub
