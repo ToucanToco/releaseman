@@ -11,6 +11,7 @@ const runHelp = ({ state }) => {
   const options = trim(`
 Options:
 
+  --branches.beta <value>     Latest beta branch
   --branches.develop <value>  Develop branch
   --branches.doc <value>      Documentation branches prefix
   --branches.feature <value>  Feature branches prefix
@@ -158,8 +159,8 @@ Usage: releaseman init
 
 Description:
 
-  Make your repository ready for \`releaseman\` by creating the develop branch,
-  an initial release and labels.
+  Make your repository ready for \`releaseman\` by creating develop and
+  latest-beta branches, an initial release and labels.
 
 ${options}
 `);

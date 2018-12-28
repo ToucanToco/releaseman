@@ -32,6 +32,7 @@ const runInit = ({ commit, getters, state }) => {
   logActionStart(RUN_INIT);
 
   const configError = getters.configError(
+    'branches.beta',
     'branches.develop',
     'branches.master',
     'labels.breaking',
@@ -128,9 +129,31 @@ const runInit = ({ commit, getters, state }) => {
         })
         .then(() => getters.runOrSkip(6, 7)(CREATE_RELEASE));
     })
-    .then(() => getters.runOrSkip(5, 7, 8)(GET_LABELS))
+    .then(() => {
+      if (getters.isCurrentTaskIndex(5) || getters.isCurrentTaskIndex(7)) {
+        return commit(SET_DATA, { branch: state.config.branches.beta });
+      }
+
+      return undefined
+    })
+    .then(() => getters.runOrSkip(5, 7, 8)(GET_BRANCH_EXISTENCE))
     .then(() => {
       if (getters.isCurrentTaskIndex(8)) {
+        if (state.data.isBranchPresent) {
+          return logWarn(`${state.config.branches.beta} already present.\n`);
+        }
+
+        commit(ASSIGN_DATA, {
+          base: state.config.branches.master,
+          head: state.config.branches.beta
+        });
+      }
+
+      return getters.runOrSkip(8, 9)(CREATE_BRANCH);
+    })
+    .then(() => getters.runOrSkip(8, 9, 10)(GET_LABELS))
+    .then(() => {
+      if (getters.isCurrentTaskIndex(10)) {
         const labelsNames = map('name')(state.data.labels);
 
         const missingLabels = flow(
@@ -149,7 +172,7 @@ const runInit = ({ commit, getters, state }) => {
         commit(ASSIGN_DATA, { labels: missingLabels });
       }
 
-      return getters.runOrSkip(8, 9)(CREATE_LABELS);
+      return getters.runOrSkip(10, 11)(CREATE_LABELS);
     })
     .then(() => logActionEnd(RUN_INIT));
 };

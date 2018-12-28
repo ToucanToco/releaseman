@@ -29,6 +29,7 @@ const runHotfixFinish = ({ commit, getters, state }) => {
   logActionStart(RUN_HOTFIX_FINISH);
 
   const configError = getters.configError(
+    'branches.beta',
     'branches.develop',
     (
       state.config.isDoc
@@ -240,7 +241,17 @@ const runHotfixFinish = ({ commit, getters, state }) => {
 
             return undefined;
           })
-          .then(() => getters.runOrSkip(11, 15, 16)(MERGE_BRANCHES));
+          .then(() => getters.runOrSkip(11, 15, 16)(MERGE_BRANCHES))
+          .then(() => {
+            if (getters.isCurrentTaskIndex(16)) {
+              return commit(ASSIGN_DATA, {
+                base: state.config.branches.beta
+              })
+            }
+
+            return undefined;
+          })
+          .then(() => getters.runOrSkip(16, 17)(UPDATE_BRANCH));
       }
       if (getters.isCurrentTaskIndex(10)) {
         commit(ASSIGN_DATA, {
@@ -249,7 +260,7 @@ const runHotfixFinish = ({ commit, getters, state }) => {
         });
       }
 
-      return getters.runOrSkip(10, 17)(MERGE_BRANCHES);
+      return getters.runOrSkip(10, 18)(MERGE_BRANCHES);
     })
     .then(() => logActionEnd(RUN_HOTFIX_FINISH));
 };
