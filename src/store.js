@@ -1,12 +1,12 @@
-import actions, { RUN_TASK, SKIP_TASK } from './actions';
-import flow from 'lodash/fp/flow';
-import get from 'lodash/fp/get';
-import includes from 'lodash/fp/includes';
-import isEqual from 'lodash/fp/isEqual';
-import join from 'lodash/fp/join';
-import last from 'lodash/fp/last';
-import map from 'lodash/fp/map';
-import mutations from './mutations';
+import actions, { RUN_TASK, SKIP_TASK } from './actions'
+import flow from 'lodash/fp/flow'
+import get from 'lodash/fp/get'
+import includes from 'lodash/fp/includes'
+import isEqual from 'lodash/fp/isEqual'
+import join from 'lodash/fp/join'
+import last from 'lodash/fp/last'
+import map from 'lodash/fp/map'
+import mutations from './mutations'
 
 const ACTIONS = {
   CHANGES: 'changes',
@@ -17,8 +17,8 @@ const ACTIONS = {
   HOTFIX: 'hotfix',
   INIT: 'init',
   RELEASE: 'release'
-};
-const STATE_FILE_PATH = `${__dirname}/state.json`;
+}
+const STATE_FILE_PATH = `${__dirname}/state.json`
 
 const Store = {
   actions: actions,
@@ -50,10 +50,10 @@ const Store = {
     data: null,
     taskIndex: 0
   }
-};
+}
 
 export {
   ACTIONS,
   STATE_FILE_PATH
-};
-export default Store;
+}
+export default Store
