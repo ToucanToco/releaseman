@@ -1,20 +1,20 @@
-import { ASSIGN_DATA } from '../mutations';
-import { logInfo, logTaskStart } from '../log';
+import { ASSIGN_DATA } from '../mutations'
+import { logInfo, logTaskStart } from '../log'
 
-const CREATE_RELEASE = 'CREATE_RELEASE';
+const CREATE_RELEASE = 'CREATE_RELEASE'
 
 const createRelease = ({ commit, getters, state }, isSkipped) => {
-  logTaskStart('Create release');
+  logTaskStart('Create release')
 
   if (isSkipped) {
-    return undefined;
+    return undefined
   }
 
   logInfo(`Creating new ${
     state.data.isPrerelease
       ? 'prerelease'
       : 'release'
-  }...`);
+  }...`)
 
   return getters.github.releases.create({
     branch: state.data.branch,
@@ -24,11 +24,11 @@ const createRelease = ({ commit, getters, state }, isSkipped) => {
     tag: state.data.tag
   })
     .then(({ tag, url }) => {
-      logInfo(url);
+      logInfo(url)
 
-      return commit(ASSIGN_DATA, { tag: tag });
-    });
-};
+      return commit(ASSIGN_DATA, { tag: tag })
+    })
+}
 
-export { CREATE_RELEASE };
-export default createRelease;
+export { CREATE_RELEASE }
+export default createRelease

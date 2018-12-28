@@ -1,17 +1,17 @@
-import isEmpty from 'lodash/fp/isEmpty';
-import kebabCase from 'lodash/fp/kebabCase';
-import { ASSIGN_DATA, SET_DATA } from '../mutations';
+import isEmpty from 'lodash/fp/isEmpty'
+import kebabCase from 'lodash/fp/kebabCase'
+import { ASSIGN_DATA, SET_DATA } from '../mutations'
 import {
   CREATE_PULL_REQUEST,
   GET_RELEASE_BRANCH,
   UPDATE_PULL_REQUEST_LABELS
-} from '../actions';
-import { logActionEnd, logActionStart } from '../log';
+} from '../actions'
+import { logActionEnd, logActionStart } from '../log'
 
-const RUN_FIX_PUBLISH = 'RUN_FIX_PUBLISH';
+const RUN_FIX_PUBLISH = 'RUN_FIX_PUBLISH'
 
 const runFixPublish = ({ commit, getters, state }) => {
-  logActionStart(RUN_FIX_PUBLISH);
+  logActionStart(RUN_FIX_PUBLISH)
 
   const configError = getters.configError(
     (
@@ -28,13 +28,13 @@ const runFixPublish = ({ commit, getters, state }) => {
     'labels.wip',
     'name',
     'tag'
-  );
+  )
 
   if (!isEmpty(configError)) {
-    return Promise.reject(configError);
+    return Promise.reject(configError)
   }
   if (getters.isCurrentTaskIndex(0)) {
-    commit(SET_DATA, {});
+    commit(SET_DATA, {})
   }
 
   return getters.runOrSkip(0, 1)(GET_RELEASE_BRANCH)
@@ -56,10 +56,10 @@ const runFixPublish = ({ commit, getters, state }) => {
               ? 'Doc'
               : 'Fix'
           } :: ${state.config.name}`
-        });
+        })
       }
 
-      return undefined;
+      return undefined
     })
     .then(() => getters.runOrSkip(1, 2)(CREATE_PULL_REQUEST))
     .then(() => {
@@ -73,14 +73,14 @@ const runFixPublish = ({ commit, getters, state }) => {
             ),
             state.config.labels.wip
           ]
-        });
+        })
       }
 
-      return undefined;
+      return undefined
     })
     .then(() => getters.runOrSkip(2, 3)(UPDATE_PULL_REQUEST_LABELS))
-    .then(() => logActionEnd(RUN_FIX_PUBLISH));
-};
+    .then(() => logActionEnd(RUN_FIX_PUBLISH))
+}
 
-export { RUN_FIX_PUBLISH };
-export default runFixPublish;
+export { RUN_FIX_PUBLISH }
+export default runFixPublish

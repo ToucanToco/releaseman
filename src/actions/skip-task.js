@@ -1,11 +1,11 @@
-import { logWarn } from '../log';
+import { logWarn } from '../log'
 
-const SKIP_TASK = 'SKIP_TASK';
+const SKIP_TASK = 'SKIP_TASK'
 
 const skipTask = ({ dispatch }, { name }) => {
   dispatch(name, true)
-    .then(() => logWarn('Skipped.\n'));
-};
+    .then(() => logWarn('Skipped.\n'))
+}
 
-export { SKIP_TASK };
-export default skipTask;
+export { SKIP_TASK }
+export default skipTask
