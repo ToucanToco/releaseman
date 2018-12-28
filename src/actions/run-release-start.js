@@ -18,6 +18,7 @@ const runReleaseStart = ({ commit, getters, state }) => {
   logActionStart(RUN_RELEASE_START);
 
   const configError = getters.configError(
+    'branches.beta',
     'branches.develop',
     'branches.master',
     'branches.release',
@@ -106,6 +107,17 @@ const runReleaseStart = ({ commit, getters, state }) => {
       return undefined;
     })
     .then(() => getters.runOrSkip(5, 6)(UPDATE_PULL_REQUEST_LABELS))
+    .then(() => {
+      if (getters.isCurrentTaskIndex(6)) {
+        return commit(ASSIGN_DATA, {
+          base: state.config.branches.beta,
+          head: state.data.branch
+        });
+      }
+
+      return undefined;
+    })
+    .then(() => getters.runOrSkip(6, 7)(UPDATE_BRANCH))
     .then(() => logActionEnd(RUN_RELEASE_START));
 };
 
