@@ -3,7 +3,7 @@ import { logInfo, logTaskStart } from '../log'
 
 const GET_LATEST_RELEASE = 'GET_LATEST_RELEASE'
 
-const getLatestRelease = ({ commit, getters, state }, isSkipped) => {
+const getLatestRelease = async ({ commit, getters, state }, isSkipped) => {
   logTaskStart('Get latest release')
 
   if (isSkipped) {
@@ -16,17 +16,16 @@ const getLatestRelease = ({ commit, getters, state }, isSkipped) => {
       : 'release'
   }...`)
 
-  return getters.github.releases.getLatest({
+  const { name, tag } = await getters.query('releases.getLatest')({
     isPrerelease: state.data.isPrerelease
   })
-    .then(({ name, tag }) => {
-      logInfo(`${tag}: ${name}`)
 
-      return commit(ASSIGN_DATA, {
-        name: name,
-        tag: tag
-      })
-    })
+  logInfo(`${tag}: ${name}`)
+
+  return commit(ASSIGN_DATA, {
+    name: name,
+    tag: tag
+  })
 }
 
 export { GET_LATEST_RELEASE }

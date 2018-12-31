@@ -1,4 +1,3 @@
-import isEmpty from 'lodash/fp/isEmpty'
 import kebabCase from 'lodash/fp/kebabCase'
 import { SET_DATA } from '../mutations'
 import { CREATE_BRANCH } from '../actions'
@@ -6,10 +5,9 @@ import { logActionEnd, logActionStart } from '../log'
 
 const RUN_FEATURE_START = 'RUN_FEATURE_START'
 
-const runFeatureStart = ({ commit, getters, state }) => {
+const runFeatureStart = async ({ commit, getters, state }) => {
   logActionStart(RUN_FEATURE_START)
-
-  const configError = getters.configError(
+  getters.validateConfig(
     'branches.develop',
     (
       state.config.isDoc
@@ -19,10 +17,7 @@ const runFeatureStart = ({ commit, getters, state }) => {
     'name'
   )
 
-  if (!isEmpty(configError)) {
-    return Promise.reject(configError)
-  }
-  if (getters.isCurrentTaskIndex(0)) {
+  if (getters.matchesTaskIndex(0)) {
     commit(SET_DATA, {
       base: state.config.branches.develop,
       head: `${
@@ -33,8 +28,9 @@ const runFeatureStart = ({ commit, getters, state }) => {
     })
   }
 
-  return getters.runOrSkip(0, 1)(CREATE_BRANCH)
-    .then(() => logActionEnd(RUN_FEATURE_START))
+  await getters.runOrSkip(0, 1)(CREATE_BRANCH)
+
+  return logActionEnd(RUN_FEATURE_START)
 }
 
 export { RUN_FEATURE_START }

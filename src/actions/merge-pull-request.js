@@ -2,7 +2,7 @@ import { logInfo, logTaskStart, logWarn } from '../log'
 
 const MERGE_PULL_REQUEST = 'MERGE_PULL_REQUEST'
 
-const mergePullRequest = ({ getters, state }, isSkipped) => {
+const mergePullRequest = async ({ getters, state }, isSkipped) => {
   logTaskStart('Merge pull request')
 
   if (isSkipped) {
@@ -15,15 +15,16 @@ const mergePullRequest = ({ getters, state }, isSkipped) => {
     return logWarn('Pull request already merged.')
   }
   if (!state.data.isMergeable) {
-    return Promise.reject('Pull request non-mergeable!')
+    throw 'Pull request non-mergeable!'
   }
 
-  return getters.github.pullRequests.merge({
+  const { url } = await getters.query('pullRequests.merge')({
     message: state.data.message,
     method: state.data.method,
     number: state.data.number
   })
-    .then(({ url }) => logInfo(url))
+
+  return logInfo(url)
 }
 
 export { MERGE_PULL_REQUEST }

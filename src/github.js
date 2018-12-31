@@ -22,268 +22,298 @@ const GitHub = (config) => {
     'content-type': 'application/json'
   }
 
-  const fetchGitHub = (path, method = 'GET', body) => fetch(
-    `https://api.github.com/repos/${config.owner}/${config.repo}/${path}`,
-    {
-      body: JSON.stringify(body),
-      headers: headers,
-      method: method
+  const fetchGitHub = async (path, method = 'GET', body) => {
+    const res = await fetch(
+      `https://api.github.com/repos/${config.owner}/${config.repo}/${path}`,
+      {
+        body: JSON.stringify(body),
+        headers: headers,
+        method: method
+      }
+    )
+
+    if (isEqual(204)(res.status)) {
+      return {}
     }
-  )
-    .then((res) => {
-      if (isEqual(204)(res.status)) {
-        return {
-          data: {},
-          isSuccess: true
-        }
-      }
 
-      return res.json()
-        .then((data) => ({
-          data: data,
-          isSuccess: res.ok
-        }))
-    })
-    .then(({ data, isSuccess }) => {
-      if (isSuccess) {
-        return data
-      }
+    const data = await res.json()
 
-      return Promise.reject(data.message)
-    })
+    if (res.ok) {
+      return data
+    }
+
+    throw data.message
+  }
 
   const github = {
     branches: {
-      create: ({ base, head }) => (
-        fetchGitHub(`git/refs/heads/${base}`)
-          .then(({ object }) => fetchGitHub('git/refs', 'POST', {
-            ref: `refs/heads/${head}`,
-            sha: object.sha
-          }))
-          .then(() => ({
-            branch: head,
-            url: `${baseUrl}tree/${head}`
-          }))
-      ),
-      delete: ({ branch }) => (
-        fetchGitHub(`git/refs/heads/${branch}`, 'DELETE')
-          .then(() => true)
-      ),
-      getExistence: ({ name }) => (
-        fetchGitHub(`git/refs/heads/${name}`)
-          .then(() => true)
-          .catch((message) => {
-            if (isEqual('Not Found')(message)) {
-              return false
-            }
+      create: async ({ base, head }) => {
+        const { object } = await fetchGitHub(`git/refs/heads/${base}`)
 
-            return Promise.reject(message)
-          })
-      ),
-      merge: ({ base, head }) => (
-        fetchGitHub('merges', 'POST', {
+        await fetchGitHub('git/refs', 'POST', {
+          ref: `refs/heads/${head}`,
+          sha: object.sha
+        })
+
+        return {
+          branch: head,
+          url: `${baseUrl}tree/${head}`
+        }
+      },
+      delete: async ({ branch }) => {
+        await fetchGitHub(`git/refs/heads/${branch}`, 'DELETE')
+
+        return true
+      },
+      getExistence: async ({ name }) => {
+        try {
+          await fetchGitHub(`git/refs/heads/${name}`)
+        } catch (message) {
+          if (isEqual('Not Found')(message)) {
+            return false
+          }
+
+          throw message
+        }
+
+        return true
+      },
+      merge: async ({ base, head }) => {
+        const { commit, html_url } = await fetchGitHub('merges', 'POST', {
           base: base,
           head: head
         })
-          .then(({ commit, html_url }) => ({
-            message: commit.message,
-            url: html_url
-          }))
-      ),
-      update: ({ base, head }) => (
-        fetchGitHub(`git/refs/heads/${head}`)
-          .then(({ object }) => fetchGitHub(`git/refs/heads/${base}`, 'PATCH', {
-            sha: object.sha
-          }))
-          .then(() => ({ url: `${baseUrl}tree/${base}` }))
-      )
+
+        return {
+          message: commit.message,
+          url: html_url
+        }
+      },
+      update: async ({ base, head }) => {
+        const { object } = await fetchGitHub(`git/refs/heads/${head}`)
+
+        await fetchGitHub(`git/refs/heads/${base}`, 'PATCH', {
+          sha: object.sha
+        })
+
+        return { url: `${baseUrl}tree/${base}` }
+      }
     },
     commits: {
-      getChangelog: ({ base, head }) => (
-        fetchGitHub(`compare/${base}...${head}`)
-          .then(({ commits }) => {
-            const matchPRNumber = new RegExp('^.*?\\(#(\\d+)\\)')
+      getChangelog: async ({ base, head }) => {
+        const categoriesLabels = flow(
+          map('label'),
+          concat(config.labels.release)
+        )(config.categories)
+        const matchPRNumber = new RegExp('^.*?\\(#(\\d+)\\)')
 
-            return Promise.all(flow(
-              map(({ commit }) => get(1)(matchPRNumber.exec(commit.message))),
-              reject(isUndefined),
-              map((number) => github.pullRequests.getChangelog({
-                number: number
-              }))
-            )(commits))
-          })
-          .then((pullRequests) => {
-            const categoriesLabels = flow(
-              map('label'),
-              concat(config.labels.release)
-            )(config.categories)
+        const { commits } = await fetchGitHub(`compare/${base}...${head}`)
 
-            const uncategorizedPullRequests = reject(({ labels }) => (
-              some((categoryLabel) => (
-                includes(categoryLabel)(labels)
-              ))(categoriesLabels)
-            ))(pullRequests)
+        const pullRequests = await Promise.all(flow(
+          map(({ commit }) => get(1)(matchPRNumber.exec(commit.message))),
+          reject(isUndefined),
+          map((number) => github.pullRequests.getChangelog({
+            number: number
+          }))
+        )(commits))
 
-            if (isEmpty(uncategorizedPullRequests)) {
-              return flow(
-                map((category) => (
-                  assign(category)({
-                    pullRequests: flow(
-                      filter(({ labels }) => includes(category.label)(labels)),
-                      map('text')
-                    )(pullRequests)
-                  })
-                )),
-                reject(({ pullRequests }) => isEmpty(pullRequests)),
-                (categories) => ({
-                  labels: map('label')(categories),
-                  text: (
-                    isEmpty(categories)
-                      ? 'No new PR'
-                      : flow(
-                        map(({ pullRequests, title }) => (
-                          `## ${title}\n${join('\n')(pullRequests)}`
-                        )),
-                        join('\n\n')
-                      )(categories)
-                  )
-                })
-              )(config.categories)
-            }
+        const uncategorizedPullRequests = reject(({ labels }) => (
+          some((categoryLabel) => (
+            includes(categoryLabel)(labels)
+          ))(categoriesLabels)
+        ))(pullRequests)
 
-            return Promise.reject(`${
-              isEqual(1)(size(uncategorizedPullRequests))
-                ? 'This PR is missing a label'
-                : 'These PRs are missing a label'
-            }:\n${flow(
-              map('text'),
-              join('\n')
-            )(uncategorizedPullRequests)}`)
-          })
-      )
+        if (isEmpty(uncategorizedPullRequests)) {
+          return flow(
+            map((category) => (
+              assign(category)({
+                pullRequests: flow(
+                  filter(({ labels }) => includes(category.label)(labels)),
+                  map('text')
+                )(pullRequests)
+              })
+            )),
+            reject(({ pullRequests }) => isEmpty(pullRequests)),
+            (categories) => ({
+              labels: map('label')(categories),
+              text: (
+                isEmpty(categories)
+                  ? 'No new PR'
+                  : flow(
+                    map(({ pullRequests, title }) => (
+                      `## ${title}\n${join('\n')(pullRequests)}`
+                    )),
+                    join('\n\n')
+                  )(categories)
+              )
+            })
+          )(config.categories)
+        }
+
+        throw `${
+          isEqual(1)(size(uncategorizedPullRequests))
+            ? 'This PR is missing a label'
+            : 'These PRs are missing a label'
+        }:\n${flow(
+          map('text'),
+          join('\n')
+        )(uncategorizedPullRequests)}`
+      }
     },
     labels: {
-      create: ({ color, name }) => (
-        fetchGitHub('labels', 'POST', {
+      create: async ({ color, name }) => {
+        await fetchGitHub('labels', 'POST', {
           color: color,
           name: name
         })
-          .then(({ name }) => ({
-            name: name,
-            url: `${baseUrl}labels/${name}`
-          }))
-      ),
-      index: () => (
-        fetchGitHub('labels')
-          .then(map(({ color, name }) => ({
-            color: color,
-            name: name
-          })))
-      )
+
+        return {
+          name: name,
+          url: `${baseUrl}labels/${name}`
+        }
+      },
+      index: async () => {
+        const labels = await fetchGitHub('labels')
+
+        return map(({ color, name }) => ({
+          color: color,
+          name: name
+        }))(labels)
+      }
     },
     pullRequests: {
-      create: ({ base, changelog, head, name }) => (
-        fetchGitHub('pulls', 'POST', {
+      create: async ({ base, changelog, head, name }) => {
+        const { number, html_url } = await fetchGitHub('pulls', 'POST', {
           base: base,
           body: changelog,
           head: head,
           title: name
         })
-          .then(({ number, html_url }) => ({
-            number: number,
-            url: html_url
-          }))
-      ),
-      find: ({ base, head }) => (
-        fetchGitHub(`pulls?base=${base}&head=${config.owner}:${head}`)
-          .then(first)
-          .then(({ number }) => ({ number: number }))
-      ),
-      get: ({ number }) => (
-        fetchGitHub(`pulls/${number}`)
-          .then(({ base, head, mergeable, merged, title }) => ({
-            base: base.ref,
-            head: head.ref,
-            isMergeable: mergeable,
-            isMerged: merged,
-            name: title
-          }))
-      ),
-      getChangelog: ({ number }) => (
-        fetchGitHub(`issues/${number}`)
-          .then(({ labels, number, title }) => ({
-            labels: map('name')(labels),
-            text: `#${number} ${title}`
-          }))
-      ),
-      getLabels: ({ number }) => (
-        fetchGitHub(`issues/${number}/labels`)
-          .then(map(({ color, name }) => ({
-            color: color,
-            name: name
-          })))
-      ),
-      merge: ({ message, method, number }) => (
-        fetchGitHub(`pulls/${number}/merge`, 'PUT', {
+
+        return {
+          number: number,
+          url: html_url
+        }
+      },
+      find: async ({ base, head }) => {
+        const pullRequests = await fetchGitHub(
+          `pulls?base=${base}&head=${config.owner}:${head}`
+        )
+
+        return {
+          number: flow(
+            first,
+            get('number')
+          )(pullRequests)
+        }
+      },
+      get: async ({ number }) => {
+        const {
+          base,
+          head,
+          mergeable,
+          merged,
+          title
+        } = await fetchGitHub(`pulls/${number}`)
+
+        return {
+          base: base.ref,
+          head: head.ref,
+          isMergeable: mergeable,
+          isMerged: merged,
+          name: title
+        }
+      },
+      getChangelog: async ({ number }) => {
+        const { labels, title } = await fetchGitHub(`issues/${number}`)
+
+        return {
+          labels: map('name')(labels),
+          text: `#${number} ${title}`
+        }
+      },
+      getLabels: async ({ number }) => {
+        const labels = await fetchGitHub(`issues/${number}/labels`)
+
+        return map(({ color, name }) => ({
+          color: color,
+          name: name
+        }))(labels)
+      },
+      merge: async ({ message, method, number }) => {
+        await fetchGitHub(`pulls/${number}/merge`, 'PUT', {
           commit_title: message,
           merge_method: method
         })
-          .then(() => ({ url: `${baseUrl}pull/${number}` }))
-      ),
-      setLabels: ({ labels, number }) => (
-        fetchGitHub(`issues/${number}/labels`, 'PUT', labels)
-          .then(() => ({ url: `${baseUrl}pull/${number}` }))
-      ),
-      update: ({ changelog, name, number }) => (
-        fetchGitHub(`pulls/${number}`, 'PATCH', {
+
+        return { url: `${baseUrl}pull/${number}` }
+      },
+      setLabels: async ({ labels, number }) => {
+        await fetchGitHub(`issues/${number}/labels`, 'PUT', labels)
+
+        return { url: `${baseUrl}pull/${number}` }
+      },
+      update: async ({ changelog, name, number }) => {
+        const { html_url } = await fetchGitHub(`pulls/${number}`, 'PATCH', {
           body: changelog,
           title: name
         })
-          .then(({ html_url }) => ({ url: html_url }))
-      )
+
+        return { url: html_url }
+      }
     },
     releases: {
-      create: ({ branch, changelog, isPrerelease = false, name, tag }) => (
-        fetchGitHub('releases', 'POST', {
+      create: async ({
+        branch,
+        changelog,
+        isPrerelease = false,
+        name,
+        tag
+      }) => {
+        const { html_url } = await fetchGitHub('releases', 'POST', {
           body: changelog,
           name: name,
           prerelease: isPrerelease,
           tag_name: tag,
           target_commitish: branch
         })
-          .then(({ html_url }) => ({
-            tag: tag,
-            url: html_url
-          }))
-      ),
-      getLatest: ({ isPrerelease = false } = {}) => (
-        (
-          isPrerelease
-            ? (
-              fetchGitHub('releases')
-                .then(flow(
-                  filter('prerelease'),
-                  first
-                ))
-            )
-            : fetchGitHub('releases/latest')
-        )
-          .then(({ name, tag_name }) => ({
-            name: name,
-            tag: tag_name
-          }))
-      ),
-      size: ({ isPrerelease = false } = {}) => (
-        fetchGitHub('releases')
-          .then(flow(
-            (
-              isPrerelease
-                ? filter('prerelease')
-                : reject('prerelease')
-            ),
-            size
-          ))
-      )
+
+        return {
+          tag: tag,
+          url: html_url
+        }
+      },
+      getLatest: async ({ isPrerelease = false } = {}) => {
+        let release = {}
+
+        if (isPrerelease) {
+          const releases = await fetchGitHub('releases')
+
+          release = flow(
+            filter('prerelease'),
+            first
+          )(releases)
+        } else {
+          release = await fetchGitHub('releases/latest')
+        }
+
+        return {
+          name: release.name,
+          tag: release.tag_name
+        }
+      },
+      size: async ({ isPrerelease = false } = {}) => {
+        const releases = await fetchGitHub('releases')
+
+        return flow(
+          (
+            isPrerelease
+              ? filter
+              : reject
+          )('prerelease'),
+          size
+        )(releases)
+      }
     }
   }
 

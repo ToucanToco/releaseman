@@ -5,7 +5,7 @@ import { toReadableList } from '../helpers'
 
 const GET_PULL_REQUEST_LABELS = 'GET_PULL_REQUEST_LABELS'
 
-const getPullRequestLabels = ({ commit, getters, state }, isSkipped) => {
+const getPullRequestLabels = async ({ commit, getters, state }, isSkipped) => {
   logTaskStart('Get pull request labels')
 
   if (isSkipped) {
@@ -14,12 +14,13 @@ const getPullRequestLabels = ({ commit, getters, state }, isSkipped) => {
 
   logInfo(`Retrieving pull request #${state.data.number}'s labels...`)
 
-  return getters.github.pullRequests.getLabels({ number: state.data.number })
-    .then((labels) => {
-      logInfo(toReadableList(map('name')(labels)))
+  const labels = await getters.query('pullRequests.getLabels')({
+    number: state.data.number
+  })
 
-      return commit(ASSIGN_DATA, { labels: labels })
-    })
+  logInfo(toReadableList(map('name')(labels)))
+
+  return commit(ASSIGN_DATA, { labels: labels })
 }
 
 export { GET_PULL_REQUEST_LABELS }

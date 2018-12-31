@@ -25,7 +25,7 @@
     "prefer-promise-reject-errors": 0,
     "semi": [2, "never", { "beforeStatementContinuationChars": "always" }],
     "sort-keys": [2, "asc", { "caseSensitive": false, "natural": true }],
-    "space-before-function-paren": [2, "never"]
+    "space-before-function-paren": [2, { "anonymous": "never", "asyncArrow": "always", "named": "never" }]
   },
   "settings": {
     "import/resolver": "node"

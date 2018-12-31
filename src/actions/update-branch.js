@@ -2,7 +2,7 @@ import { logInfo, logTaskStart } from '../log'
 
 const UPDATE_BRANCH = 'UPDATE_BRANCH'
 
-const updateBranch = ({ getters, state }, isSkipped) => {
+const updateBranch = async ({ getters, state }, isSkipped) => {
   logTaskStart('Update branch')
 
   if (isSkipped) {
@@ -11,11 +11,12 @@ const updateBranch = ({ getters, state }, isSkipped) => {
 
   logInfo(`Updating \`${state.data.base}\` to \`${state.data.head}\`...`)
 
-  return getters.github.branches.update({
+  const { url } = await getters.query('branches.update')({
     base: state.data.base,
     head: state.data.head
   })
-    .then(({ url }) => logInfo(url))
+
+  return logInfo(url)
 }
 
 export { UPDATE_BRANCH }

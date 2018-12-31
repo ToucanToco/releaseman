@@ -2,7 +2,7 @@ import { logInfo, logTaskStart } from '../log'
 
 const UPDATE_PULL_REQUEST = 'UPDATE_PULL_REQUEST'
 
-const updatePullRequest = ({ getters, state }, isSkipped) => {
+const updatePullRequest = async ({ getters, state }, isSkipped) => {
   logTaskStart('Update pull request')
 
   if (isSkipped) {
@@ -11,12 +11,13 @@ const updatePullRequest = ({ getters, state }, isSkipped) => {
 
   logInfo(`Updating pull request #${state.data.number}...`)
 
-  return getters.github.pullRequests.update({
+  const { url } = await getters.query('pullRequests.update')({
     changelog: state.data.changelog.text,
     name: state.data.name,
     number: state.data.number
   })
-    .then(({ url }) => logInfo(url))
+
+  return logInfo(url)
 }
 
 export { UPDATE_PULL_REQUEST }

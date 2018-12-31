@@ -6,7 +6,7 @@ import {
 
 const RUN_FIX = 'RUN_FIX'
 
-const runFix = ({ dispatch, state }) => {
+const runFix = async ({ dispatch, state }) => {
   switch (state.config.position) {
     case 'finish':
       return dispatch(RUN_FIX_FINISH)
@@ -15,9 +15,7 @@ const runFix = ({ dispatch, state }) => {
     case 'start':
       return dispatch(RUN_FIX_START)
     default:
-      return Promise.reject(
-        'The `fix` command must be run in start, publish or finish mode!'
-      )
+      throw 'The `fix` command must be run in start, publish or finish mode!'
   }
 }
 

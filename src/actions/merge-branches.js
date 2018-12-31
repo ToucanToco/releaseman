@@ -2,7 +2,7 @@ import { logInfo, logTaskStart } from '../log'
 
 const MERGE_BRANCHES = 'MERGE_BRANCHES'
 
-const mergeBranches = ({ getters, state }, isSkipped) => {
+const mergeBranches = async ({ getters, state }, isSkipped) => {
   logTaskStart('Merge branches')
 
   if (isSkipped) {
@@ -11,11 +11,12 @@ const mergeBranches = ({ getters, state }, isSkipped) => {
 
   logInfo(`Merging \`${state.data.head}\` into \`${state.data.base}\`...`)
 
-  return getters.github.branches.merge({
+  const { url } = await getters.query('branches.merge')({
     base: state.data.base,
     head: state.data.head
   })
-    .then(({ url }) => logInfo(url))
+
+  return logInfo(url)
 }
 
 export { MERGE_BRANCHES }

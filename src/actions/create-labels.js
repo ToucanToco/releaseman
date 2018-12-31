@@ -5,7 +5,7 @@ import { logInfo, logTaskStart } from '../log'
 
 const CREATE_LABELS = 'CREATE_LABELS'
 
-const createLabels = ({ commit, getters, state }, isSkipped) => {
+const createLabels = async ({ commit, getters, state }, isSkipped) => {
   logTaskStart('Create labels')
 
   if (isSkipped) {
@@ -15,16 +15,15 @@ const createLabels = ({ commit, getters, state }, isSkipped) => {
   logInfo('Creating labels...')
 
   return Promise.all(
-    map((label) => (
-      getters.github.labels.create(label)
-        .then(({ name, url }) => {
-          logInfo(`${name}: ${url}`)
+    map(async (label) => {
+      const { name, url } = await getters.query('labels.create')(label)
 
-          return commit(ASSIGN_DATA, {
-            labels: reject(['name', name])(state.data.labels)
-          })
-        })
-    ))(state.data.labels)
+      logInfo(`${name}: ${url}`)
+
+      return commit(ASSIGN_DATA, {
+        labels: reject(['name', name])(state.data.labels)
+      })
+    })(state.data.labels)
   )
 }
 

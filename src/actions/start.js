@@ -7,12 +7,8 @@ import { SET_CONFIG } from '../mutations'
 
 const START = 'START'
 
-const start = ({ commit, dispatch, state }, argv) => {
-  try {
-    commit(SET_CONFIG, Config(argv))
-  } catch (e) {
-    return Promise.reject(e)
-  }
+const start = async ({ commit, dispatch, state }, argv) => {
+  commit(SET_CONFIG, Config(argv))
 
   if (
     !isEqual(state.config.action)(ACTIONS.CONTINUE) &&
@@ -21,11 +17,15 @@ const start = ({ commit, dispatch, state }, argv) => {
     fs.unlinkSync(STATE_FILE_PATH)
   }
 
-  return dispatch(RUN)
-    .catch((e) => (
-      dispatch(SAVE_STATE)
-        .then(() => Promise.reject(e))
-    ))
+  try {
+    await dispatch(RUN)
+  } catch (e) {
+    await dispatch(SAVE_STATE)
+
+    throw e
+  }
+
+  return undefined
 }
 
 export { START }

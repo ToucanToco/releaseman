@@ -1,8 +1,10 @@
 import actions, { RUN_TASK, SKIP_TASK } from './actions'
+import filter from 'lodash/fp/filter'
 import flow from 'lodash/fp/flow'
 import get from 'lodash/fp/get'
 import includes from 'lodash/fp/includes'
-import isEqual from 'lodash/fp/isEqual'
+import isEmpty from 'lodash/fp/isEmpty'
+import isUndefined from 'lodash/fp/isUndefined'
 import join from 'lodash/fp/join'
 import last from 'lodash/fp/last'
 import map from 'lodash/fp/map'
@@ -25,24 +27,34 @@ const Store = {
   commit: (mutation, payload) => (
     get(mutation)(Store.mutations)(Store.state, payload)
   ),
-  dispatch: (action, payload) => (
-    Promise.resolve(get(action)(Store.actions)(Store, payload))
+  dispatch: async (action, payload) => (
+    get(action)(Store.actions)(Store, payload)
   ),
   getters: {
-    configError: (...keys) => flow(
-      map((key) => `The <${key}> param is mandatory!`),
-      join('\n')
-    )(keys),
     github: null,
-    isCurrentTaskIndex: isEqual(0),
+    matchesTaskIndex: (...indexes) => includes(Store.state.taskIndex)(indexes),
+    query: (path) => (payload) => get(path)(Store.getters.github)(payload),
     runOrSkip: (...indexes) => (name) => Store.dispatch((
-      includes(0)(indexes)
+      Store.getters.matchesTaskIndex(...indexes)
         ? RUN_TASK
         : SKIP_TASK
     ), {
       index: last(indexes),
       name: name
-    })
+    }),
+    validateConfig: (...keys) => {
+      const error = flow(
+        filter((key) => isUndefined(get(key)(Store.state.config))),
+        map((key) => `The <${key}> param is mandatory!`),
+        join('\n')
+      )(keys)
+
+      if (isEmpty(error)) {
+        return undefined
+      }
+
+      throw error
+    }
   },
   mutations: mutations,
   state: {

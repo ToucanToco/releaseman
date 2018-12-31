@@ -3,7 +3,7 @@ import { logInfo, logTaskStart } from '../log'
 
 const CREATE_BRANCH = 'CREATE_BRANCH'
 
-const createBranch = ({ commit, getters, state }, isSkipped) => {
+const createBranch = async ({ commit, getters, state }, isSkipped) => {
   logTaskStart('Create branch')
 
   if (isSkipped) {
@@ -16,15 +16,14 @@ const createBranch = ({ commit, getters, state }, isSkipped) => {
     state.data.base
   }\`...`)
 
-  return getters.github.branches.create({
+  const { branch, url } = await getters.query('branches.create')({
     base: state.data.base,
     head: state.data.head
   })
-    .then(({ branch, url }) => {
-      logInfo(url)
 
-      return commit(ASSIGN_DATA, { branch: branch })
-    })
+  logInfo(url)
+
+  return commit(ASSIGN_DATA, { branch: branch })
 }
 
 export { CREATE_BRANCH }
