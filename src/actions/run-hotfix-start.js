@@ -1,4 +1,3 @@
-import isEmpty from 'lodash/fp/isEmpty'
 import kebabCase from 'lodash/fp/kebabCase'
 import { SET_DATA } from '../mutations'
 import { CREATE_BRANCH } from '../actions'
@@ -8,8 +7,7 @@ const RUN_HOTFIX_START = 'RUN_HOTFIX_START'
 
 const runHotfixStart = async ({ commit, getters, state }) => {
   logActionStart(RUN_HOTFIX_START)
-
-  const configError = getters.configError(
+  getters.validateConfig(
     (
       state.config.isDoc
         ? 'branches.doc'
@@ -19,9 +17,6 @@ const runHotfixStart = async ({ commit, getters, state }) => {
     'name'
   )
 
-  if (!isEmpty(configError)) {
-    throw configError
-  }
   if (getters.isCurrentTaskIndex(0)) {
     commit(SET_DATA, {
       base: state.config.branches.master,

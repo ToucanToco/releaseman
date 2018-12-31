@@ -1,6 +1,5 @@
 import get from 'lodash/fp/get'
 import includes from 'lodash/fp/includes'
-import isEmpty from 'lodash/fp/isEmpty'
 import { ASSIGN_DATA, SET_DATA } from '../mutations'
 import {
   CREATE_BRANCH,
@@ -17,8 +16,7 @@ const RUN_RELEASE_START = 'RUN_RELEASE_START'
 
 const runReleaseStart = async ({ commit, getters, state }) => {
   logActionStart(RUN_RELEASE_START)
-
-  const configError = getters.configError(
+  getters.validateConfig(
     'branches.beta',
     'branches.develop',
     'branches.master',
@@ -30,9 +28,6 @@ const runReleaseStart = async ({ commit, getters, state }) => {
     'tag'
   )
 
-  if (!isEmpty(configError)) {
-    throw configError
-  }
   if (/\sbeta$/i.test(state.config.name)) {
     throw 'The <name> param must be the final release name (no beta)!'
   }

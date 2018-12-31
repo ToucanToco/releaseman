@@ -30,8 +30,7 @@ const RUN_INIT = 'RUN_INIT'
 
 const runInit = async ({ commit, getters, state }) => {
   logActionStart(RUN_INIT)
-
-  const configError = getters.configError(
+  getters.validateConfig(
     'branches.beta',
     'branches.develop',
     'branches.master',
@@ -44,9 +43,6 @@ const runInit = async ({ commit, getters, state }) => {
     'tag'
   )
 
-  if (!isEmpty(configError)) {
-    throw configError
-  }
   if (getters.isCurrentTaskIndex(0)) {
     commit(SET_DATA, { branch: state.config.branches.develop })
   }

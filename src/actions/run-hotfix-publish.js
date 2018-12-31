@@ -1,4 +1,3 @@
-import isEmpty from 'lodash/fp/isEmpty'
 import kebabCase from 'lodash/fp/kebabCase'
 import { ASSIGN_DATA, SET_DATA } from '../mutations'
 import { CREATE_PULL_REQUEST, UPDATE_PULL_REQUEST_LABELS } from '../actions'
@@ -8,8 +7,7 @@ const RUN_HOTFIX_PUBLISH = 'RUN_HOTFIX_PUBLISH'
 
 const runHotfixPublish = async ({ commit, getters, state }) => {
   logActionStart(RUN_HOTFIX_PUBLISH)
-
-  const configError = getters.configError(
+  getters.validateConfig(
     (
       state.config.isDoc
         ? 'branches.doc'
@@ -25,9 +23,6 @@ const runHotfixPublish = async ({ commit, getters, state }) => {
     'name'
   )
 
-  if (!isEmpty(configError)) {
-    throw configError
-  }
   if (getters.isCurrentTaskIndex(0)) {
     commit(SET_DATA, {
       base: state.config.branches.master,

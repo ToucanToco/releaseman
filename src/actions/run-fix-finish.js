@@ -1,7 +1,6 @@
 import concat from 'lodash/fp/concat'
 import flow from 'lodash/fp/flow'
 import includes from 'lodash/fp/includes'
-import isEmpty from 'lodash/fp/isEmpty'
 import isEqual from 'lodash/fp/isEqual'
 import map from 'lodash/fp/map'
 import startsWith from 'lodash/fp/startsWith'
@@ -28,8 +27,7 @@ const RUN_FIX_FINISH = 'RUN_FIX_FINISH'
 
 const runFixFinish = async ({ commit, getters, state }) => {
   logActionStart(RUN_FIX_FINISH)
-
-  const configError = getters.configError(
+  getters.validateConfig(
     'branches.beta',
     'branches.develop',
     (
@@ -48,6 +46,7 @@ const runFixFinish = async ({ commit, getters, state }) => {
     'number',
     'tag'
   )
+
   const fixBranchesPrefix = (
     state.config.isDoc
       ? state.config.branches.doc
@@ -59,9 +58,6 @@ const runFixFinish = async ({ commit, getters, state }) => {
       : state.config.labels.fix
   )
 
-  if (!isEmpty(configError)) {
-    throw configError
-  }
   if (getters.isCurrentTaskIndex(0)) {
     commit(SET_DATA, {})
   }

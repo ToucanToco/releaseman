@@ -29,10 +29,6 @@ const Store = {
     get(action)(Store.actions)(Store, payload)
   ),
   getters: {
-    configError: (...keys) => flow(
-      map((key) => `The <${key}> param is mandatory!`),
-      join('\n')
-    )(keys),
     github: null,
     isCurrentTaskIndex: isEqual(0),
     runOrSkip: (...indexes) => (name) => Store.dispatch((
@@ -42,7 +38,13 @@ const Store = {
     ), {
       index: last(indexes),
       name: name
-    })
+    }),
+    validateConfig: (...keys) => {
+      throw flow(
+        map((key) => `The <${key}> param is mandatory!`),
+        join('\n')
+      )(keys)
+    }
   },
   mutations: mutations,
   state: {

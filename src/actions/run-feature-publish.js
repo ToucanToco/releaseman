@@ -1,4 +1,3 @@
-import isEmpty from 'lodash/fp/isEmpty'
 import kebabCase from 'lodash/fp/kebabCase'
 import { ASSIGN_DATA, SET_DATA } from '../mutations'
 import { CREATE_PULL_REQUEST, UPDATE_PULL_REQUEST_LABELS } from '../actions'
@@ -8,8 +7,7 @@ const RUN_FEATURE_PUBLISH = 'RUN_FEATURE_PUBLISH'
 
 const runFeaturePublish = async ({ commit, getters, state }) => {
   logActionStart(RUN_FEATURE_PUBLISH)
-
-  const configError = getters.configError(
+  getters.validateConfig(
     'branches.develop',
     ...(
       state.config.isDoc
@@ -20,9 +18,6 @@ const runFeaturePublish = async ({ commit, getters, state }) => {
     'name'
   )
 
-  if (!isEmpty(configError)) {
-    throw configError
-  }
   if (getters.isCurrentTaskIndex(0)) {
     commit(SET_DATA, {
       base: state.config.branches.develop,

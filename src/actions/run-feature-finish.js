@@ -1,7 +1,6 @@
 import concat from 'lodash/fp/concat'
 import flow from 'lodash/fp/flow'
 import includes from 'lodash/fp/includes'
-import isEmpty from 'lodash/fp/isEmpty'
 import isEqual from 'lodash/fp/isEqual'
 import map from 'lodash/fp/map'
 import startsWith from 'lodash/fp/startsWith'
@@ -19,8 +18,7 @@ const RUN_FEATURE_FINISH = 'RUN_FEATURE_FINISH'
 
 const runFeatureFinish = async ({ commit, getters, state }) => {
   logActionStart(RUN_FEATURE_FINISH)
-
-  const configError = getters.configError(
+  getters.validateConfig(
     'branches.develop',
     ...(
       state.config.isDoc
@@ -29,6 +27,7 @@ const runFeatureFinish = async ({ commit, getters, state }) => {
     ),
     'number'
   )
+
   const featureBranchesPrefix = (
     state.config.isDoc
       ? state.config.branches.doc
@@ -40,9 +39,6 @@ const runFeatureFinish = async ({ commit, getters, state }) => {
       : state.config.labels.feature
   )
 
-  if (!isEmpty(configError)) {
-    throw configError
-  }
   if (getters.isCurrentTaskIndex(0)) {
     commit(SET_DATA, {
       number: state.config.number

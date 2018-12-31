@@ -1,5 +1,4 @@
 import includes from 'lodash/fp/includes'
-import isEmpty from 'lodash/fp/isEmpty'
 import isEqual from 'lodash/fp/isEqual'
 import { ASSIGN_DATA, SET_DATA } from '../mutations'
 import { GET_CHANGELOG, GET_LATEST_RELEASE } from '../actions'
@@ -21,15 +20,11 @@ const runChanges = async ({ commit, getters, state }) => {
     'labels.release'
   ]
 
-  const configError = getters.configError(...(
+  getters.validateConfig(...(
     isFinish
       ? mandatoryConfigParams
       : ['branches.develop', ...mandatoryConfigParams]
   ))
-
-  if (!isEmpty(configError)) {
-    throw configError
-  }
 
   if (isFinish) {
     if (getters.isCurrentTaskIndex(0)) {

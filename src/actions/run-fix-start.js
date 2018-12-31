@@ -1,4 +1,3 @@
-import isEmpty from 'lodash/fp/isEmpty'
 import kebabCase from 'lodash/fp/kebabCase'
 import { ASSIGN_DATA, SET_DATA } from '../mutations'
 import { CREATE_BRANCH, GET_RELEASE_BRANCH } from '../actions'
@@ -8,8 +7,7 @@ const RUN_FIX_START = 'RUN_FIX_START'
 
 const runFixStart = async ({ commit, getters, state }) => {
   logActionStart(RUN_FIX_START)
-
-  const configError = getters.configError(
+  getters.validateConfig(
     (
       state.config.isDoc
         ? 'branches.doc'
@@ -20,9 +18,6 @@ const runFixStart = async ({ commit, getters, state }) => {
     'tag'
   )
 
-  if (!isEmpty(configError)) {
-    throw configError
-  }
   if (getters.isCurrentTaskIndex(0)) {
     commit(SET_DATA, {})
   }

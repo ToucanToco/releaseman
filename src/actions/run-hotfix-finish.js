@@ -3,7 +3,6 @@ import flow from 'lodash/fp/flow'
 import get from 'lodash/fp/get'
 import gt from 'lodash/fp/gt'
 import includes from 'lodash/fp/includes'
-import isEmpty from 'lodash/fp/isEmpty'
 import isEqual from 'lodash/fp/isEqual'
 import map from 'lodash/fp/map'
 import startsWith from 'lodash/fp/startsWith'
@@ -28,8 +27,7 @@ const RUN_HOTFIX_FINISH = 'RUN_HOTFIX_FINISH'
 
 const runHotfixFinish = async ({ commit, getters, state }) => {
   logActionStart(RUN_HOTFIX_FINISH)
-
-  const configError = getters.configError(
+  getters.validateConfig(
     'branches.beta',
     'branches.develop',
     (
@@ -49,6 +47,7 @@ const runHotfixFinish = async ({ commit, getters, state }) => {
     'number',
     'tag'
   )
+
   const hotfixBranchesPrefix = (
     state.config.isDoc
       ? state.config.branches.doc
@@ -60,9 +59,6 @@ const runHotfixFinish = async ({ commit, getters, state }) => {
       : state.config.labels.fix
   )
 
-  if (!isEmpty(configError)) {
-    throw configError
-  }
   if (getters.isCurrentTaskIndex(0)) {
     commit(SET_DATA, {
       number: state.config.number

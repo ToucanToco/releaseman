@@ -1,5 +1,4 @@
 import includes from 'lodash/fp/includes'
-import isEmpty from 'lodash/fp/isEmpty'
 import { ACTIONS } from '../store'
 import {
   RUN_CHANGES,
@@ -18,15 +17,11 @@ const run = async ({ dispatch, getters, state }) => {
   if (!includes(state.config.action)([
     ACTIONS.CONTINUE, ACTIONS.HELP, undefined
   ])) {
-    const configError = getters.configError(
+    getters.validateConfig(
       'owner',
       'repo',
       'token'
     )
-
-    if (!isEmpty(configError)) {
-      throw configError
-    }
   }
   switch (state.config.action) {
     case ACTIONS.CHANGES:

@@ -2,7 +2,6 @@ import concat from 'lodash/fp/concat'
 import flow from 'lodash/fp/flow'
 import get from 'lodash/fp/get'
 import includes from 'lodash/fp/includes'
-import isEmpty from 'lodash/fp/isEmpty'
 import map from 'lodash/fp/map'
 import replace from 'lodash/fp/replace'
 import { ASSIGN_DATA, SET_DATA } from '../mutations'
@@ -24,8 +23,7 @@ const RUN_RELEASE_FINISH = 'RUN_RELEASE_FINISH'
 
 const runReleaseFinish = async ({ commit, getters, state }) => {
   logActionStart(RUN_RELEASE_FINISH)
-
-  const configError = getters.configError(
+  getters.validateConfig(
     'branches.master',
     'branches.release',
     'categories',
@@ -33,9 +31,6 @@ const runReleaseFinish = async ({ commit, getters, state }) => {
     'tag'
   )
 
-  if (!isEmpty(configError)) {
-    throw configError
-  }
   if (getters.isCurrentTaskIndex(0)) {
     commit(SET_DATA, { isPrerelease: false })
   }
