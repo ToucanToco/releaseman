@@ -23,7 +23,7 @@ const runHotfixPublish = async ({ commit, getters, state }) => {
     'name'
   )
 
-  if (getters.isCurrentTaskIndex(0)) {
+  if (getters.matchesTaskIndex(0)) {
     commit(SET_DATA, {
       base: state.config.branches.master,
       changelog: {
@@ -45,7 +45,7 @@ const runHotfixPublish = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(0, 1)(CREATE_PULL_REQUEST)
 
-  if (getters.isCurrentTaskIndex(1)) {
+  if (getters.matchesTaskIndex(1)) {
     commit(ASSIGN_DATA, {
       labels: [
         (

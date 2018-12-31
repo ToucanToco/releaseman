@@ -20,7 +20,7 @@ const findReleasePullRequest = async ({
     state.data.base
   }\`...`)
 
-  const { number } = await getters.github.pullRequests.find({
+  const { number } = await getters.query('pullRequests.find')({
     base: state.data.base,
     head: state.data.head
   })

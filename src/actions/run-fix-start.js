@@ -18,13 +18,13 @@ const runFixStart = async ({ commit, getters, state }) => {
     'tag'
   )
 
-  if (getters.isCurrentTaskIndex(0)) {
+  if (getters.matchesTaskIndex(0)) {
     commit(SET_DATA, {})
   }
 
   await getters.runOrSkip(0, 1)(GET_RELEASE_BRANCH)
 
-  if (getters.isCurrentTaskIndex(1)) {
+  if (getters.matchesTaskIndex(1)) {
     commit(ASSIGN_DATA, {
       base: state.data.branch,
       head: `${

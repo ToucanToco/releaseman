@@ -28,13 +28,13 @@ const runFixPublish = async ({ commit, getters, state }) => {
     'tag'
   )
 
-  if (getters.isCurrentTaskIndex(0)) {
+  if (getters.matchesTaskIndex(0)) {
     commit(SET_DATA, {})
   }
 
   await getters.runOrSkip(0, 1)(GET_RELEASE_BRANCH)
 
-  if (getters.isCurrentTaskIndex(1)) {
+  if (getters.matchesTaskIndex(1)) {
     commit(ASSIGN_DATA, {
       base: state.data.branch,
       changelog: {
@@ -56,7 +56,7 @@ const runFixPublish = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(1, 2)(CREATE_PULL_REQUEST)
 
-  if (getters.isCurrentTaskIndex(2)) {
+  if (getters.matchesTaskIndex(2)) {
     commit(ASSIGN_DATA, {
       labels: [
         (

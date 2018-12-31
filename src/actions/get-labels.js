@@ -15,7 +15,7 @@ const getLabels = async ({ commit, getters }, isSkipped) => {
 
   logInfo('Retrieving labels...')
 
-  const labels = await getters.github.labels.index()
+  const labels = await getters.query('labels.index')()
 
   logInfo(
     isEmpty(labels)

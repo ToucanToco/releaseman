@@ -18,7 +18,7 @@ const mergePullRequest = async ({ getters, state }, isSkipped) => {
     throw 'Pull request non-mergeable!'
   }
 
-  const { url } = await getters.github.pullRequests.merge({
+  const { url } = await getters.query('pullRequests.merge')({
     message: state.data.message,
     method: state.data.method,
     number: state.data.number

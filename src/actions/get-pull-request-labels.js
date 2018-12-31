@@ -14,7 +14,7 @@ const getPullRequestLabels = async ({ commit, getters, state }, isSkipped) => {
 
   logInfo(`Retrieving pull request #${state.data.number}'s labels...`)
 
-  const labels = await getters.github.pullRequests.getLabels({
+  const labels = await getters.query('pullRequests.getLabels')({
     number: state.data.number
   })
 

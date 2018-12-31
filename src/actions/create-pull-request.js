@@ -16,7 +16,7 @@ const createPullRequest = async ({ commit, getters, state }, isSkipped) => {
     state.data.base
   }\`...`)
 
-  const { number, url } = await getters.github.pullRequests.create({
+  const { number, url } = await getters.query('pullRequests.create')({
     base: state.data.base,
     changelog: state.data.changelog.text,
     head: state.data.head,

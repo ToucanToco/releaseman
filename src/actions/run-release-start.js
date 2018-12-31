@@ -31,7 +31,7 @@ const runReleaseStart = async ({ commit, getters, state }) => {
   if (/\sbeta$/i.test(state.config.name)) {
     throw 'The <name> param must be the final release name (no beta)!'
   }
-  if (getters.isCurrentTaskIndex(0)) {
+  if (getters.matchesTaskIndex(0)) {
     commit(SET_DATA, {
       base: state.config.branches.master,
       head: state.config.branches.develop
@@ -40,7 +40,7 @@ const runReleaseStart = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(0, 1)(GET_CHANGELOG)
 
-  if (getters.isCurrentTaskIndex(1)) {
+  if (getters.matchesTaskIndex(1)) {
     commit(ASSIGN_DATA, {
       isBreaking: includes(state.config.labels.breaking)(
         state.data.changelog.labels
@@ -52,7 +52,7 @@ const runReleaseStart = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(1, 2)(GET_NEXT_RELEASE)
 
-  if (getters.isCurrentTaskIndex(2)) {
+  if (getters.matchesTaskIndex(2)) {
     const version = get(1)(
       new RegExp(
         `^${state.config.tag}(\\d+\\.\\d+\\.\\d+)-beta$`
@@ -67,13 +67,13 @@ const runReleaseStart = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(2, 3)(CREATE_BRANCH)
 
-  if (getters.isCurrentTaskIndex(3)) {
+  if (getters.matchesTaskIndex(3)) {
     commit(ASSIGN_DATA, { branch: state.data.head })
   }
 
   await getters.runOrSkip(3, 4)(CREATE_RELEASE)
 
-  if (getters.isCurrentTaskIndex(4)) {
+  if (getters.matchesTaskIndex(4)) {
     const nameMatch = new RegExp('^(.*?) beta$').exec(state.data.name)
 
     commit(ASSIGN_DATA, {
@@ -84,7 +84,7 @@ const runReleaseStart = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(4, 5)(CREATE_PULL_REQUEST)
 
-  if (getters.isCurrentTaskIndex(5)) {
+  if (getters.matchesTaskIndex(5)) {
     commit(ASSIGN_DATA, {
       labels: [state.config.labels.release]
     })
@@ -92,7 +92,7 @@ const runReleaseStart = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(5, 6)(UPDATE_PULL_REQUEST_LABELS)
 
-  if (getters.isCurrentTaskIndex(6)) {
+  if (getters.matchesTaskIndex(6)) {
     commit(ASSIGN_DATA, {
       base: state.config.branches.beta,
       head: state.data.branch

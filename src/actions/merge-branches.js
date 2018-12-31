@@ -11,7 +11,7 @@ const mergeBranches = async ({ getters, state }, isSkipped) => {
 
   logInfo(`Merging \`${state.data.head}\` into \`${state.data.base}\`...`)
 
-  const { url } = await getters.github.branches.merge({
+  const { url } = await getters.query('branches.merge')({
     base: state.data.base,
     head: state.data.head
   })

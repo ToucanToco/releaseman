@@ -17,7 +17,7 @@ const getReleasesExistence = async ({ commit, getters, state }, isSkipped) => {
       : 'releases'
   } existence...`)
 
-  const size = await getters.github.releases.size({
+  const size = await getters.query('releases.size')({
     isPrerelease: state.data.isPrerelease
   })
 

@@ -58,13 +58,13 @@ const runFixFinish = async ({ commit, getters, state }) => {
       : state.config.labels.fix
   )
 
-  if (getters.isCurrentTaskIndex(0)) {
+  if (getters.matchesTaskIndex(0)) {
     commit(SET_DATA, {})
   }
 
   await getters.runOrSkip(0, 1)(GET_RELEASE_BRANCH)
 
-  if (getters.isCurrentTaskIndex(1)) {
+  if (getters.matchesTaskIndex(1)) {
     commit(ASSIGN_DATA, {
       number: state.config.number
     })
@@ -72,7 +72,7 @@ const runFixFinish = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(1, 2)(GET_PULL_REQUEST)
 
-  if (getters.isCurrentTaskIndex(2)) {
+  if (getters.matchesTaskIndex(2)) {
     if (!isEqual(state.data.branch)(state.data.base)) {
       throw `A fix cannot be merged into \`${state.data.base}\`!`
     }
@@ -85,7 +85,7 @@ const runFixFinish = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(2, 3)(GET_PULL_REQUEST_LABELS)
 
-  if (getters.isCurrentTaskIndex(3)) {
+  if (getters.matchesTaskIndex(3)) {
     if (!flow(
       map('name'),
       includes(fixLabel)
@@ -104,7 +104,7 @@ const runFixFinish = async ({ commit, getters, state }) => {
   } else {
     await getters.runOrSkip(3, 4)(UPDATE_PULL_REQUEST_LABELS)
   }
-  if (getters.isCurrentTaskIndex(3) || getters.isCurrentTaskIndex(4)) {
+  if (getters.matchesTaskIndex(3, 4)) {
     commit(ASSIGN_DATA, {
       message: `${state.data.name} (#${state.data.number})`,
       method: 'squash'
@@ -113,7 +113,7 @@ const runFixFinish = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(3, 4, 5)(MERGE_PULL_REQUEST)
 
-  if (getters.isCurrentTaskIndex(5)) {
+  if (getters.matchesTaskIndex(5)) {
     commit(ASSIGN_DATA, {
       branch: state.data.head
     })
@@ -122,13 +122,13 @@ const runFixFinish = async ({ commit, getters, state }) => {
   await getters.runOrSkip(5, 6)(DELETE_BRANCH)
 
   if (state.config.isRelease) {
-    if (getters.isCurrentTaskIndex(6)) {
+    if (getters.matchesTaskIndex(6)) {
       commit(ASSIGN_DATA, { isPrerelease: true })
     }
 
     await getters.runOrSkip(6, 7)(GET_LATEST_RELEASE)
 
-    if (getters.isCurrentTaskIndex(7)) {
+    if (getters.matchesTaskIndex(7)) {
       commit(ASSIGN_DATA, {
         base: state.data.tag,
         head: state.data.base
@@ -137,19 +137,19 @@ const runFixFinish = async ({ commit, getters, state }) => {
 
     await getters.runOrSkip(7, 8)(GET_CHANGELOG)
 
-    if (getters.isCurrentTaskIndex(8)) {
+    if (getters.matchesTaskIndex(8)) {
       return commit(ASSIGN_DATA, { isFix: true })
     }
 
     await getters.runOrSkip(8, 9)(GET_NEXT_RELEASE)
 
-    if (getters.isCurrentTaskIndex(9)) {
+    if (getters.matchesTaskIndex(9)) {
       commit(ASSIGN_DATA, { branch: state.data.head })
     }
 
     await getters.runOrSkip(9, 10)(CREATE_RELEASE)
 
-    if (getters.isCurrentTaskIndex(10)) {
+    if (getters.matchesTaskIndex(10)) {
       commit(ASSIGN_DATA, {
         base: state.config.branches.master
       })
@@ -158,15 +158,15 @@ const runFixFinish = async ({ commit, getters, state }) => {
     await getters.runOrSkip(10, 11)(GET_CHANGELOG)
     await getters.runOrSkip(11, 12)(FIND_RELEASE_PULL_REQUEST)
 
-    if (getters.isCurrentTaskIndex(12)) {
+    if (getters.matchesTaskIndex(12)) {
       commit(ASSIGN_DATA, { name: undefined })
     }
 
     await getters.runOrSkip(12, 13)(UPDATE_PULL_REQUEST)
-  } else if (getters.isCurrentTaskIndex(6)) {
+  } else if (getters.matchesTaskIndex(6)) {
     commit(ASSIGN_DATA, { head: state.data.base })
   }
-  if (getters.isCurrentTaskIndex(6) || getters.isCurrentTaskIndex(13)) {
+  if (getters.matchesTaskIndex(6, 13)) {
     commit(ASSIGN_DATA, {
       base: state.config.branches.develop
     })
@@ -174,7 +174,7 @@ const runFixFinish = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(6, 13, 14)(MERGE_BRANCHES)
 
-  if (getters.isCurrentTaskIndex(14)) {
+  if (getters.matchesTaskIndex(14)) {
     commit(ASSIGN_DATA, {
       base: state.config.branches.beta
     })

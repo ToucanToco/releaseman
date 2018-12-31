@@ -13,7 +13,7 @@ const getReleaseBranch = async ({ commit, getters, state }, isSkipped) => {
 
   logInfo('Retrieving latest prerelease tag...')
 
-  const { tag } = await getters.github.releases.getLatest({
+  const { tag } = await getters.query('releases.getLatest')({
     isPrerelease: true
   })
 

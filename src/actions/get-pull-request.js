@@ -18,7 +18,7 @@ const getPullRequest = async ({ commit, getters, state }, isSkipped) => {
     isMergeable,
     isMerged,
     name
-  } = await getters.github.pullRequests.get({ number: state.data.number })
+  } = await getters.query('pullRequests.get')({ number: state.data.number })
 
   logInfo(name)
 

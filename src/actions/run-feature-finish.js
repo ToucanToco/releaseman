@@ -39,7 +39,7 @@ const runFeatureFinish = async ({ commit, getters, state }) => {
       : state.config.labels.feature
   )
 
-  if (getters.isCurrentTaskIndex(0)) {
+  if (getters.matchesTaskIndex(0)) {
     commit(SET_DATA, {
       number: state.config.number
     })
@@ -47,7 +47,7 @@ const runFeatureFinish = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(0, 1)(GET_PULL_REQUEST)
 
-  if (getters.isCurrentTaskIndex(1)) {
+  if (getters.matchesTaskIndex(1)) {
     if (!isEqual(state.config.branches.develop)(state.data.base)) {
       throw `A feature cannot be merged into \`${state.data.base}\`!`
     }
@@ -60,7 +60,7 @@ const runFeatureFinish = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(1, 2)(GET_PULL_REQUEST_LABELS)
 
-  if (getters.isCurrentTaskIndex(2)) {
+  if (getters.matchesTaskIndex(2)) {
     if (!flow(
       map('name'),
       includes(featureLabel)
@@ -79,7 +79,7 @@ const runFeatureFinish = async ({ commit, getters, state }) => {
   } else {
     await getters.runOrSkip(2, 3)(UPDATE_PULL_REQUEST_LABELS)
   }
-  if (getters.isCurrentTaskIndex(2) || getters.isCurrentTaskIndex(3)) {
+  if (getters.matchesTaskIndex(2, 3)) {
     commit(ASSIGN_DATA, {
       message: `${state.data.name} (#${state.data.number})`,
       method: 'squash'
@@ -88,7 +88,7 @@ const runFeatureFinish = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(2, 3, 4)(MERGE_PULL_REQUEST)
 
-  if (getters.isCurrentTaskIndex(4)) {
+  if (getters.matchesTaskIndex(4)) {
     commit(ASSIGN_DATA, {
       branch: state.data.head
     })

@@ -27,19 +27,19 @@ const runChanges = async ({ commit, getters, state }) => {
   ))
 
   if (isFinish) {
-    if (getters.isCurrentTaskIndex(0)) {
+    if (getters.matchesTaskIndex(0)) {
       commit(SET_DATA, { isPrerelease: true })
     }
 
     await getters.runOrSkip(0, 1)(GET_LATEST_RELEASE)
 
-    if (getters.isCurrentTaskIndex(1)) {
+    if (getters.matchesTaskIndex(1)) {
       commit(ASSIGN_DATA, {
         base: state.config.branches.master,
         head: state.data.tag
       })
     }
-  } else if (getters.isCurrentTaskIndex(0)) {
+  } else if (getters.matchesTaskIndex(0)) {
     commit(SET_DATA, {
       base: state.config.branches.master,
       head: state.config.branches.develop

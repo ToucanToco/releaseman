@@ -16,7 +16,7 @@ const getChangelog = async ({ commit, getters, state }, isSkipped) => {
     state.data.base
   }\`...`)
 
-  const changelog = await getters.github.commits.getChangelog({
+  const changelog = await getters.query('commits.getChangelog')({
     base: state.data.base,
     head: state.data.head
   })

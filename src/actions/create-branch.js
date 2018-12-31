@@ -16,7 +16,7 @@ const createBranch = async ({ commit, getters, state }, isSkipped) => {
     state.data.base
   }\`...`)
 
-  const { branch, url } = await getters.github.branches.create({
+  const { branch, url } = await getters.query('branches.create')({
     base: state.data.base,
     head: state.data.head
   })

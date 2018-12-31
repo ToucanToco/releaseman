@@ -16,7 +16,7 @@ const createLabels = async ({ commit, getters, state }, isSkipped) => {
 
   return Promise.all(
     map(async (label) => {
-      const { name, url } = await getters.github.labels.create(label)
+      const { name, url } = await getters.query('labels.create')(label)
 
       logInfo(`${name}: ${url}`)
 

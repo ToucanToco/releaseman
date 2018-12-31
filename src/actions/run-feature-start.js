@@ -17,7 +17,7 @@ const runFeatureStart = async ({ commit, getters, state }) => {
     'name'
   )
 
-  if (getters.isCurrentTaskIndex(0)) {
+  if (getters.matchesTaskIndex(0)) {
     commit(SET_DATA, {
       base: state.config.branches.develop,
       head: `${

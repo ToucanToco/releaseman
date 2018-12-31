@@ -31,13 +31,13 @@ const runReleaseFinish = async ({ commit, getters, state }) => {
     'tag'
   )
 
-  if (getters.isCurrentTaskIndex(0)) {
+  if (getters.matchesTaskIndex(0)) {
     commit(SET_DATA, { isPrerelease: false })
   }
 
   await getters.runOrSkip(0, 1)(GET_NEXT_RELEASE)
 
-  if (getters.isCurrentTaskIndex(1)) {
+  if (getters.matchesTaskIndex(1)) {
     const version = get(1)(
       new RegExp(
         `^${state.config.tag}(\\d+\\.\\d+\\.\\d+)$`
@@ -53,7 +53,7 @@ const runReleaseFinish = async ({ commit, getters, state }) => {
   await getters.runOrSkip(1, 2)(GET_CHANGELOG)
   await getters.runOrSkip(2, 3)(FIND_RELEASE_PULL_REQUEST)
 
-  if (getters.isCurrentTaskIndex(3)) {
+  if (getters.matchesTaskIndex(3)) {
     commit(ASSIGN_DATA, {
       name: `Release :: ${state.data.name}`
     })
@@ -62,7 +62,7 @@ const runReleaseFinish = async ({ commit, getters, state }) => {
   await getters.runOrSkip(3, 4)(UPDATE_PULL_REQUEST)
   await getters.runOrSkip(4, 5)(GET_PULL_REQUEST_LABELS)
 
-  if (getters.isCurrentTaskIndex(5)) {
+  if (getters.matchesTaskIndex(5)) {
     if (!flow(
       map('name'),
       includes(state.config.labels.release)
@@ -84,7 +84,7 @@ const runReleaseFinish = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(5, 6, 7)(GET_PULL_REQUEST)
 
-  if (getters.isCurrentTaskIndex(7)) {
+  if (getters.matchesTaskIndex(7)) {
     commit(ASSIGN_DATA, {
       message: `${state.data.name} (#${state.data.number})`
     })
@@ -92,7 +92,7 @@ const runReleaseFinish = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(7, 8)(MERGE_PULL_REQUEST)
 
-  if (getters.isCurrentTaskIndex(8)) {
+  if (getters.matchesTaskIndex(8)) {
     commit(ASSIGN_DATA, {
       branch: state.data.head
     })
@@ -100,7 +100,7 @@ const runReleaseFinish = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(8, 9)(DELETE_BRANCH)
 
-  if (getters.isCurrentTaskIndex(9)) {
+  if (getters.matchesTaskIndex(9)) {
     commit(ASSIGN_DATA, {
       branch: state.config.branches.master,
       name: replace('Release :: ')('')(state.data.name)

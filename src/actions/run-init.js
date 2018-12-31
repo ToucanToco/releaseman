@@ -43,13 +43,13 @@ const runInit = async ({ commit, getters, state }) => {
     'tag'
   )
 
-  if (getters.isCurrentTaskIndex(0)) {
+  if (getters.matchesTaskIndex(0)) {
     commit(SET_DATA, { branch: state.config.branches.develop })
   }
 
   await getters.runOrSkip(0, 1)(GET_BRANCH_EXISTENCE)
 
-  if (getters.isCurrentTaskIndex(1)) {
+  if (getters.matchesTaskIndex(1)) {
     if (state.data.isBranchPresent) {
       logWarn(`${state.config.branches.develop} already present.\n`)
     } else {
@@ -63,13 +63,13 @@ const runInit = async ({ commit, getters, state }) => {
   } else {
     await getters.runOrSkip(1, 2)(CREATE_BRANCH)
   }
-  if (getters.isCurrentTaskIndex(1) || getters.isCurrentTaskIndex(2)) {
+  if (getters.matchesTaskIndex(1, 2)) {
     commit(ASSIGN_DATA, { isPrerelease: false })
   }
 
   await getters.runOrSkip(1, 2, 3)(GET_RELEASES_EXISTENCE)
 
-  if (getters.isCurrentTaskIndex(3)) {
+  if (getters.matchesTaskIndex(3)) {
     if (state.data.isWithReleases) {
       logWarn('Release already present.\n')
     } else {
@@ -88,13 +88,13 @@ const runInit = async ({ commit, getters, state }) => {
   } else {
     await getters.runOrSkip(3, 4)(CREATE_RELEASE)
   }
-  if (getters.isCurrentTaskIndex(3) || getters.isCurrentTaskIndex(4)) {
+  if (getters.matchesTaskIndex(3, 4)) {
     commit(ASSIGN_DATA, { isPrerelease: true })
   }
 
   await getters.runOrSkip(3, 4, 5)(GET_RELEASES_EXISTENCE)
 
-  if (getters.isCurrentTaskIndex(5)) {
+  if (getters.matchesTaskIndex(5)) {
     if (state.data.isWithReleases) {
       logWarn('Prerelease already present.\n')
     } else {
@@ -102,7 +102,7 @@ const runInit = async ({ commit, getters, state }) => {
 
       await getters.runOrSkip(5, 6)(GET_LATEST_RELEASE)
 
-      if (getters.isCurrentTaskIndex(6)) {
+      if (getters.matchesTaskIndex(6)) {
         commit(ASSIGN_DATA, {
           branch: state.config.branches.master,
           changelog: {
@@ -120,7 +120,7 @@ const runInit = async ({ commit, getters, state }) => {
   } else {
     await getters.runOrSkip(5, 6)(GET_LATEST_RELEASE)
 
-    if (getters.isCurrentTaskIndex(6)) {
+    if (getters.matchesTaskIndex(6)) {
       commit(ASSIGN_DATA, {
         branch: state.config.branches.master,
         changelog: {
@@ -135,13 +135,13 @@ const runInit = async ({ commit, getters, state }) => {
 
     await getters.runOrSkip(6, 7)(CREATE_RELEASE)
   }
-  if (getters.isCurrentTaskIndex(5) || getters.isCurrentTaskIndex(7)) {
+  if (getters.matchesTaskIndex(5, 7)) {
     commit(SET_DATA, { branch: state.config.branches.beta })
   }
 
   await getters.runOrSkip(5, 7, 8)(GET_BRANCH_EXISTENCE)
 
-  if (getters.isCurrentTaskIndex(8)) {
+  if (getters.matchesTaskIndex(8)) {
     if (state.data.isBranchPresent) {
       logWarn(`${state.config.branches.beta} already present.\n`)
     } else {
@@ -158,7 +158,7 @@ const runInit = async ({ commit, getters, state }) => {
 
   await getters.runOrSkip(8, 9, 10)(GET_LABELS)
 
-  if (getters.isCurrentTaskIndex(10)) {
+  if (getters.matchesTaskIndex(10)) {
     const labelsNames = map('name')(state.data.labels)
 
     const missingLabels = flow(

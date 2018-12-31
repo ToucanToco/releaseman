@@ -28,7 +28,7 @@ const getNextRelease = async ({ commit, getters, state }, isSkipped) => {
       : 'release'
   }...`)
 
-  const { name, tag } = await getters.github.releases.getLatest({
+  const { name, tag } = await getters.query('releases.getLatest')({
     isPrerelease: isLatestPrerelease
   })
 

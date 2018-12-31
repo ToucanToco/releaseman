@@ -11,7 +11,7 @@ const updatePullRequest = async ({ getters, state }, isSkipped) => {
 
   logInfo(`Updating pull request #${state.data.number}...`)
 
-  const { url } = await getters.github.pullRequests.update({
+  const { url } = await getters.query('pullRequests.update')({
     changelog: state.data.changelog.text,
     name: state.data.name,
     number: state.data.number

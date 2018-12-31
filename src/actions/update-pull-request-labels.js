@@ -16,7 +16,7 @@ const updatePullRequestLabels = async ({ getters, state }, isSkipped) => {
     toReadableList(state.data.labels)
   }...`)
 
-  const { url } = await getters.github.pullRequests.setLabels({
+  const { url } = await getters.query('pullRequests.setLabels')({
     labels: state.data.labels,
     number: state.data.number
   })

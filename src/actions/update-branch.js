@@ -11,7 +11,7 @@ const updateBranch = async ({ getters, state }, isSkipped) => {
 
   logInfo(`Updating \`${state.data.base}\` to \`${state.data.head}\`...`)
 
-  const { url } = await getters.github.branches.update({
+  const { url } = await getters.query('branches.update')({
     base: state.data.base,
     head: state.data.head
   })

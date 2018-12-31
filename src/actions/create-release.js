@@ -16,7 +16,7 @@ const createRelease = async ({ commit, getters, state }, isSkipped) => {
       : 'release'
   }...`)
 
-  const { tag, url } = await getters.github.releases.create({
+  const { tag, url } = await getters.query('releases.create')({
     branch: state.data.branch,
     changelog: state.data.changelog.text,
     isPrerelease: state.data.isPrerelease,

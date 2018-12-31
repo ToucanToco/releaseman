@@ -12,7 +12,7 @@ const getBranchExistence = async ({ commit, getters, state }, isSkipped) => {
 
   logInfo(`Retrieving ${state.data.branch} existence...`)
 
-  const isBranchPresent = await getters.github.branches.getExistence({
+  const isBranchPresent = await getters.query('branches.getExistence')({
     name: state.data.branch
   })
 
