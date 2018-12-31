@@ -25,8 +25,8 @@ const Store = {
   commit: (mutation, payload) => (
     get(mutation)(Store.mutations)(Store.state, payload)
   ),
-  dispatch: (action, payload) => (
-    Promise.resolve(get(action)(Store.actions)(Store, payload))
+  dispatch: async (action, payload) => (
+    get(action)(Store.actions)(Store, payload)
   ),
   getters: {
     configError: (...keys) => flow(

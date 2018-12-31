@@ -9,7 +9,7 @@ import { logInfo, logTaskStart } from '../log'
 
 const GET_NEXT_RELEASE = 'GET_NEXT_RELEASE'
 
-const getNextRelease = ({ commit, getters, state }, isSkipped) => {
+const getNextRelease = async ({ commit, getters, state }, isSkipped) => {
   logTaskStart('Get next release')
 
   if (isSkipped) {
@@ -28,99 +28,98 @@ const getNextRelease = ({ commit, getters, state }, isSkipped) => {
       : 'release'
   }...`)
 
-  return getters.github.releases.getLatest({
+  const { name, tag } = await getters.github.releases.getLatest({
     isPrerelease: isLatestPrerelease
   })
-    .then(({ name, tag }) => {
-      logInfo(`${tag}: ${name}`)
-      logInfo(`Parsing ${
-        state.data.isFix
-          ? 'fixed'
-          : 'next'
-      } ${
-        state.data.isPrerelease
-          ? 'prerelease'
-          : 'release'
-      }...`)
 
-      let nextName = null
-      let nextTag = null
+  logInfo(`${tag}: ${name}`)
+  logInfo(`Parsing ${
+    state.data.isFix
+      ? 'fixed'
+      : 'next'
+  } ${
+    state.data.isPrerelease
+      ? 'prerelease'
+      : 'release'
+  }...`)
 
-      if (state.data.isPrerelease) {
-        if (state.data.isFix) {
-          const nameMatch = new RegExp('^(.*?\\sbeta)\\s?\\d*$').exec(name)
-          const tagMatch = new RegExp(
-            `^(${state.config.tag}\\d+\\.\\d+\\.\\d+-beta)\\.?(\\d*)$`
-          ).exec(tag)
+  let nextName = null
+  let nextTag = null
 
-          const latestBetaNumber = get(2)(tagMatch)
+  if (state.data.isPrerelease) {
+    if (state.data.isFix) {
+      const nameMatch = new RegExp('^(.*?\\sbeta)\\s?\\d*$').exec(name)
+      const tagMatch = new RegExp(
+        `^(${state.config.tag}\\d+\\.\\d+\\.\\d+-beta)\\.?(\\d*)$`
+      ).exec(tag)
 
-          const nextBetaNumber = add(1)(
-            isUndefined(latestBetaNumber)
-              ? 0
-              : toNumber(latestBetaNumber)
-          )
+      const latestBetaNumber = get(2)(tagMatch)
 
-          nextName = `${get(1)(nameMatch)} ${nextBetaNumber}`
-          nextTag = `${get(1)(tagMatch)}.${nextBetaNumber}`
-        } else {
-          const tagMatch = new RegExp(
-            `^${state.config.tag}(\\d+)\\.(\\d+)\\.\\d+$`
-          ).exec(tag)
+      const nextBetaNumber = add(1)(
+        isUndefined(latestBetaNumber)
+          ? 0
+          : toNumber(latestBetaNumber)
+      )
 
-          const major = (
-            state.data.isBreaking
-              ? flow(
-                get(1),
-                toNumber,
-                add(1)
-              )(tagMatch)
-              : get(1)(tagMatch)
-          )
-          const minor = (
-            state.data.isBreaking
-              ? 0
-              : flow(
-                get(2),
-                toNumber,
-                add(1)
-              )(tagMatch)
-          )
+      nextName = `${get(1)(nameMatch)} ${nextBetaNumber}`
+      nextTag = `${get(1)(tagMatch)}.${nextBetaNumber}`
+    } else {
+      const tagMatch = new RegExp(
+        `^${state.config.tag}(\\d+)\\.(\\d+)\\.\\d+$`
+      ).exec(tag)
 
-          nextName = `${state.data.name} beta`
-          nextTag = `${state.config.tag}${major}.${minor}.0-beta`
-        }
-      } else if (state.data.isFix) {
-        const nameMatch = new RegExp('^(.*?)\\s?\\d*$').exec(name)
-        const tagMatch = new RegExp(
-          `^(${state.config.tag}\\d+\\.\\d+)\\.(\\d+)$`
-        ).exec(tag)
+      const major = (
+        state.data.isBreaking
+          ? flow(
+            get(1),
+            toNumber,
+            add(1)
+          )(tagMatch)
+          : get(1)(tagMatch)
+      )
+      const minor = (
+        state.data.isBreaking
+          ? 0
+          : flow(
+            get(2),
+            toNumber,
+            add(1)
+          )(tagMatch)
+      )
 
-        const nextFixNumber = flow(
-          get(2),
-          toNumber,
-          add(1)
-        )(tagMatch)
+      nextName = `${state.data.name} beta`
+      nextTag = `${state.config.tag}${major}.${minor}.0-beta`
+    }
+  } else if (state.data.isFix) {
+    const nameMatch = new RegExp('^(.*?)\\s?\\d*$').exec(name)
+    const tagMatch = new RegExp(
+      `^(${state.config.tag}\\d+\\.\\d+)\\.(\\d+)$`
+    ).exec(tag)
 
-        nextName = `${get(1)(nameMatch)} ${nextFixNumber}`
-        nextTag = `${get(1)(tagMatch)}.${nextFixNumber}`
-      } else {
-        const nameMatch = new RegExp('^(.*?)\\sbeta\\s?\\d*$').exec(name)
-        const tagMatch = new RegExp(
-          `^(${state.config.tag}\\d+\\.\\d+\\.\\d+)-beta\\.?\\d*$`
-        ).exec(tag)
+    const nextFixNumber = flow(
+      get(2),
+      toNumber,
+      add(1)
+    )(tagMatch)
 
-        nextName = get(1)(nameMatch)
-        nextTag = get(1)(tagMatch)
-      }
+    nextName = `${get(1)(nameMatch)} ${nextFixNumber}`
+    nextTag = `${get(1)(tagMatch)}.${nextFixNumber}`
+  } else {
+    const nameMatch = new RegExp('^(.*?)\\sbeta\\s?\\d*$').exec(name)
+    const tagMatch = new RegExp(
+      `^(${state.config.tag}\\d+\\.\\d+\\.\\d+)-beta\\.?\\d*$`
+    ).exec(tag)
 
-      logInfo(`${nextTag}: ${nextName}`)
+    nextName = get(1)(nameMatch)
+    nextTag = get(1)(tagMatch)
+  }
 
-      return commit(ASSIGN_DATA, {
-        name: nextName,
-        tag: nextTag
-      })
-    })
+  logInfo(`${nextTag}: ${nextName}`)
+
+  return commit(ASSIGN_DATA, {
+    name: nextName,
+    tag: nextTag
+  })
 }
 
 export { GET_NEXT_RELEASE }

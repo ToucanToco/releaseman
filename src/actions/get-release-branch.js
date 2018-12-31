@@ -4,7 +4,7 @@ import { logInfo, logTaskStart } from '../log'
 
 const GET_RELEASE_BRANCH = 'GET_RELEASE_BRANCH'
 
-const getReleaseBranch = ({ commit, getters, state }, isSkipped) => {
+const getReleaseBranch = async ({ commit, getters, state }, isSkipped) => {
   logTaskStart('Get release branch')
 
   if (isSkipped) {
@@ -13,25 +13,24 @@ const getReleaseBranch = ({ commit, getters, state }, isSkipped) => {
 
   logInfo('Retrieving latest prerelease tag...')
 
-  return getters.github.releases.getLatest({
+  const { tag } = await getters.github.releases.getLatest({
     isPrerelease: true
   })
-    .then(({ tag }) => {
-      logInfo(tag)
-      logInfo('Parsing release branch...')
 
-      const tagMatch = new RegExp(
-        `^${state.config.tag}(\\d+\\.\\d+\\.\\d+)-beta\\.?\\d*$`
-      ).exec(tag)
+  logInfo(tag)
+  logInfo('Parsing release branch...')
 
-      const branch = `${state.config.branches.release}${get(1)(tagMatch)}`
+  const tagMatch = new RegExp(
+    `^${state.config.tag}(\\d+\\.\\d+\\.\\d+)-beta\\.?\\d*$`
+  ).exec(tag)
 
-      logInfo(branch)
+  const branch = `${state.config.branches.release}${get(1)(tagMatch)}`
 
-      return commit(ASSIGN_DATA, {
-        branch: branch
-      })
-    })
+  logInfo(branch)
+
+  return commit(ASSIGN_DATA, {
+    branch: branch
+  })
 }
 
 export { GET_RELEASE_BRANCH }

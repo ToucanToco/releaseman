@@ -3,7 +3,7 @@ import { logInfo, logTaskStart } from '../log'
 
 const UPDATE_PULL_REQUEST_LABELS = 'UPDATE_PULL_REQUEST_LABELS'
 
-const updatePullRequestLabels = ({ getters, state }, isSkipped) => {
+const updatePullRequestLabels = async ({ getters, state }, isSkipped) => {
   logTaskStart('Update pull request labels')
 
   if (isSkipped) {
@@ -16,11 +16,12 @@ const updatePullRequestLabels = ({ getters, state }, isSkipped) => {
     toReadableList(state.data.labels)
   }...`)
 
-  return getters.github.pullRequests.setLabels({
+  const { url } = await getters.github.pullRequests.setLabels({
     labels: state.data.labels,
     number: state.data.number
   })
-    .then(({ url }) => logInfo(url))
+
+  return logInfo(url)
 }
 
 export { UPDATE_PULL_REQUEST_LABELS }

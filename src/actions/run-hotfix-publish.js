@@ -6,7 +6,7 @@ import { logActionEnd, logActionStart } from '../log'
 
 const RUN_HOTFIX_PUBLISH = 'RUN_HOTFIX_PUBLISH'
 
-const runHotfixPublish = ({ commit, getters, state }) => {
+const runHotfixPublish = async ({ commit, getters, state }) => {
   logActionStart(RUN_HOTFIX_PUBLISH)
 
   const configError = getters.configError(
@@ -26,7 +26,7 @@ const runHotfixPublish = ({ commit, getters, state }) => {
   )
 
   if (!isEmpty(configError)) {
-    return Promise.reject(configError)
+    throw configError
   }
   if (getters.isCurrentTaskIndex(0)) {
     commit(SET_DATA, {
@@ -48,25 +48,24 @@ const runHotfixPublish = ({ commit, getters, state }) => {
     })
   }
 
-  return getters.runOrSkip(0, 1)(CREATE_PULL_REQUEST)
-    .then(() => {
-      if (getters.isCurrentTaskIndex(1)) {
-        return commit(ASSIGN_DATA, {
-          labels: [
-            (
-              state.config.isDoc
-                ? state.config.labels.doc
-                : state.config.labels.fix
-            ),
-            state.config.labels.wip
-          ]
-        })
-      }
+  await getters.runOrSkip(0, 1)(CREATE_PULL_REQUEST)
 
-      return undefined
+  if (getters.isCurrentTaskIndex(1)) {
+    commit(ASSIGN_DATA, {
+      labels: [
+        (
+          state.config.isDoc
+            ? state.config.labels.doc
+            : state.config.labels.fix
+        ),
+        state.config.labels.wip
+      ]
     })
-    .then(() => getters.runOrSkip(1, 2)(UPDATE_PULL_REQUEST_LABELS))
-    .then(() => logActionEnd(RUN_HOTFIX_PUBLISH))
+  }
+
+  await getters.runOrSkip(1, 2)(UPDATE_PULL_REQUEST_LABELS)
+
+  return logActionEnd(RUN_HOTFIX_PUBLISH)
 }
 
 export { RUN_HOTFIX_PUBLISH }

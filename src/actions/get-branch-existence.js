@@ -3,7 +3,7 @@ import { logInfo, logTaskStart } from '../log'
 
 const GET_BRANCH_EXISTENCE = 'GET_BRANCH_EXISTENCE'
 
-const getBranchExistence = ({ commit, getters, state }, isSkipped) => {
+const getBranchExistence = async ({ commit, getters, state }, isSkipped) => {
   logTaskStart('Get branch existence')
 
   if (isSkipped) {
@@ -12,14 +12,13 @@ const getBranchExistence = ({ commit, getters, state }, isSkipped) => {
 
   logInfo(`Retrieving ${state.data.branch} existence...`)
 
-  return getters.github.branches.getExistence({
+  const isBranchPresent = await getters.github.branches.getExistence({
     name: state.data.branch
   })
-    .then((isBranchPresent) => {
-      logInfo(isBranchPresent)
 
-      return commit(ASSIGN_DATA, { isBranchPresent: isBranchPresent })
-    })
+  logInfo(isBranchPresent)
+
+  return commit(ASSIGN_DATA, { isBranchPresent: isBranchPresent })
 }
 
 export { GET_BRANCH_EXISTENCE }

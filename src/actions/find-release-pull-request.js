@@ -3,7 +3,11 @@ import { logInfo, logTaskStart } from '../log'
 
 const FIND_RELEASE_PULL_REQUEST = 'FIND_RELEASE_PULL_REQUEST'
 
-const findReleasePullRequest = ({ commit, getters, state }, isSkipped) => {
+const findReleasePullRequest = async ({
+  commit,
+  getters,
+  state
+}, isSkipped) => {
   logTaskStart('Find release pull request')
 
   if (isSkipped) {
@@ -16,15 +20,14 @@ const findReleasePullRequest = ({ commit, getters, state }, isSkipped) => {
     state.data.base
   }\`...`)
 
-  return getters.github.pullRequests.find({
+  const { number } = await getters.github.pullRequests.find({
     base: state.data.base,
     head: state.data.head
   })
-    .then(({ number }) => {
-      logInfo(number)
 
-      return commit(ASSIGN_DATA, { number: number })
-    })
+  logInfo(number)
+
+  return commit(ASSIGN_DATA, { number: number })
 }
 
 export { FIND_RELEASE_PULL_REQUEST }

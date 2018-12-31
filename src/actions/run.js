@@ -14,7 +14,7 @@ import {
 
 const RUN = 'RUN'
 
-const run = ({ dispatch, getters, state }) => {
+const run = async ({ dispatch, getters, state }) => {
   if (!includes(state.config.action)([
     ACTIONS.CONTINUE, ACTIONS.HELP, undefined
   ])) {
@@ -25,7 +25,7 @@ const run = ({ dispatch, getters, state }) => {
     )
 
     if (!isEmpty(configError)) {
-      return Promise.reject(configError)
+      throw configError
     }
   }
   switch (state.config.action) {

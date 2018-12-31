@@ -6,7 +6,7 @@ import { toReadableList } from '../helpers'
 
 const GET_LABELS = 'GET_LABELS'
 
-const getLabels = ({ commit, getters }, isSkipped) => {
+const getLabels = async ({ commit, getters }, isSkipped) => {
   logTaskStart('Get labels')
 
   if (isSkipped) {
@@ -15,16 +15,15 @@ const getLabels = ({ commit, getters }, isSkipped) => {
 
   logInfo('Retrieving labels...')
 
-  return getters.github.labels.index()
-    .then((labels) => {
-      if (isEmpty(labels)) {
-        logInfo('No labels')
-      } else {
-        logInfo(toReadableList(map('name')(labels)))
-      }
+  const labels = await getters.github.labels.index()
 
-      return commit(ASSIGN_DATA, { labels: labels })
-    })
+  logInfo(
+    isEmpty(labels)
+      ? 'No labels'
+      : toReadableList(map('name')(labels))
+  )
+
+  return commit(ASSIGN_DATA, { labels: labels })
 }
 
 export { GET_LABELS }

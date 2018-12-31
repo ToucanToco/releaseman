@@ -7,7 +7,7 @@ const RUN_HELP = 'RUN_HELP'
 
 const _logTrim = (value) => log(`${trim(value)}\n`)
 
-const runHelp = ({ state }) => {
+const runHelp = async ({ state }) => {
   const options = trim(`
 Options:
 
@@ -57,7 +57,7 @@ Run \`releaseman help <command>\` for more information on specific commands.
 `)
 
   if (!isEqual(ACTIONS.HELP)(state.config.action)) {
-    return Promise.reject(`${helpDefault}\n`)
+    throw `${helpDefault}\n`
   }
 
   switch (state.config.helpOn) {
@@ -185,7 +185,7 @@ ${options}
     case undefined:
       return _logTrim(helpDefault)
     default:
-      return Promise.reject(`${helpDefault}\n`)
+      throw `${helpDefault}\n`
   }
 }
 

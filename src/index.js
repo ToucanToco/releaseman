@@ -13,12 +13,10 @@ const { argv } = yargs
 
 logHint(`${Package.name} v${Package.version}\n`)
 
-Store
-  .dispatch(START, argv)
-  .catch((e) => (
-    setTimeout(() => {
-      logError(e)
+try {
+  Store.dispatch(START, argv)
+} catch (e) {
+  logError(e)
 
-      throw 1
-    }, 0)
-  ))
+  throw 1
+}

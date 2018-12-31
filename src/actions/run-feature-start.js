@@ -6,7 +6,7 @@ import { logActionEnd, logActionStart } from '../log'
 
 const RUN_FEATURE_START = 'RUN_FEATURE_START'
 
-const runFeatureStart = ({ commit, getters, state }) => {
+const runFeatureStart = async ({ commit, getters, state }) => {
   logActionStart(RUN_FEATURE_START)
 
   const configError = getters.configError(
@@ -20,7 +20,7 @@ const runFeatureStart = ({ commit, getters, state }) => {
   )
 
   if (!isEmpty(configError)) {
-    return Promise.reject(configError)
+    throw configError
   }
   if (getters.isCurrentTaskIndex(0)) {
     commit(SET_DATA, {
@@ -33,8 +33,9 @@ const runFeatureStart = ({ commit, getters, state }) => {
     })
   }
 
-  return getters.runOrSkip(0, 1)(CREATE_BRANCH)
-    .then(() => logActionEnd(RUN_FEATURE_START))
+  await getters.runOrSkip(0, 1)(CREATE_BRANCH)
+
+  return logActionEnd(RUN_FEATURE_START)
 }
 
 export { RUN_FEATURE_START }

@@ -6,7 +6,7 @@ import { logActionEnd, logActionStart } from '../log'
 
 const RUN_FEATURE_PUBLISH = 'RUN_FEATURE_PUBLISH'
 
-const runFeaturePublish = ({ commit, getters, state }) => {
+const runFeaturePublish = async ({ commit, getters, state }) => {
   logActionStart(RUN_FEATURE_PUBLISH)
 
   const configError = getters.configError(
@@ -21,7 +21,7 @@ const runFeaturePublish = ({ commit, getters, state }) => {
   )
 
   if (!isEmpty(configError)) {
-    return Promise.reject(configError)
+    throw configError
   }
   if (getters.isCurrentTaskIndex(0)) {
     commit(SET_DATA, {
@@ -43,25 +43,24 @@ const runFeaturePublish = ({ commit, getters, state }) => {
     })
   }
 
-  return getters.runOrSkip(0, 1)(CREATE_PULL_REQUEST)
-    .then(() => {
-      if (getters.isCurrentTaskIndex(1)) {
-        return commit(ASSIGN_DATA, {
-          labels: [
-            (
-              state.config.isDoc
-                ? state.config.labels.doc
-                : state.config.labels.feature
-            ),
-            state.config.labels.wip
-          ]
-        })
-      }
+  await getters.runOrSkip(0, 1)(CREATE_PULL_REQUEST)
 
-      return undefined
+  if (getters.isCurrentTaskIndex(1)) {
+    commit(ASSIGN_DATA, {
+      labels: [
+        (
+          state.config.isDoc
+            ? state.config.labels.doc
+            : state.config.labels.feature
+        ),
+        state.config.labels.wip
+      ]
     })
-    .then(() => getters.runOrSkip(1, 2)(UPDATE_PULL_REQUEST_LABELS))
-    .then(() => logActionEnd(RUN_FEATURE_PUBLISH))
+  }
+
+  await getters.runOrSkip(1, 2)(UPDATE_PULL_REQUEST_LABELS)
+
+  return logActionEnd(RUN_FEATURE_PUBLISH)
 }
 
 export { RUN_FEATURE_PUBLISH }

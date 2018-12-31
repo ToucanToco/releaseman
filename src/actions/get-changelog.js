@@ -3,7 +3,7 @@ import { logInfo, logTaskStart } from '../log'
 
 const GET_CHANGELOG = 'GET_CHANGELOG'
 
-const getChangelog = ({ commit, getters, state }, isSkipped) => {
+const getChangelog = async ({ commit, getters, state }, isSkipped) => {
   logTaskStart('Get changelog')
 
   if (isSkipped) {
@@ -16,15 +16,14 @@ const getChangelog = ({ commit, getters, state }, isSkipped) => {
     state.data.base
   }\`...`)
 
-  return getters.github.commits.getChangelog({
+  const changelog = await getters.github.commits.getChangelog({
     base: state.data.base,
     head: state.data.head
   })
-    .then((changelog) => {
-      logInfo(changelog.text)
 
-      return commit(ASSIGN_DATA, { changelog: changelog })
-    })
+  logInfo(changelog.text)
+
+  return commit(ASSIGN_DATA, { changelog: changelog })
 }
 
 export { GET_CHANGELOG }

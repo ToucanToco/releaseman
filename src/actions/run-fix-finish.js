@@ -26,7 +26,7 @@ import { logActionEnd, logActionStart, logWarn } from '../log'
 
 const RUN_FIX_FINISH = 'RUN_FIX_FINISH'
 
-const runFixFinish = ({ commit, getters, state }) => {
+const runFixFinish = async ({ commit, getters, state }) => {
   logActionStart(RUN_FIX_FINISH)
 
   const configError = getters.configError(
@@ -60,163 +60,133 @@ const runFixFinish = ({ commit, getters, state }) => {
   )
 
   if (!isEmpty(configError)) {
-    return Promise.reject(configError)
+    throw configError
   }
   if (getters.isCurrentTaskIndex(0)) {
     commit(SET_DATA, {})
   }
 
-  return getters.runOrSkip(0, 1)(GET_RELEASE_BRANCH)
-    .then(() => {
-      if (getters.isCurrentTaskIndex(1)) {
-        commit(ASSIGN_DATA, {
-          number: state.config.number
-        })
-      }
+  await getters.runOrSkip(0, 1)(GET_RELEASE_BRANCH)
 
-      return undefined
+  if (getters.isCurrentTaskIndex(1)) {
+    commit(ASSIGN_DATA, {
+      number: state.config.number
     })
-    .then(() => getters.runOrSkip(1, 2)(GET_PULL_REQUEST))
-    .then(() => {
-      if (getters.isCurrentTaskIndex(2)) {
-        if (!isEqual(state.data.branch)(state.data.base)) {
-          return Promise.reject(
-            `A fix cannot be merged into \`${state.data.base}\`!`
-          )
-        }
-        if (!startsWith(fixBranchesPrefix)(state.data.head)) {
-          return Promise.reject(`A fix branch name must start with \`${
-            fixBranchesPrefix
-          }\`, your branch name is \`${state.data.head}\`!`)
-        }
-      }
+  }
 
-      return undefined
-    })
-    .then(() => getters.runOrSkip(2, 3)(GET_PULL_REQUEST_LABELS))
-    .then(() => {
-      if (getters.isCurrentTaskIndex(3)) {
-        if (flow(
+  await getters.runOrSkip(1, 2)(GET_PULL_REQUEST)
+
+  if (getters.isCurrentTaskIndex(2)) {
+    if (!isEqual(state.data.branch)(state.data.base)) {
+      throw `A fix cannot be merged into \`${state.data.base}\`!`
+    }
+    if (!startsWith(fixBranchesPrefix)(state.data.head)) {
+      throw `A fix branch name must start with \`${
+        fixBranchesPrefix
+      }\`, your branch name is \`${state.data.head}\`!`
+    }
+  }
+
+  await getters.runOrSkip(2, 3)(GET_PULL_REQUEST_LABELS)
+
+  if (getters.isCurrentTaskIndex(3)) {
+    if (!flow(
+      map('name'),
+      includes(fixLabel)
+    )(state.data.labels)) {
+      logWarn(`Missing ${fixLabel} label.\n`)
+
+      commit(ASSIGN_DATA, {
+        labels: flow(
           map('name'),
-          includes(fixLabel)
-        )(state.data.labels)) {
-          return undefined
-        }
+          concat(fixLabel)
+        )(state.data.labels)
+      })
 
-        logWarn(`Missing ${fixLabel} label.\n`)
-
-        commit(ASSIGN_DATA, {
-          labels: flow(
-            map('name'),
-            concat(fixLabel)
-          )(state.data.labels)
-        })
-      }
-
-      return getters.runOrSkip(3, 4)(UPDATE_PULL_REQUEST_LABELS)
+      await getters.runOrSkip(3, 4)(UPDATE_PULL_REQUEST_LABELS)
+    }
+  } else {
+    await getters.runOrSkip(3, 4)(UPDATE_PULL_REQUEST_LABELS)
+  }
+  if (getters.isCurrentTaskIndex(3) || getters.isCurrentTaskIndex(4)) {
+    commit(ASSIGN_DATA, {
+      message: `${state.data.name} (#${state.data.number})`,
+      method: 'squash'
     })
-    .then(() => {
-      if (getters.isCurrentTaskIndex(3) || getters.isCurrentTaskIndex(4)) {
-        return commit(ASSIGN_DATA, {
-          message: `${state.data.name} (#${state.data.number})`,
-          method: 'squash'
-        })
-      }
+  }
 
-      return undefined
+  await getters.runOrSkip(3, 4, 5)(MERGE_PULL_REQUEST)
+
+  if (getters.isCurrentTaskIndex(5)) {
+    commit(ASSIGN_DATA, {
+      branch: state.data.head
     })
-    .then(() => getters.runOrSkip(3, 4, 5)(MERGE_PULL_REQUEST))
-    .then(() => {
-      if (getters.isCurrentTaskIndex(5)) {
-        return commit(ASSIGN_DATA, {
-          branch: state.data.head
-        })
-      }
+  }
 
-      return undefined
+  await getters.runOrSkip(5, 6)(DELETE_BRANCH)
+
+  if (state.config.isRelease) {
+    if (getters.isCurrentTaskIndex(6)) {
+      commit(ASSIGN_DATA, { isPrerelease: true })
+    }
+
+    await getters.runOrSkip(6, 7)(GET_LATEST_RELEASE)
+
+    if (getters.isCurrentTaskIndex(7)) {
+      commit(ASSIGN_DATA, {
+        base: state.data.tag,
+        head: state.data.base
+      })
+    }
+
+    await getters.runOrSkip(7, 8)(GET_CHANGELOG)
+
+    if (getters.isCurrentTaskIndex(8)) {
+      return commit(ASSIGN_DATA, { isFix: true })
+    }
+
+    await getters.runOrSkip(8, 9)(GET_NEXT_RELEASE)
+
+    if (getters.isCurrentTaskIndex(9)) {
+      commit(ASSIGN_DATA, { branch: state.data.head })
+    }
+
+    await getters.runOrSkip(9, 10)(CREATE_RELEASE)
+
+    if (getters.isCurrentTaskIndex(10)) {
+      commit(ASSIGN_DATA, {
+        base: state.config.branches.master
+      })
+    }
+
+    await getters.runOrSkip(10, 11)(GET_CHANGELOG)
+    await getters.runOrSkip(11, 12)(FIND_RELEASE_PULL_REQUEST)
+
+    if (getters.isCurrentTaskIndex(12)) {
+      commit(ASSIGN_DATA, { name: undefined })
+    }
+
+    await getters.runOrSkip(12, 13)(UPDATE_PULL_REQUEST)
+  } else if (getters.isCurrentTaskIndex(6)) {
+    commit(ASSIGN_DATA, { head: state.data.base })
+  }
+  if (getters.isCurrentTaskIndex(6) || getters.isCurrentTaskIndex(13)) {
+    commit(ASSIGN_DATA, {
+      base: state.config.branches.develop
     })
-    .then(() => getters.runOrSkip(5, 6)(DELETE_BRANCH))
-    .then(() => {
-      if (state.config.isRelease) {
-        if (getters.isCurrentTaskIndex(6)) {
-          commit(ASSIGN_DATA, { isPrerelease: true })
-        }
+  }
 
-        return getters.runOrSkip(6, 7)(GET_LATEST_RELEASE)
-          .then(() => {
-            if (getters.isCurrentTaskIndex(7)) {
-              return commit(ASSIGN_DATA, {
-                base: state.data.tag,
-                head: state.data.base
-              })
-            }
+  await getters.runOrSkip(6, 13, 14)(MERGE_BRANCHES)
 
-            return undefined
-          })
-          .then(() => getters.runOrSkip(7, 8)(GET_CHANGELOG))
-          .then(() => {
-            if (getters.isCurrentTaskIndex(8)) {
-              return commit(ASSIGN_DATA, { isFix: true })
-            }
-
-            return undefined
-          })
-          .then(() => getters.runOrSkip(8, 9)(GET_NEXT_RELEASE))
-          .then(() => {
-            if (getters.isCurrentTaskIndex(9)) {
-              return commit(ASSIGN_DATA, { branch: state.data.head })
-            }
-
-            return undefined
-          })
-          .then(() => getters.runOrSkip(9, 10)(CREATE_RELEASE))
-          .then(() => {
-            if (getters.isCurrentTaskIndex(10)) {
-              return commit(ASSIGN_DATA, {
-                base: state.config.branches.master
-              })
-            }
-
-            return undefined
-          })
-          .then(() => getters.runOrSkip(10, 11)(GET_CHANGELOG))
-          .then(() => getters.runOrSkip(11, 12)(FIND_RELEASE_PULL_REQUEST))
-          .then(() => {
-            if (getters.isCurrentTaskIndex(12)) {
-              return commit(ASSIGN_DATA, { name: undefined })
-            }
-
-            return undefined
-          })
-          .then(() => getters.runOrSkip(12, 13)(UPDATE_PULL_REQUEST))
-      }
-      if (getters.isCurrentTaskIndex(6)) {
-        return commit(ASSIGN_DATA, { head: state.data.base })
-      }
-
-      return undefined
+  if (getters.isCurrentTaskIndex(14)) {
+    commit(ASSIGN_DATA, {
+      base: state.config.branches.beta
     })
-    .then(() => {
-      if (getters.isCurrentTaskIndex(6) || getters.isCurrentTaskIndex(13)) {
-        return commit(ASSIGN_DATA, {
-          base: state.config.branches.develop
-        })
-      }
+  }
 
-      return undefined
-    })
-    .then(() => getters.runOrSkip(6, 13, 14)(MERGE_BRANCHES))
-    .then(() => {
-      if (getters.isCurrentTaskIndex(14)) {
-        return commit(ASSIGN_DATA, {
-          base: state.config.branches.beta
-        })
-      }
+  await getters.runOrSkip(14, 15)(UPDATE_BRANCH)
 
-      return undefined
-    })
-    .then(() => getters.runOrSkip(14, 15)(UPDATE_BRANCH))
-    .then(() => logActionEnd(RUN_FIX_FINISH))
+  return logActionEnd(RUN_FIX_FINISH)
 }
 
 export { RUN_FIX_FINISH }

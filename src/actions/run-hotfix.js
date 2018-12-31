@@ -6,7 +6,7 @@ import {
 
 const RUN_HOTFIX = 'RUN_HOTFIX'
 
-const runHotfix = ({ dispatch, state }) => {
+const runHotfix = async ({ dispatch, state }) => {
   switch (state.config.position) {
     case 'finish':
       return dispatch(RUN_HOTFIX_FINISH)
@@ -15,9 +15,7 @@ const runHotfix = ({ dispatch, state }) => {
     case 'start':
       return dispatch(RUN_HOTFIX_START)
     default:
-      return Promise.reject(
-        'The `hotfix` command must be run in start, publish or finish mode!'
-      )
+      throw 'The `hotfix` command must be run in start, publish or finish mode!'
   }
 }
 
