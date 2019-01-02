@@ -1,6 +1,5 @@
 import get from 'lodash/fp/get'
 import includes from 'lodash/fp/includes'
-import { ASSIGN_DATA, SET_DATA } from '../mutations'
 import {
   CREATE_BRANCH,
   CREATE_PULL_REQUEST,
@@ -14,7 +13,7 @@ import { logActionEnd, logActionStart } from '../log'
 
 const RUN_RELEASE_START = 'RUN_RELEASE_START'
 
-const runReleaseStart = async ({ commit, getters, state }) => {
+const runReleaseStart = ({ getters, state }) => async () => {
   logActionStart(RUN_RELEASE_START)
   getters.validateConfig(
     'branches.beta',
@@ -31,75 +30,53 @@ const runReleaseStart = async ({ commit, getters, state }) => {
   if (/\sbeta$/i.test(state.config.name)) {
     throw 'The <name> param must be the final release name (no beta)!'
   }
-  if (getters.matchesTaskIndex(0)) {
-    commit(SET_DATA, {
-      base: state.config.branches.master,
-      head: state.config.branches.develop
-    })
-  }
 
-  await getters.runOrSkip(0, 1)(GET_CHANGELOG)
+  const changelog = await getters.runOrSkip(0, 1)(GET_CHANGELOG)({
+    base: state.config.branches.master,
+    head: state.config.branches.develop
+  })
+  const nextPrerelease = await getters.runOrSkip(1, 2)(GET_NEXT_RELEASE)({
+    isBreaking: includes(state.config.labels.breaking)(
+      changelog.labels
+    ),
+    isFix: false,
+    isPrerelease: true
+  })
 
-  if (getters.matchesTaskIndex(1)) {
-    commit(ASSIGN_DATA, {
-      isBreaking: includes(state.config.labels.breaking)(
-        state.data.changelog.labels
-      ),
-      isPrerelease: true,
-      name: state.config.name
-    })
-  }
+  const version = get(1)(
+    new RegExp(`^${state.config.tag}(\\d+\\.\\d+\\.\\d+)-beta$`)
+      .exec(nextPrerelease.tag)
+  )
 
-  await getters.runOrSkip(1, 2)(GET_NEXT_RELEASE)
+  const branch = `${state.config.branches.release}${version}`
 
-  if (getters.matchesTaskIndex(2)) {
-    const version = get(1)(
-      new RegExp(
-        `^${state.config.tag}(\\d+\\.\\d+\\.\\d+)-beta$`
-      ).exec(state.data.tag)
-    )
-
-    commit(ASSIGN_DATA, {
-      base: state.config.branches.develop,
-      head: `${state.config.branches.release}${version}`
-    })
-  }
-
-  await getters.runOrSkip(2, 3)(CREATE_BRANCH)
-
-  if (getters.matchesTaskIndex(3)) {
-    commit(ASSIGN_DATA, { branch: state.data.head })
-  }
-
-  await getters.runOrSkip(3, 4)(CREATE_RELEASE)
-
-  if (getters.matchesTaskIndex(4)) {
-    const nameMatch = new RegExp('^(.*?) beta$').exec(state.data.name)
-
-    commit(ASSIGN_DATA, {
-      base: state.config.branches.master,
-      name: `Release :: ${get(1)(nameMatch)}`
-    })
-  }
-
-  await getters.runOrSkip(4, 5)(CREATE_PULL_REQUEST)
-
-  if (getters.matchesTaskIndex(5)) {
-    commit(ASSIGN_DATA, {
-      labels: [state.config.labels.release]
-    })
-  }
-
-  await getters.runOrSkip(5, 6)(UPDATE_PULL_REQUEST_LABELS)
-
-  if (getters.matchesTaskIndex(6)) {
-    commit(ASSIGN_DATA, {
-      base: state.config.branches.beta,
-      head: state.data.branch
-    })
-  }
-
-  await getters.runOrSkip(6, 7)(UPDATE_BRANCH)
+  await getters.runOrSkip(2, 3)(CREATE_BRANCH)({
+    base: state.config.branches.develop,
+    head: branch
+  })
+  await getters.runOrSkip(3, 4)(CREATE_RELEASE)({
+    branch: branch,
+    changelog: changelog.text,
+    isPrerelease: true,
+    name: nextPrerelease.name,
+    tag: nextPrerelease.tag
+  })
+  const pullRequest = await getters.runOrSkip(4, 5)(CREATE_PULL_REQUEST)({
+    base: state.config.branches.master,
+    changelog: changelog.text,
+    head: branch,
+    name: `Release :: ${get(1)(
+      new RegExp('^(.*?) beta$').exec(nextPrerelease.name)
+    )}`
+  })
+  await getters.runOrSkip(5, 6)(UPDATE_PULL_REQUEST_LABELS)({
+    labels: [state.config.labels.release],
+    number: pullRequest.number
+  })
+  await getters.runOrSkip(6, 7)(UPDATE_BRANCH)({
+    base: state.config.branches.beta,
+    head: branch
+  })
 
   return logActionEnd(RUN_RELEASE_START)
 }

@@ -56,7 +56,7 @@ const GitHub = (config) => {
         })
 
         return {
-          branch: head,
+          name: head,
           url: `${baseUrl}tree/${head}`
         }
       },
@@ -196,15 +196,19 @@ const GitHub = (config) => {
         }
       },
       find: async ({ base, head }) => {
-        const pullRequests = await fetchGitHub(
+        const pullRequest = first(await fetchGitHub(
           `pulls?base=${base}&head=${config.owner}:${head}`
-        )
+        ))
+
+        if (isUndefined(pullRequest)) {
+          return undefined
+        }
 
         return {
-          number: flow(
-            first,
-            get('number')
-          )(pullRequests)
+          isMergeable: pullRequest.mergeable,
+          isMerged: pullRequest.merged,
+          name: pullRequest.title,
+          number: pullRequest.number
         }
       },
       get: async ({ number }) => {

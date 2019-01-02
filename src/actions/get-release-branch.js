@@ -1,10 +1,9 @@
 import get from 'lodash/fp/get'
-import { ASSIGN_DATA } from '../mutations'
 import { logInfo, logTaskStart } from '../log'
 
 const GET_RELEASE_BRANCH = 'GET_RELEASE_BRANCH'
 
-const getReleaseBranch = async ({ commit, getters, state }, isSkipped) => {
+const getReleaseBranch = ({ getters, state }) => async ({ isSkipped }) => {
   logTaskStart('Get release branch')
 
   if (isSkipped) {
@@ -24,13 +23,11 @@ const getReleaseBranch = async ({ commit, getters, state }, isSkipped) => {
     `^${state.config.tag}(\\d+\\.\\d+\\.\\d+)-beta\\.?\\d*$`
   ).exec(tag)
 
-  const branch = `${state.config.branches.release}${get(1)(tagMatch)}`
+  const name = `${state.config.branches.release}${get(1)(tagMatch)}`
 
-  logInfo(branch)
+  logInfo(name)
 
-  return commit(ASSIGN_DATA, {
-    branch: branch
-  })
+  return { name: name }
 }
 
 export { GET_RELEASE_BRANCH }

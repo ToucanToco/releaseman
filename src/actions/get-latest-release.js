@@ -1,9 +1,11 @@
-import { ASSIGN_DATA } from '../mutations'
 import { logInfo, logTaskStart } from '../log'
 
 const GET_LATEST_RELEASE = 'GET_LATEST_RELEASE'
 
-const getLatestRelease = async ({ commit, getters, state }, isSkipped) => {
+const getLatestRelease = ({ getters }) => async ({
+  isPrerelease,
+  isSkipped
+}) => {
   logTaskStart('Get latest release')
 
   if (isSkipped) {
@@ -11,21 +13,18 @@ const getLatestRelease = async ({ commit, getters, state }, isSkipped) => {
   }
 
   logInfo(`Retrieving latest ${
-    state.data.isPrerelease
+    isPrerelease
       ? 'prerelease'
       : 'release'
   }...`)
 
-  const { name, tag } = await getters.query('releases.getLatest')({
-    isPrerelease: state.data.isPrerelease
+  const latestRelease = await getters.query('releases.getLatest')({
+    isPrerelease: isPrerelease
   })
 
-  logInfo(`${tag}: ${name}`)
+  logInfo(`${latestRelease.tag}: ${latestRelease.name}`)
 
-  return commit(ASSIGN_DATA, {
-    name: name,
-    tag: tag
-  })
+  return latestRelease
 }
 
 export { GET_LATEST_RELEASE }

@@ -4,11 +4,10 @@ import includes from 'lodash/fp/includes'
 import isEqual from 'lodash/fp/isEqual'
 import map from 'lodash/fp/map'
 import startsWith from 'lodash/fp/startsWith'
-import { SET_DATA, ASSIGN_DATA } from '../mutations'
 import {
   CREATE_RELEASE,
   DELETE_BRANCH,
-  FIND_RELEASE_PULL_REQUEST,
+  FIND_PULL_REQUEST,
   GET_CHANGELOG,
   GET_LATEST_RELEASE,
   GET_NEXT_RELEASE,
@@ -25,7 +24,7 @@ import { logActionEnd, logActionStart, logWarn } from '../log'
 
 const RUN_FIX_FINISH = 'RUN_FIX_FINISH'
 
-const runFixFinish = async ({ commit, getters, state }) => {
+const runFixFinish = ({ getters, state }) => async () => {
   logActionStart(RUN_FIX_FINISH)
   getters.validateConfig(
     'branches.beta',
@@ -47,140 +46,112 @@ const runFixFinish = async ({ commit, getters, state }) => {
     'tag'
   )
 
-  const fixBranchesPrefix = (
-    state.config.isDoc
-      ? state.config.branches.doc
-      : state.config.branches.fix
+  const releaseBranch = await getters.runOrSkip(0, 1)(GET_RELEASE_BRANCH)()
+  const pullRequest = await getters.runOrSkip(1, 2)(GET_PULL_REQUEST)({
+    number: state.config.number
+  })
+
+  if (getters.matchesTaskIndex(2)) {
+    if (!isEqual(releaseBranch.name)(pullRequest.base)) {
+      throw `A fix cannot be merged into \`${pullRequest.base}\`!`
+    }
+
+    const fixBranchesPrefix = (
+      state.config.isDoc
+        ? state.config.branches.doc
+        : state.config.branches.fix
+    )
+
+    if (!startsWith(fixBranchesPrefix)(pullRequest.head)) {
+      throw `A fix branch name must start with \`${
+        fixBranchesPrefix
+      }\`, your branch name is \`${pullRequest.head}\`!`
+    }
+  }
+
+  const pullRequestLabels = (
+    await getters.runOrSkip(2, 3)(GET_PULL_REQUEST_LABELS)({
+      number: state.config.number
+    })
   )
+
   const fixLabel = (
     state.config.isDoc
       ? state.config.labels.doc
       : state.config.labels.fix
   )
 
-  if (getters.matchesTaskIndex(0)) {
-    commit(SET_DATA, {})
-  }
+  if (getters.matchesTaskIndex(3, 4) && !flow(
+    map('name'),
+    includes(fixLabel)
+  )(pullRequestLabels)) {
+    logWarn(`Missing ${fixLabel} label.\n`)
 
-  await getters.runOrSkip(0, 1)(GET_RELEASE_BRANCH)
-
-  if (getters.matchesTaskIndex(1)) {
-    commit(ASSIGN_DATA, {
+    await getters.runOrSkip(3, 4)(UPDATE_PULL_REQUEST_LABELS)({
+      labels: flow(
+        map('name'),
+        concat(fixLabel)
+      )(pullRequestLabels),
       number: state.config.number
     })
   }
 
-  await getters.runOrSkip(1, 2)(GET_PULL_REQUEST)
-
-  if (getters.matchesTaskIndex(2)) {
-    if (!isEqual(state.data.branch)(state.data.base)) {
-      throw `A fix cannot be merged into \`${state.data.base}\`!`
-    }
-    if (!startsWith(fixBranchesPrefix)(state.data.head)) {
-      throw `A fix branch name must start with \`${
-        fixBranchesPrefix
-      }\`, your branch name is \`${state.data.head}\`!`
-    }
-  }
-
-  await getters.runOrSkip(2, 3)(GET_PULL_REQUEST_LABELS)
-
-  if (getters.matchesTaskIndex(3)) {
-    if (!flow(
-      map('name'),
-      includes(fixLabel)
-    )(state.data.labels)) {
-      logWarn(`Missing ${fixLabel} label.\n`)
-
-      commit(ASSIGN_DATA, {
-        labels: flow(
-          map('name'),
-          concat(fixLabel)
-        )(state.data.labels)
-      })
-
-      await getters.runOrSkip(3, 4)(UPDATE_PULL_REQUEST_LABELS)
-    }
-  } else {
-    await getters.runOrSkip(3, 4)(UPDATE_PULL_REQUEST_LABELS)
-  }
-  if (getters.matchesTaskIndex(3, 4)) {
-    commit(ASSIGN_DATA, {
-      message: `${state.data.name} (#${state.data.number})`,
-      method: 'squash'
-    })
-  }
-
-  await getters.runOrSkip(3, 4, 5)(MERGE_PULL_REQUEST)
-
-  if (getters.matchesTaskIndex(5)) {
-    commit(ASSIGN_DATA, {
-      branch: state.data.head
-    })
-  }
-
-  await getters.runOrSkip(5, 6)(DELETE_BRANCH)
+  await getters.runOrSkip(3, 4, 5)(MERGE_PULL_REQUEST)({
+    isMergeable: pullRequest.isMergeable,
+    isMerged: pullRequest.isMerged,
+    message: `${pullRequest.name} (#${state.config.number})`,
+    method: 'squash',
+    number: state.config.number
+  })
+  await getters.runOrSkip(5, 6)(DELETE_BRANCH)({
+    branch: pullRequest.head
+  })
 
   if (state.config.isRelease) {
-    if (getters.matchesTaskIndex(6)) {
-      commit(ASSIGN_DATA, { isPrerelease: true })
-    }
-
-    await getters.runOrSkip(6, 7)(GET_LATEST_RELEASE)
-
-    if (getters.matchesTaskIndex(7)) {
-      commit(ASSIGN_DATA, {
-        base: state.data.tag,
-        head: state.data.base
+    const latestPrerelease = await getters.runOrSkip(6, 7)(GET_LATEST_RELEASE)({
+      isPrerelease: true
+    })
+    const fixChangelog = await getters.runOrSkip(7, 8)(GET_CHANGELOG)({
+      base: latestPrerelease.tag,
+      head: releaseBranch.name
+    })
+    const nextPrerelease = await getters.runOrSkip(8, 9)(GET_NEXT_RELEASE)({
+      isBreaking: false,
+      isFix: true,
+      isPrerelease: true
+    })
+    await getters.runOrSkip(9, 10)(CREATE_RELEASE)({
+      branch: releaseBranch.name,
+      changelog: fixChangelog.text,
+      isPrerelease: true,
+      name: nextPrerelease.name,
+      tag: nextPrerelease.tag
+    })
+    const releaseChangelog = await getters.runOrSkip(10, 11)(GET_CHANGELOG)({
+      base: state.config.branches.master,
+      head: releaseBranch.name
+    })
+    const releasePullRequest = (
+      await getters.runOrSkip(11, 12)(FIND_PULL_REQUEST)({
+        base: state.config.branches.master,
+        head: releaseBranch.name
       })
-    }
-
-    await getters.runOrSkip(7, 8)(GET_CHANGELOG)
-
-    if (getters.matchesTaskIndex(8)) {
-      return commit(ASSIGN_DATA, { isFix: true })
-    }
-
-    await getters.runOrSkip(8, 9)(GET_NEXT_RELEASE)
-
-    if (getters.matchesTaskIndex(9)) {
-      commit(ASSIGN_DATA, { branch: state.data.head })
-    }
-
-    await getters.runOrSkip(9, 10)(CREATE_RELEASE)
-
-    if (getters.matchesTaskIndex(10)) {
-      commit(ASSIGN_DATA, {
-        base: state.config.branches.master
-      })
-    }
-
-    await getters.runOrSkip(10, 11)(GET_CHANGELOG)
-    await getters.runOrSkip(11, 12)(FIND_RELEASE_PULL_REQUEST)
-
-    if (getters.matchesTaskIndex(12)) {
-      commit(ASSIGN_DATA, { name: undefined })
-    }
-
-    await getters.runOrSkip(12, 13)(UPDATE_PULL_REQUEST)
-  } else if (getters.matchesTaskIndex(6)) {
-    commit(ASSIGN_DATA, { head: state.data.base })
-  }
-  if (getters.matchesTaskIndex(6, 13)) {
-    commit(ASSIGN_DATA, {
-      base: state.config.branches.develop
+    )
+    await getters.runOrSkip(12, 13)(UPDATE_PULL_REQUEST)({
+      changelog: releaseChangelog.text,
+      name: releasePullRequest.name,
+      number: releasePullRequest.number
     })
   }
 
-  await getters.runOrSkip(6, 13, 14)(MERGE_BRANCHES)
-
-  if (getters.matchesTaskIndex(14)) {
-    commit(ASSIGN_DATA, {
-      base: state.config.branches.beta
-    })
-  }
-
-  await getters.runOrSkip(14, 15)(UPDATE_BRANCH)
+  await getters.runOrSkip(6, 13, 14)(MERGE_BRANCHES)({
+    base: state.config.branches.develop,
+    head: releaseBranch.name
+  })
+  await getters.runOrSkip(14, 15)(UPDATE_BRANCH)({
+    base: state.config.branches.beta,
+    head: releaseBranch.name
+  })
 
   return logActionEnd(RUN_FIX_FINISH)
 }

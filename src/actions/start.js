@@ -7,7 +7,7 @@ import { SET_CONFIG } from '../mutations'
 
 const START = 'START'
 
-const start = async ({ commit, dispatch, state }, argv) => {
+const start = ({ commit, dispatch, state }) => async (argv) => {
   commit(SET_CONFIG, Config(argv))
 
   if (

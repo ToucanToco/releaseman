@@ -3,22 +3,24 @@ import { logInfo, logTaskStart } from '../log'
 
 const UPDATE_PULL_REQUEST_LABELS = 'UPDATE_PULL_REQUEST_LABELS'
 
-const updatePullRequestLabels = async ({ getters, state }, isSkipped) => {
+const updatePullRequestLabels = ({ getters }) => async ({
+  isSkipped,
+  labels,
+  number
+}) => {
   logTaskStart('Update pull request labels')
 
   if (isSkipped) {
     return undefined
   }
 
-  logInfo(`Setting pull request #${
-    state.data.number
-  } labels to ${
-    toReadableList(state.data.labels)
+  logInfo(`Setting pull request #${number} labels to ${
+    toReadableList(labels)
   }...`)
 
   const { url } = await getters.query('pullRequests.setLabels')({
-    labels: state.data.labels,
-    number: state.data.number
+    labels: labels,
+    number: number
   })
 
   return logInfo(url)

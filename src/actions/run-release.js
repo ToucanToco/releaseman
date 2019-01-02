@@ -2,7 +2,7 @@ import { RUN_RELEASE_FINISH, RUN_RELEASE_START } from '../actions'
 
 const RUN_RELEASE = 'RUN_RELEASE'
 
-const runRelease = async ({ dispatch, state }) => {
+const runRelease = ({ dispatch, state }) => () => {
   switch (state.config.position) {
     case 'finish':
       return dispatch(RUN_RELEASE_FINISH)

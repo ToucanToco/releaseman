@@ -1,26 +1,25 @@
 import map from 'lodash/fp/map'
-import { ASSIGN_DATA } from '../mutations'
 import { logInfo, logTaskStart } from '../log'
 import { toReadableList } from '../helpers'
 
 const GET_PULL_REQUEST_LABELS = 'GET_PULL_REQUEST_LABELS'
 
-const getPullRequestLabels = async ({ commit, getters, state }, isSkipped) => {
+const getPullRequestLabels = ({ getters }) => async ({ isSkipped, number }) => {
   logTaskStart('Get pull request labels')
 
   if (isSkipped) {
     return undefined
   }
 
-  logInfo(`Retrieving pull request #${state.data.number}'s labels...`)
+  logInfo(`Retrieving pull request #${number}'s labels...`)
 
   const labels = await getters.query('pullRequests.getLabels')({
-    number: state.data.number
+    number: number
   })
 
   logInfo(toReadableList(map('name')(labels)))
 
-  return commit(ASSIGN_DATA, { labels: labels })
+  return labels
 }
 
 export { GET_PULL_REQUEST_LABELS }

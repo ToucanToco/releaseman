@@ -1,10 +1,12 @@
 import lt from 'lodash/fp/lt'
-import { ASSIGN_DATA } from '../mutations'
 import { logInfo, logTaskStart } from '../log'
 
 const GET_RELEASES_EXISTENCE = 'GET_RELEASES_EXISTENCE'
 
-const getReleasesExistence = async ({ commit, getters, state }, isSkipped) => {
+const getReleasesExistence = ({ getters }) => async ({
+  isPrerelease,
+  isSkipped
+}) => {
   logTaskStart('Get releases existence')
 
   if (isSkipped) {
@@ -12,20 +14,20 @@ const getReleasesExistence = async ({ commit, getters, state }, isSkipped) => {
   }
 
   logInfo(`Retrieving ${
-    state.data.isPrerelease
+    isPrerelease
       ? 'prereleases'
       : 'releases'
   } existence...`)
 
   const size = await getters.query('releases.size')({
-    isPrerelease: state.data.isPrerelease
+    isPrerelease: isPrerelease
   })
 
-  const isWithReleases = lt(0)(size)
+  const isReleasesPresent = lt(0)(size)
 
-  logInfo(isWithReleases)
+  logInfo(isReleasesPresent)
 
-  return commit(ASSIGN_DATA, { isWithReleases: isWithReleases })
+  return isReleasesPresent
 }
 
 export { GET_RELEASES_EXISTENCE }

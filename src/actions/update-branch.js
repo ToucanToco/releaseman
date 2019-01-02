@@ -2,18 +2,18 @@ import { logInfo, logTaskStart } from '../log'
 
 const UPDATE_BRANCH = 'UPDATE_BRANCH'
 
-const updateBranch = async ({ getters, state }, isSkipped) => {
+const updateBranch = ({ getters }) => async ({ base, head, isSkipped }) => {
   logTaskStart('Update branch')
 
   if (isSkipped) {
     return undefined
   }
 
-  logInfo(`Updating \`${state.data.base}\` to \`${state.data.head}\`...`)
+  logInfo(`Updating \`${base}\` to \`${head}\`...`)
 
   const { url } = await getters.query('branches.update')({
-    base: state.data.base,
-    head: state.data.head
+    base: base,
+    head: head
   })
 
   return logInfo(url)

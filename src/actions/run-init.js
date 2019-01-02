@@ -6,7 +6,6 @@ import last from 'lodash/fp/last'
 import map from 'lodash/fp/map'
 import reject from 'lodash/fp/reject'
 import toPairs from 'lodash/fp/toPairs'
-import { ASSIGN_DATA, SET_DATA } from '../mutations'
 import {
   CREATE_BRANCH,
   CREATE_LABELS,
@@ -28,7 +27,7 @@ const LABELS_DEFAULT_COLORS = {
 }
 const RUN_INIT = 'RUN_INIT'
 
-const runInit = async ({ commit, getters, state }) => {
+const runInit = ({ getters, state }) => async () => {
   logActionStart(RUN_INIT)
   getters.validateConfig(
     'branches.beta',
@@ -43,142 +42,93 @@ const runInit = async ({ commit, getters, state }) => {
     'tag'
   )
 
-  if (getters.matchesTaskIndex(0)) {
-    commit(SET_DATA, { branch: state.config.branches.develop })
-  }
+  const isDevelopPresent = await getters.runOrSkip(0, 1)(GET_BRANCH_EXISTENCE)({
+    name: state.config.branches.develop
+  })
 
-  await getters.runOrSkip(0, 1)(GET_BRANCH_EXISTENCE)
-
-  if (getters.matchesTaskIndex(1)) {
-    if (state.data.isBranchPresent) {
-      logWarn(`${state.config.branches.develop} already present.\n`)
-    } else {
-      commit(ASSIGN_DATA, {
-        base: state.config.branches.master,
-        head: state.config.branches.develop
-      })
-
-      await getters.runOrSkip(1, 2)(CREATE_BRANCH)
-    }
+  if (isDevelopPresent) {
+    logWarn(`${state.config.branches.develop} already present.\n`)
   } else {
-    await getters.runOrSkip(1, 2)(CREATE_BRANCH)
+    await getters.runOrSkip(1, 2)(CREATE_BRANCH)({
+      base: state.config.branches.master,
+      head: state.config.branches.develop
+    })
   }
-  if (getters.matchesTaskIndex(1, 2)) {
-    commit(ASSIGN_DATA, { isPrerelease: false })
-  }
 
-  await getters.runOrSkip(1, 2, 3)(GET_RELEASES_EXISTENCE)
+  const isReleasesPresent = (
+    await getters.runOrSkip(1, 2, 3)(GET_RELEASES_EXISTENCE)({
+      isPrerelease: false
+    })
+  )
 
-  if (getters.matchesTaskIndex(3)) {
-    if (state.data.isWithReleases) {
-      logWarn('Release already present.\n')
-    } else {
-      commit(ASSIGN_DATA, {
-        branch: state.config.branches.master,
-        changelog: {
-          labels: [],
-          text: 'Initial release'
-        },
-        name: 'Initial release',
-        tag: `${state.config.tag}0.0.0`
-      })
-
-      await getters.runOrSkip(3, 4)(CREATE_RELEASE)
-    }
+  if (isReleasesPresent) {
+    logWarn('Release already present.\n')
   } else {
-    await getters.runOrSkip(3, 4)(CREATE_RELEASE)
+    await getters.runOrSkip(3, 4)(CREATE_RELEASE)({
+      branch: state.config.branches.master,
+      changelog: 'Initial release',
+      isPrerelease: false,
+      name: 'Initial release',
+      tag: `${state.config.tag}0.0.0`
+    })
   }
-  if (getters.matchesTaskIndex(3, 4)) {
-    commit(ASSIGN_DATA, { isPrerelease: true })
-  }
 
-  await getters.runOrSkip(3, 4, 5)(GET_RELEASES_EXISTENCE)
+  const isPrereleasesPresent = (
+    await getters.runOrSkip(3, 4, 5)(GET_RELEASES_EXISTENCE)({
+      isPrerelease: true
+    })
+  )
 
-  if (getters.matchesTaskIndex(5)) {
-    if (state.data.isWithReleases) {
-      logWarn('Prerelease already present.\n')
-    } else {
-      commit(ASSIGN_DATA, { isPrerelease: false })
-
-      await getters.runOrSkip(5, 6)(GET_LATEST_RELEASE)
-
-      if (getters.matchesTaskIndex(6)) {
-        commit(ASSIGN_DATA, {
-          branch: state.config.branches.master,
-          changelog: {
-            labels: [],
-            text: `${state.data.name} beta`
-          },
-          isPrerelease: true,
-          name: `${state.data.name} beta`,
-          tag: `${state.data.tag}-beta`
-        })
-      }
-
-      await getters.runOrSkip(6, 7)(CREATE_RELEASE)
-    }
+  if (isPrereleasesPresent) {
+    logWarn('Prerelease already present.\n')
   } else {
-    await getters.runOrSkip(5, 6)(GET_LATEST_RELEASE)
+    const latestRelease = await getters.runOrSkip(5, 6)(GET_LATEST_RELEASE)({
+      isPrerelease: false
+    })
 
-    if (getters.matchesTaskIndex(6)) {
-      commit(ASSIGN_DATA, {
-        branch: state.config.branches.master,
-        changelog: {
-          labels: [],
-          text: `${state.data.name} beta`
-        },
-        isPrerelease: true,
-        name: `${state.data.name} beta`,
-        tag: `${state.data.tag}-beta`
-      })
-    }
-
-    await getters.runOrSkip(6, 7)(CREATE_RELEASE)
-  }
-  if (getters.matchesTaskIndex(5, 7)) {
-    commit(SET_DATA, { branch: state.config.branches.beta })
+    await getters.runOrSkip(6, 7)(CREATE_RELEASE)({
+      branch: state.config.branches.master,
+      changelog: `${latestRelease.name} beta`,
+      isPrerelease: true,
+      name: `${latestRelease.name} beta`,
+      tag: `${latestRelease.tag}-beta`
+    })
   }
 
-  await getters.runOrSkip(5, 7, 8)(GET_BRANCH_EXISTENCE)
+  const isBranchPresent = (
+    await getters.runOrSkip(5, 7, 8)(GET_BRANCH_EXISTENCE)({
+      name: state.config.branches.beta
+    })
+  )
 
-  if (getters.matchesTaskIndex(8)) {
-    if (state.data.isBranchPresent) {
-      logWarn(`${state.config.branches.beta} already present.\n`)
-    } else {
-      commit(ASSIGN_DATA, {
-        base: state.config.branches.master,
-        head: state.config.branches.beta
-      })
-
-      await getters.runOrSkip(8, 9)(CREATE_BRANCH)
-    }
+  if (isBranchPresent) {
+    logWarn(`${state.config.branches.beta} already present.\n`)
   } else {
-    await getters.runOrSkip(8, 9)(CREATE_BRANCH)
+    await getters.runOrSkip(8, 9)(CREATE_BRANCH)({
+      base: state.config.branches.master,
+      head: state.config.branches.beta
+    })
   }
 
-  await getters.runOrSkip(8, 9, 10)(GET_LABELS)
+  const labelsNames = map('name')(
+    await getters.runOrSkip(8, 9, 10)(GET_LABELS)()
+  )
 
-  if (getters.matchesTaskIndex(10)) {
-    const labelsNames = map('name')(state.data.labels)
+  const missingLabels = flow(
+    toPairs,
+    reject((labelPair) => includes(last(labelPair))(labelsNames)),
+    map(([key, name]) => ({
+      color: get(key)(LABELS_DEFAULT_COLORS),
+      name: name
+    }))
+  )(state.config.labels)
 
-    const missingLabels = flow(
-      toPairs,
-      reject((labelPair) => includes(last(labelPair))(labelsNames)),
-      map(([key, name]) => ({
-        color: get(key)(LABELS_DEFAULT_COLORS),
-        name: name
-      }))
-    )(state.config.labels)
-
-    if (isEmpty(missingLabels)) {
-      logWarn('All mandatory labels already present.\n')
-    } else {
-      commit(ASSIGN_DATA, { labels: missingLabels })
-
-      await getters.runOrSkip(10, 11)(CREATE_LABELS)
-    }
+  if (isEmpty(missingLabels)) {
+    logWarn('All mandatory labels already present.\n')
   } else {
-    await getters.runOrSkip(10, 11)(CREATE_LABELS)
+    await getters.runOrSkip(10, 11)(CREATE_LABELS)({
+      labels: missingLabels
+    })
   }
 
   return logActionEnd(RUN_INIT)

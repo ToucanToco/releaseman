@@ -4,7 +4,6 @@ import includes from 'lodash/fp/includes'
 import isEqual from 'lodash/fp/isEqual'
 import map from 'lodash/fp/map'
 import startsWith from 'lodash/fp/startsWith'
-import { SET_DATA, ASSIGN_DATA } from '../mutations'
 import {
   DELETE_BRANCH,
   GET_PULL_REQUEST,
@@ -16,7 +15,7 @@ import { logActionEnd, logActionStart, logWarn } from '../log'
 
 const RUN_FEATURE_FINISH = 'RUN_FEATURE_FINISH'
 
-const runFeatureFinish = async ({ commit, getters, state }) => {
+const runFeatureFinish = ({ getters, state }) => async () => {
   logActionStart(RUN_FEATURE_FINISH)
   getters.validateConfig(
     'branches.develop',
@@ -28,73 +27,65 @@ const runFeatureFinish = async ({ commit, getters, state }) => {
     'number'
   )
 
-  const featureBranchesPrefix = (
-    state.config.isDoc
-      ? state.config.branches.doc
-      : state.config.branches.feature
+  const pullRequest = await getters.runOrSkip(0, 1)(GET_PULL_REQUEST)({
+    number: state.config.number
+  })
+
+  if (getters.matchesTaskIndex(1)) {
+    if (!isEqual(state.config.branches.develop)(pullRequest.base)) {
+      throw `A feature cannot be merged into \`${pullRequest.base}\`!`
+    }
+
+    const featureBranchesPrefix = (
+      state.config.isDoc
+        ? state.config.branches.doc
+        : state.config.branches.feature
+    )
+
+    if (!startsWith(featureBranchesPrefix)(pullRequest.head)) {
+      throw `A feature branch name must start with \`${
+        featureBranchesPrefix
+      }\`, your branch name is \`${pullRequest.head}\`!`
+    }
+  }
+
+  const pullRequestLabels = (
+    await getters.runOrSkip(1, 2)(GET_PULL_REQUEST_LABELS)({
+      number: state.config.number
+    })
   )
+
   const featureLabel = (
     state.config.isDoc
       ? state.config.labels.doc
       : state.config.labels.feature
   )
 
-  if (getters.matchesTaskIndex(0)) {
-    commit(SET_DATA, {
+  if (getters.matchesTaskIndex(2, 3) && !flow(
+    map('name'),
+    includes(featureLabel)
+  )(pullRequestLabels)) {
+    logWarn(`Missing ${featureLabel} label.\n`)
+
+    await getters.runOrSkip(2, 3)(UPDATE_PULL_REQUEST_LABELS)({
+      labels: flow(
+        map('name'),
+        concat(featureLabel)
+      )(pullRequestLabels),
       number: state.config.number
     })
   }
 
-  await getters.runOrSkip(0, 1)(GET_PULL_REQUEST)
-
-  if (getters.matchesTaskIndex(1)) {
-    if (!isEqual(state.config.branches.develop)(state.data.base)) {
-      throw `A feature cannot be merged into \`${state.data.base}\`!`
-    }
-    if (!startsWith(featureBranchesPrefix)(state.data.head)) {
-      throw `A feature branch name must start with \`${
-        featureBranchesPrefix
-      }\`, your branch name is \`${state.data.head}\`!`
-    }
-  }
-
-  await getters.runOrSkip(1, 2)(GET_PULL_REQUEST_LABELS)
-
-  if (getters.matchesTaskIndex(2)) {
-    if (!flow(
-      map('name'),
-      includes(featureLabel)
-    )(state.data.labels)) {
-      logWarn(`Missing ${featureLabel} label.\n`)
-
-      commit(ASSIGN_DATA, {
-        labels: flow(
-          map('name'),
-          concat(featureLabel)
-        )(state.data.labels)
-      })
-
-      await getters.runOrSkip(2, 3)(UPDATE_PULL_REQUEST_LABELS)
-    }
-  } else {
-    await getters.runOrSkip(2, 3)(UPDATE_PULL_REQUEST_LABELS)
-  }
-  if (getters.matchesTaskIndex(2, 3)) {
-    commit(ASSIGN_DATA, {
-      message: `${state.data.name} (#${state.data.number})`,
-      method: 'squash'
-    })
-  }
-
-  await getters.runOrSkip(2, 3, 4)(MERGE_PULL_REQUEST)
-
-  if (getters.matchesTaskIndex(4)) {
-    commit(ASSIGN_DATA, {
-      branch: state.data.head
-    })
-  }
-
-  await getters.runOrSkip(4, 5)(DELETE_BRANCH)
+  await getters.runOrSkip(2, 3, 4)(MERGE_PULL_REQUEST)({
+    isMergeable: pullRequest.isMergeable,
+    isMerged: pullRequest.isMerged,
+    message: `${pullRequest.name} (#${pullRequest.number})`,
+    method: 'squash',
+    number: state.config.number
+  })
+  await getters.runOrSkip(4, 5)(DELETE_BRANCH)({
+    branch: pullRequest.head
+  })
 
   return logActionEnd(RUN_FEATURE_FINISH)
 }

@@ -6,7 +6,7 @@ import { SET_CONFIG, SET_DATA, SET_TASK_INDEX } from '../mutations'
 
 const RUN_CONTINUE = 'RUN_CONTINUE'
 
-const runContinue = async ({ commit, dispatch }) => {
+const runContinue = ({ commit, dispatch }) => () => {
   if (!fs.existsSync(STATE_FILE_PATH)) {
     throw 'There\'s no state file from which to continue!'
   }

@@ -1,6 +1,6 @@
 const SET_TASK_INDEX = 'SET_TASK_INDEX'
 
-const setTaskIndex = (state, taskIndex) => {
+const setTaskIndex = (state) => (taskIndex) => {
   state.taskIndex = taskIndex
 }
 

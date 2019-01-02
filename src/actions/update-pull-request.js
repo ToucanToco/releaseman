@@ -2,19 +2,24 @@ import { logInfo, logTaskStart } from '../log'
 
 const UPDATE_PULL_REQUEST = 'UPDATE_PULL_REQUEST'
 
-const updatePullRequest = async ({ getters, state }, isSkipped) => {
+const updatePullRequest = ({ getters }) => async ({
+  changelog,
+  isSkipped,
+  name,
+  number
+}) => {
   logTaskStart('Update pull request')
 
   if (isSkipped) {
     return undefined
   }
 
-  logInfo(`Updating pull request #${state.data.number}...`)
+  logInfo(`Updating pull request #${number}...`)
 
   const { url } = await getters.query('pullRequests.update')({
-    changelog: state.data.changelog.text,
-    name: state.data.name,
-    number: state.data.number
+    changelog: changelog,
+    name: name,
+    number: number
   })
 
   return logInfo(url)

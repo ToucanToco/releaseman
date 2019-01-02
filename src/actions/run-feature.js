@@ -6,14 +6,14 @@ import {
 
 const RUN_FEATURE = 'RUN_FEATURE'
 
-const runFeature = async ({ dispatch, state }) => {
+const runFeature = ({ dispatch, state }) => () => {
   switch (state.config.position) {
     case 'finish':
-      return dispatch(RUN_FEATURE_FINISH)
+      return dispatch(RUN_FEATURE_FINISH)()
     case 'publish':
-      return dispatch(RUN_FEATURE_PUBLISH)
+      return dispatch(RUN_FEATURE_PUBLISH)()
     case 'start':
-      return dispatch(RUN_FEATURE_START)
+      return dispatch(RUN_FEATURE_START)()
     default:
       throw (
         'The `feature` command must be run in start, publish or finish mode!'

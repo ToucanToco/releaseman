@@ -6,7 +6,7 @@ import {
 
 const RUN_HOTFIX = 'RUN_HOTFIX'
 
-const runHotfix = async ({ dispatch, state }) => {
+const runHotfix = ({ dispatch, state }) => () => {
   switch (state.config.position) {
     case 'finish':
       return dispatch(RUN_HOTFIX_FINISH)
