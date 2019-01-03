@@ -7,7 +7,7 @@ const RUN_HELP = 'RUN_HELP'
 
 const _logTrim = (value) => log(`${trim(value)}\n`)
 
-const runHelp = async ({ state }) => {
+const runHelp = ({ state }) => () => {
   const options = trim(`
 Options:
 

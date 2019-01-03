@@ -1,6 +1,6 @@
 const SET_DATA = 'SET_DATA'
 
-const setData = (state, data) => {
+const setData = (state) => (data) => {
   state.data = data
 }
 

@@ -1,11 +1,9 @@
 import map from 'lodash/fp/map'
-import reject from 'lodash/fp/reject'
-import { ASSIGN_DATA } from '../mutations'
 import { logInfo, logTaskStart } from '../log'
 
 const CREATE_LABELS = 'CREATE_LABELS'
 
-const createLabels = async ({ commit, getters, state }, isSkipped) => {
+const createLabels = ({ getters }) => async ({ isSkipped, labels }) => {
   logTaskStart('Create labels')
 
   if (isSkipped) {
@@ -14,17 +12,17 @@ const createLabels = async ({ commit, getters, state }, isSkipped) => {
 
   logInfo('Creating labels...')
 
-  return Promise.all(
+  const createdLabels = await Promise.all(
     map(async (label) => {
-      const { name, url } = await getters.query('labels.create')(label)
+      const createdLabel = await getters.query('labels.create')(label)
 
-      logInfo(`${name}: ${url}`)
+      logInfo(`${createdLabel.name}: ${createdLabel.url}`)
 
-      return commit(ASSIGN_DATA, {
-        labels: reject(['name', name])(state.data.labels)
-      })
-    })(state.data.labels)
+      return createdLabel
+    })(labels)
   )
+
+  return createdLabels
 }
 
 export { CREATE_LABELS }

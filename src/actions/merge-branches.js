@@ -2,18 +2,18 @@ import { logInfo, logTaskStart } from '../log'
 
 const MERGE_BRANCHES = 'MERGE_BRANCHES'
 
-const mergeBranches = async ({ getters, state }, isSkipped) => {
+const mergeBranches = ({ getters }) => async ({ base, head, isSkipped }) => {
   logTaskStart('Merge branches')
 
   if (isSkipped) {
     return undefined
   }
 
-  logInfo(`Merging \`${state.data.head}\` into \`${state.data.base}\`...`)
+  logInfo(`Merging \`${head}\` into \`${base}\`...`)
 
   const { url } = await getters.query('branches.merge')({
-    base: state.data.base,
-    head: state.data.head
+    base: base,
+    head: head
   })
 
   return logInfo(url)

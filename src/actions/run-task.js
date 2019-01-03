@@ -1,14 +1,26 @@
+import assign from 'lodash/fp/assign'
 import { logSuccess } from '../log'
-import { SET_TASK_INDEX } from '../mutations'
+import { PATCH_DATA, SET_TASK_INDEX } from '../mutations'
 
 const RUN_TASK = 'RUN_TASK'
 
-const runTask = async ({ commit, dispatch }, { index, name }) => {
+const runTask = ({ commit, dispatch }) => async ({
+  action,
+  index,
+  payload
+}) => {
   commit(SET_TASK_INDEX, index)
 
-  await dispatch(name)
+  const value = await dispatch(action, assign(payload)({ isSkipped: false }))
 
-  return logSuccess('Done.\n')
+  commit(PATCH_DATA, {
+    path: index,
+    value: value
+  })
+
+  logSuccess('Done.\n')
+
+  return value
 }
 
 export { RUN_TASK }

@@ -1,11 +1,10 @@
 import kebabCase from 'lodash/fp/kebabCase'
-import { ASSIGN_DATA, SET_DATA } from '../mutations'
 import { CREATE_BRANCH, GET_RELEASE_BRANCH } from '../actions'
 import { logActionEnd, logActionStart } from '../log'
 
 const RUN_FIX_START = 'RUN_FIX_START'
 
-const runFixStart = async ({ commit, getters, state }) => {
+const runFixStart = ({ getters, state }) => async () => {
   logActionStart(RUN_FIX_START)
   getters.validateConfig(
     (
@@ -18,24 +17,15 @@ const runFixStart = async ({ commit, getters, state }) => {
     'tag'
   )
 
-  if (getters.matchesTaskIndex(0)) {
-    commit(SET_DATA, {})
-  }
-
-  await getters.runOrSkip(0, 1)(GET_RELEASE_BRANCH)
-
-  if (getters.matchesTaskIndex(1)) {
-    commit(ASSIGN_DATA, {
-      base: state.data.branch,
-      head: `${
-        state.config.isDoc
-          ? state.config.branches.doc
-          : state.config.branches.fix
-      }${kebabCase(state.config.name)}`
-    })
-  }
-
-  await getters.runOrSkip(1, 2)(CREATE_BRANCH)
+  const releaseBranch = await getters.runOrSkip(0, 1)(GET_RELEASE_BRANCH)()
+  await getters.runOrSkip(1, 2)(CREATE_BRANCH)({
+    base: releaseBranch.name,
+    head: `${
+      state.config.isDoc
+        ? state.config.branches.doc
+        : state.config.branches.fix
+    }${kebabCase(state.config.name)}`
+  })
 
   return logActionEnd(RUN_FIX_START)
 }

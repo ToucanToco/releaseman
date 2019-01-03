@@ -24,23 +24,24 @@ const STATE_FILE_PATH = `${__dirname}/state.json`
 
 const Store = {
   actions: actions,
-  commit: (mutation, payload) => (
-    get(mutation)(Store.mutations)(Store.state, payload)
+  commit: (mutation) => (payload) => (
+    get(mutation)(Store.mutations)(Store.state)(payload)
   ),
-  dispatch: async (action, payload) => (
-    get(action)(Store.actions)(Store, payload)
+  dispatch: (action) => async (payload) => (
+    get(action)(Store.actions)(Store)(payload)
   ),
   getters: {
     github: null,
     matchesTaskIndex: (...indexes) => includes(Store.state.taskIndex)(indexes),
     query: (path) => (payload) => get(path)(Store.getters.github)(payload),
-    runOrSkip: (...indexes) => (name) => Store.dispatch((
+    runOrSkip: (...indexes) => (action) => (payload) => Store.dispatch((
       Store.getters.matchesTaskIndex(...indexes)
         ? RUN_TASK
         : SKIP_TASK
     ), {
+      action: action,
       index: last(indexes),
-      name: name
+      payload: payload
     }),
     validateConfig: (...keys) => {
       const error = flow(
@@ -58,8 +59,8 @@ const Store = {
   },
   mutations: mutations,
   state: {
-    config: null,
-    data: null,
+    config: {},
+    data: {},
     taskIndex: 0
   }
 }

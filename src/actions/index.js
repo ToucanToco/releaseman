@@ -3,9 +3,7 @@ import createLabels, { CREATE_LABELS } from './create-labels'
 import createPullRequest, { CREATE_PULL_REQUEST } from './create-pull-request'
 import createRelease, { CREATE_RELEASE } from './create-release'
 import deleteBranch, { DELETE_BRANCH } from './delete-branch'
-import findReleasePullRequest, {
-  FIND_RELEASE_PULL_REQUEST
-} from './find-release-pull-request'
+import findPullRequest, { FIND_PULL_REQUEST } from './find-pull-request'
 import getBranchExistence, {
   GET_BRANCH_EXISTENCE
 } from './get-branch-existence'
@@ -59,7 +57,7 @@ const actions = {
   [CREATE_PULL_REQUEST]: createPullRequest,
   [CREATE_RELEASE]: createRelease,
   [DELETE_BRANCH]: deleteBranch,
-  [FIND_RELEASE_PULL_REQUEST]: findReleasePullRequest,
+  [FIND_PULL_REQUEST]: findPullRequest,
   [GET_BRANCH_EXISTENCE]: getBranchExistence,
   [GET_CHANGELOG]: getChangelog,
   [GET_LABELS]: getLabels,
@@ -106,7 +104,7 @@ export {
   CREATE_PULL_REQUEST,
   CREATE_RELEASE,
   DELETE_BRANCH,
-  FIND_RELEASE_PULL_REQUEST,
+  FIND_PULL_REQUEST,
   GET_BRANCH_EXISTENCE,
   GET_CHANGELOG,
   GET_LABELS,

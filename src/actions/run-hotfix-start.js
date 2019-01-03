@@ -1,11 +1,10 @@
 import kebabCase from 'lodash/fp/kebabCase'
-import { SET_DATA } from '../mutations'
 import { CREATE_BRANCH } from '../actions'
 import { logActionEnd, logActionStart } from '../log'
 
 const RUN_HOTFIX_START = 'RUN_HOTFIX_START'
 
-const runHotfixStart = async ({ commit, getters, state }) => {
+const runHotfixStart = ({ getters, state }) => async () => {
   logActionStart(RUN_HOTFIX_START)
   getters.validateConfig(
     (
@@ -17,18 +16,14 @@ const runHotfixStart = async ({ commit, getters, state }) => {
     'name'
   )
 
-  if (getters.matchesTaskIndex(0)) {
-    commit(SET_DATA, {
-      base: state.config.branches.master,
-      head: `${
-        state.config.isDoc
-          ? state.config.branches.doc
-          : state.config.branches.hotfix
-      }${kebabCase(state.config.name)}`
-    })
-  }
-
-  await getters.runOrSkip(0, 1)(CREATE_BRANCH)
+  await getters.runOrSkip(0, 1)(CREATE_BRANCH)({
+    base: state.config.branches.master,
+    head: `${
+      state.config.isDoc
+        ? state.config.branches.doc
+        : state.config.branches.hotfix
+    }${kebabCase(state.config.name)}`
+  })
 
   return logActionEnd(RUN_HOTFIX_START)
 }

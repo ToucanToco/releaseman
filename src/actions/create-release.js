@@ -1,9 +1,15 @@
-import { ASSIGN_DATA } from '../mutations'
 import { logInfo, logTaskStart } from '../log'
 
 const CREATE_RELEASE = 'CREATE_RELEASE'
 
-const createRelease = async ({ commit, getters, state }, isSkipped) => {
+const createRelease = ({ getters }) => async ({
+  branch,
+  changelog,
+  isPrerelease,
+  isSkipped,
+  name,
+  tag
+}) => {
   logTaskStart('Create release')
 
   if (isSkipped) {
@@ -11,22 +17,22 @@ const createRelease = async ({ commit, getters, state }, isSkipped) => {
   }
 
   logInfo(`Creating new ${
-    state.data.isPrerelease
+    isPrerelease
       ? 'prerelease'
       : 'release'
   }...`)
 
-  const { tag, url } = await getters.query('releases.create')({
-    branch: state.data.branch,
-    changelog: state.data.changelog.text,
-    isPrerelease: state.data.isPrerelease,
-    name: state.data.name,
-    tag: state.data.tag
+  const release = await getters.query('releases.create')({
+    branch: branch,
+    changelog: changelog,
+    isPrerelease: isPrerelease,
+    name: name,
+    tag: tag
   })
 
-  logInfo(url)
+  logInfo(release.url)
 
-  return commit(ASSIGN_DATA, { tag: tag })
+  return release
 }
 
 export { CREATE_RELEASE }

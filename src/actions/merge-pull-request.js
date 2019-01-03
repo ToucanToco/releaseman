@@ -2,26 +2,33 @@ import { logInfo, logTaskStart, logWarn } from '../log'
 
 const MERGE_PULL_REQUEST = 'MERGE_PULL_REQUEST'
 
-const mergePullRequest = async ({ getters, state }, isSkipped) => {
+const mergePullRequest = ({ getters }) => async ({
+  isMergeable,
+  isMerged,
+  isSkipped,
+  message,
+  method,
+  number
+}) => {
   logTaskStart('Merge pull request')
 
   if (isSkipped) {
     return undefined
   }
 
-  logInfo(`Merging pull request #${state.data.number}...`)
+  logInfo(`Merging pull request #${number}...`)
 
-  if (state.data.isMerged) {
+  if (isMerged) {
     return logWarn('Pull request already merged.')
   }
-  if (!state.data.isMergeable) {
+  if (!isMergeable) {
     throw 'Pull request non-mergeable!'
   }
 
   const { url } = await getters.query('pullRequests.merge')({
-    message: state.data.message,
-    method: state.data.method,
-    number: state.data.number
+    message: message,
+    method: method,
+    number: number
   })
 
   return logInfo(url)

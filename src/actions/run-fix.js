@@ -6,7 +6,7 @@ import {
 
 const RUN_FIX = 'RUN_FIX'
 
-const runFix = async ({ dispatch, state }) => {
+const runFix = ({ dispatch, state }) => () => {
   switch (state.config.position) {
     case 'finish':
       return dispatch(RUN_FIX_FINISH)
