@@ -9,11 +9,11 @@ const runTask = ({ commit, dispatch }) => async ({
   index,
   payload
 }) => {
-  commit(SET_TASK_INDEX, index)
+  commit(SET_TASK_INDEX)(index)
 
-  const value = await dispatch(action, assign(payload)({ isSkipped: false }))
+  const value = await dispatch(action)(assign(payload)({ isSkipped: false }))
 
-  commit(PATCH_DATA, {
+  commit(PATCH_DATA)({
     path: index,
     value: value
   })

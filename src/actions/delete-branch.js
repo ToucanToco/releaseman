@@ -2,16 +2,16 @@ import { logInfo, logTaskStart } from '../log'
 
 const DELETE_BRANCH = 'DELETE_BRANCH'
 
-const deleteBranch = ({ getters }) => async ({ branch, isSkipped }) => {
+const deleteBranch = ({ getters }) => async ({ isSkipped, name }) => {
   logTaskStart('Delete branch')
 
   if (isSkipped) {
     return undefined
   }
 
-  logInfo(`Deleting branch \`${branch}\`...`)
+  logInfo(`Deleting branch \`${name}\`...`)
 
-  await getters.query('branches.delete')({ branch: branch })
+  await getters.query('branches.delete')({ name: name })
 
   return undefined
 }

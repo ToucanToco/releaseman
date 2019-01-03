@@ -104,7 +104,7 @@ const runFixFinish = ({ getters, state }) => async () => {
     number: state.config.number
   })
   await getters.runOrSkip(5, 6)(DELETE_BRANCH)({
-    branch: pullRequest.head
+    name: pullRequest.head
   })
 
   if (state.config.isRelease) {

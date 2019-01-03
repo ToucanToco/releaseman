@@ -8,7 +8,7 @@ import { SET_CONFIG } from '../mutations'
 const START = 'START'
 
 const start = ({ commit, dispatch, state }) => async (argv) => {
-  commit(SET_CONFIG, Config(argv))
+  commit(SET_CONFIG)(Config(argv))
 
   if (
     !isEqual(state.config.action)(ACTIONS.CONTINUE) &&
@@ -18,9 +18,9 @@ const start = ({ commit, dispatch, state }) => async (argv) => {
   }
 
   try {
-    await dispatch(RUN)
+    await dispatch(RUN)()
   } catch (e) {
-    await dispatch(SAVE_STATE)
+    await dispatch(SAVE_STATE)()
 
     throw e
   }
