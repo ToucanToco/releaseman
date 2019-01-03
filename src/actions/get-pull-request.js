@@ -2,7 +2,7 @@ import { logInfo, logTaskStart } from '../log'
 
 const GET_PULL_REQUEST = 'GET_PULL_REQUEST'
 
-const getPullRequest = async ({ getters }) => async ({ isSkipped, number }) => {
+const getPullRequest = ({ getters }) => async ({ isSkipped, number }) => {
   logTaskStart('Get pull request')
 
   if (isSkipped) {

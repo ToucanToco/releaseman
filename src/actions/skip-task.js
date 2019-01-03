@@ -9,7 +9,7 @@ const skipTask = ({ dispatch, state }) => async ({
   index,
   payload
 }) => {
-  await dispatch(action, assign(payload)({ isSkipped: true }))
+  await dispatch(action)(assign(payload)({ isSkipped: true }))
 
   logWarn('Skipped.\n')
 

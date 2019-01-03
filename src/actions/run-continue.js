@@ -18,11 +18,11 @@ const runContinue = ({ commit, dispatch }) => () => {
   }
 
   fs.unlinkSync(STATE_FILE_PATH)
-  commit(SET_CONFIG, state.config)
-  commit(SET_DATA, state.data)
-  commit(SET_TASK_INDEX, state.taskIndex)
+  commit(SET_CONFIG)(state.config)
+  commit(SET_DATA)(state.data)
+  commit(SET_TASK_INDEX)(state.taskIndex)
 
-  return dispatch(RUN)
+  return dispatch(RUN)()
 }
 
 export { RUN_CONTINUE }

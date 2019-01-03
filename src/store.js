@@ -38,7 +38,7 @@ const Store = {
       Store.getters.matchesTaskIndex(...indexes)
         ? RUN_TASK
         : SKIP_TASK
-    ), {
+    ))({
       action: action,
       index: last(indexes),
       payload: payload

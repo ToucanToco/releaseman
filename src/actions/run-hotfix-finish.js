@@ -104,7 +104,7 @@ const runHotfixFinish = ({ getters, state }) => async () => {
     number: state.config.number
   })
   await getters.runOrSkip(4, 5)(DELETE_BRANCH)({
-    branch: pullRequest.head
+    name: pullRequest.head
   })
   const latestRelease = await getters.runOrSkip(5, 6)(GET_LATEST_RELEASE)({
     isPrerelease: false

@@ -78,7 +78,7 @@ const runReleaseFinish = ({ getters, state }) => async () => {
     })
   }
 
-  await getters.runOrSkip(6, 7)(MERGE_PULL_REQUEST)({
+  await getters.runOrSkip(5, 6, 7)(MERGE_PULL_REQUEST)({
     isMergeable: pullRequest.isMergeable,
     isMerged: pullRequest.isMerged,
     message: `${pullRequestName} (#${pullRequest.number})`,

@@ -60,8 +60,8 @@ const GitHub = (config) => {
           url: `${baseUrl}tree/${head}`
         }
       },
-      delete: async ({ branch }) => {
-        await fetchGitHub(`git/refs/heads/${branch}`, 'DELETE')
+      delete: async ({ name }) => {
+        await fetchGitHub(`git/refs/heads/${name}`, 'DELETE')
 
         return true
       },
@@ -196,19 +196,28 @@ const GitHub = (config) => {
         }
       },
       find: async ({ base, head }) => {
-        const pullRequest = first(await fetchGitHub(
+        const pullRequests = await fetchGitHub(
           `pulls?base=${base}&head=${config.owner}:${head}`
-        ))
+        )
 
-        if (isUndefined(pullRequest)) {
+        const number = flow(
+          first,
+          get('number')
+        )(pullRequests)
+
+        if (isUndefined(number)) {
           return undefined
         }
 
+        const { isMergeable, isMerged, name } = await github.pullRequests.get({
+          number: number
+        })
+
         return {
-          isMergeable: pullRequest.mergeable,
-          isMerged: pullRequest.merged,
-          name: pullRequest.title,
-          number: pullRequest.number
+          isMergeable: isMergeable,
+          isMerged: isMerged,
+          name: name,
+          number: number
         }
       },
       get: async ({ number }) => {
@@ -253,7 +262,9 @@ const GitHub = (config) => {
         return { url: `${baseUrl}pull/${number}` }
       },
       setLabels: async ({ labels, number }) => {
-        await fetchGitHub(`issues/${number}/labels`, 'PUT', labels)
+        await fetchGitHub(`issues/${number}/labels`, 'PUT', {
+          labels: labels
+        })
 
         return { url: `${baseUrl}pull/${number}` }
       },
