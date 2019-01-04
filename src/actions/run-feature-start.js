@@ -16,7 +16,7 @@ const runFeatureStart = ({ getters, state }) => async () => {
     'name'
   )
 
-  await getters.runOrSkip(0, 1)(CREATE_BRANCH)({
+  await getters.runOrSkip(0)(CREATE_BRANCH)({
     base: state.config.branches.develop,
     head: `${
       state.config.isDoc

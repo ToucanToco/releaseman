@@ -42,29 +42,27 @@ const runInit = ({ getters, state }) => async () => {
     'tag'
   )
 
-  const isDevelopPresent = await getters.runOrSkip(0, 1)(GET_BRANCH_EXISTENCE)({
+  const isDevelopPresent = await getters.runOrSkip(0)(GET_BRANCH_EXISTENCE)({
     name: state.config.branches.develop
   })
 
   if (isDevelopPresent) {
     logWarn(`${state.config.branches.develop} already present.\n`)
   } else {
-    await getters.runOrSkip(1, 2)(CREATE_BRANCH)({
+    await getters.runOrSkip(1)(CREATE_BRANCH)({
       base: state.config.branches.master,
       head: state.config.branches.develop
     })
   }
 
-  const isReleasesPresent = (
-    await getters.runOrSkip(1, 2, 3)(GET_RELEASES_EXISTENCE)({
-      isPrerelease: false
-    })
-  )
+  const isReleasesPresent = await getters.runOrSkip(2)(GET_RELEASES_EXISTENCE)({
+    isPrerelease: false
+  })
 
   if (isReleasesPresent) {
     logWarn('Release already present.\n')
   } else {
-    await getters.runOrSkip(3, 4)(CREATE_RELEASE)({
+    await getters.runOrSkip(3)(CREATE_RELEASE)({
       branch: state.config.branches.master,
       changelog: 'Initial release',
       isPrerelease: false,
@@ -74,7 +72,7 @@ const runInit = ({ getters, state }) => async () => {
   }
 
   const isPrereleasesPresent = (
-    await getters.runOrSkip(3, 4, 5)(GET_RELEASES_EXISTENCE)({
+    await getters.runOrSkip(4)(GET_RELEASES_EXISTENCE)({
       isPrerelease: true
     })
   )
@@ -82,11 +80,11 @@ const runInit = ({ getters, state }) => async () => {
   if (isPrereleasesPresent) {
     logWarn('Prerelease already present.\n')
   } else {
-    const latestRelease = await getters.runOrSkip(5, 6)(GET_LATEST_RELEASE)({
+    const latestRelease = await getters.runOrSkip(5)(GET_LATEST_RELEASE)({
       isPrerelease: false
     })
 
-    await getters.runOrSkip(6, 7)(CREATE_RELEASE)({
+    await getters.runOrSkip(6)(CREATE_RELEASE)({
       branch: state.config.branches.master,
       changelog: `${latestRelease.name} beta`,
       isPrerelease: true,
@@ -95,23 +93,21 @@ const runInit = ({ getters, state }) => async () => {
     })
   }
 
-  const isBranchPresent = (
-    await getters.runOrSkip(5, 7, 8)(GET_BRANCH_EXISTENCE)({
-      name: state.config.branches.beta
-    })
-  )
+  const isBranchPresent = await getters.runOrSkip(7)(GET_BRANCH_EXISTENCE)({
+    name: state.config.branches.beta
+  })
 
   if (isBranchPresent) {
     logWarn(`${state.config.branches.beta} already present.\n`)
   } else {
-    await getters.runOrSkip(8, 9)(CREATE_BRANCH)({
+    await getters.runOrSkip(8)(CREATE_BRANCH)({
       base: state.config.branches.master,
       head: state.config.branches.beta
     })
   }
 
   const labelsNames = map('name')(
-    await getters.runOrSkip(8, 9, 10)(GET_LABELS)()
+    await getters.runOrSkip(9)(GET_LABELS)()
   )
 
   const missingLabels = flow(
@@ -126,7 +122,7 @@ const runInit = ({ getters, state }) => async () => {
   if (isEmpty(missingLabels)) {
     logWarn('All mandatory labels already present.\n')
   } else {
-    await getters.runOrSkip(10, 11)(CREATE_LABELS)({
+    await getters.runOrSkip(10)(CREATE_LABELS)({
       labels: missingLabels
     })
   }
