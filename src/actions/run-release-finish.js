@@ -25,6 +25,7 @@ const runReleaseFinish = ({ getters, state }) => async () => {
     'branches.release',
     'categories',
     'labels.release',
+    'labels.wip',
     'tag'
   )
 
@@ -57,23 +58,20 @@ const runReleaseFinish = ({ getters, state }) => async () => {
     name: pullRequestName,
     number: pullRequest.number
   })
-  const pullRequestLabels = (
+  const pullRequestLabelsName = map('name')(
     await getters.runOrSkip(4)(GET_PULL_REQUEST_LABELS)({
       number: pullRequest.number
     })
   )
 
-  if (!flow(
-    map('name'),
-    includes(state.config.labels.release)
-  )(pullRequestLabels)) {
+  if (includes(state.config.labels.wip)(pullRequestLabelsName)) {
+    throw 'This release is still a work in progress!'
+  }
+  if (!includes(state.config.labels.release)(pullRequestLabels)) {
     logWarn(`Missing ${state.config.labels.release} label.\n`)
 
     await getters.runOrSkip(5)(UPDATE_PULL_REQUEST_LABELS)({
-      labels: flow(
-        map('name'),
-        concat(state.config.labels.release)
-      )(pullRequestLabels),
+      labels: concat(state.config.labels.release)(pullRequestLabelsName),
       number: state.config.number
     })
   }

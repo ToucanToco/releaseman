@@ -13,7 +13,7 @@ import {
   GET_BRANCH_EXISTENCE,
   GET_LABELS,
   GET_LATEST_RELEASE,
-  GET_RELEASES_EXISTENCE
+  GET_RELEASE_EXISTENCE
 } from '../actions'
 import { logActionEnd, logActionStart, logWarn } from '../log'
 
@@ -55,11 +55,11 @@ const runInit = ({ getters, state }) => async () => {
     })
   }
 
-  const isReleasesPresent = await getters.runOrSkip(2)(GET_RELEASES_EXISTENCE)({
+  const isReleasePresent = await getters.runOrSkip(2)(GET_RELEASE_EXISTENCE)({
     isPrerelease: false
   })
 
-  if (isReleasesPresent) {
+  if (isReleasePresent) {
     logWarn('Release already present.\n')
   } else {
     await getters.runOrSkip(3)(CREATE_RELEASE)({
@@ -71,13 +71,13 @@ const runInit = ({ getters, state }) => async () => {
     })
   }
 
-  const isPrereleasesPresent = (
-    await getters.runOrSkip(4)(GET_RELEASES_EXISTENCE)({
+  const isPrereleasePresent = (
+    await getters.runOrSkip(4)(GET_RELEASE_EXISTENCE)({
       isPrerelease: true
     })
   )
 
-  if (isPrereleasesPresent) {
+  if (isPrereleasePresent) {
     logWarn('Prerelease already present.\n')
   } else {
     const latestRelease = await getters.runOrSkip(5)(GET_LATEST_RELEASE)({

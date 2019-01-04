@@ -16,9 +16,9 @@ import getPullRequestLabels, {
   GET_PULL_REQUEST_LABELS
 } from './get-pull-request-labels'
 import getReleaseBranch, { GET_RELEASE_BRANCH } from './get-release-branch'
-import getReleasesExistence, {
-  GET_RELEASES_EXISTENCE
-} from './get-releases-existence'
+import getReleaseExistence, {
+  GET_RELEASE_EXISTENCE
+} from './get-release-existence'
 import mergeBranches, { MERGE_BRANCHES } from './merge-branches'
 import mergePullRequest, { MERGE_PULL_REQUEST } from './merge-pull-request'
 import run, { RUN } from './run'
@@ -66,7 +66,7 @@ const actions = {
   [GET_PULL_REQUEST]: getPullRequest,
   [GET_PULL_REQUEST_LABELS]: getPullRequestLabels,
   [GET_RELEASE_BRANCH]: getReleaseBranch,
-  [GET_RELEASES_EXISTENCE]: getReleasesExistence,
+  [GET_RELEASE_EXISTENCE]: getReleaseExistence,
   [MERGE_BRANCHES]: mergeBranches,
   [MERGE_PULL_REQUEST]: mergePullRequest,
   [RUN]: run,
@@ -113,7 +113,7 @@ export {
   GET_PULL_REQUEST,
   GET_PULL_REQUEST_LABELS,
   GET_RELEASE_BRANCH,
-  GET_RELEASES_EXISTENCE,
+  GET_RELEASE_EXISTENCE,
   MERGE_BRANCHES,
   MERGE_PULL_REQUEST,
   RUN,

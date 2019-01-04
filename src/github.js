@@ -299,10 +299,14 @@ const GitHub = (config) => {
         }
       },
       getLatest: async ({ isPrerelease = false } = {}) => {
-        let release = {}
+        let release
 
         if (isPrerelease) {
           const releases = await fetchGitHub('releases')
+
+          if (isEmpty(releases)) {
+            throw 'Not Found'
+          }
 
           release = flow(
             filter('prerelease'),

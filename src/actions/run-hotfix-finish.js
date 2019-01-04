@@ -5,6 +5,7 @@ import gt from 'lodash/fp/gt'
 import includes from 'lodash/fp/includes'
 import isEqual from 'lodash/fp/isEqual'
 import map from 'lodash/fp/map'
+import some from 'lodash/fp/some'
 import startsWith from 'lodash/fp/startsWith'
 import {
   CREATE_RELEASE,
@@ -43,6 +44,7 @@ const runHotfixFinish = ({ getters, state }) => async () => {
         : 'labels.fix'
     ),
     'labels.release',
+    'labels.wip',
     'number',
     'tag'
   )
@@ -67,29 +69,30 @@ const runHotfixFinish = ({ getters, state }) => async () => {
     }\`, your branch name is \`${pullRequest.head}\`!`
   }
 
-  const pullRequestLabels = (
+  const pullRequestLabelsName = map('name')(
     await getters.runOrSkip(1)(GET_PULL_REQUEST_LABELS)({
       number: state.config.number
     })
   )
 
-  const fixLabel = (
-    state.config.isDoc
-      ? state.config.labels.doc
-      : state.config.labels.fix
-  )
-
+  if (includes(state.config.labels.wip)(pullRequestLabelsName)) {
+    throw 'This hotfix is still a work in progress!'
+  }
   if (!flow(
-    map('name'),
-    includes(fixLabel)
-  )(pullRequestLabels)) {
-    logWarn(`Missing ${fixLabel} label.\n`)
+    map('label'),
+    concat(state.config.labels.release),
+    some((label) => includes(label)(pullRequestLabelsName))
+  )(state.config.categories)) {
+    const fixLabel = (
+      state.config.isDoc
+        ? state.config.labels.doc
+        : state.config.labels.fix
+    )
+
+    logWarn(`Missing label, defaulting to ${fixLabel}.\n`)
 
     await getters.runOrSkip(2)(UPDATE_PULL_REQUEST_LABELS)({
-      labels: flow(
-        map('name'),
-        concat(fixLabel)
-      )(pullRequestLabels),
+      labels: concat(fixLabel)(pullRequestLabelsName),
       number: state.config.number
     })
   }
