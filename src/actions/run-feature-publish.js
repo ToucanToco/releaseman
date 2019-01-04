@@ -17,7 +17,7 @@ const runFeaturePublish = ({ getters, state }) => async () => {
     'name'
   )
 
-  const pullRequest = await getters.runOrSkip(0, 1)(CREATE_PULL_REQUEST)({
+  const pullRequest = await getters.runOrSkip(0)(CREATE_PULL_REQUEST)({
     base: state.config.branches.develop,
     changelog: undefined,
     head: `${
@@ -31,7 +31,7 @@ const runFeaturePublish = ({ getters, state }) => async () => {
         : 'Feature'
     } :: ${state.config.name}`
   })
-  await getters.runOrSkip(1, 2)(UPDATE_PULL_REQUEST_LABELS)({
+  await getters.runOrSkip(1)(UPDATE_PULL_REQUEST_LABELS)({
     labels: [
       (
         state.config.isDoc

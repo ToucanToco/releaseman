@@ -47,30 +47,28 @@ const runHotfixFinish = ({ getters, state }) => async () => {
     'tag'
   )
 
-  const pullRequest = await getters.runOrSkip(0, 1)(GET_PULL_REQUEST)({
+  const pullRequest = await getters.runOrSkip(0)(GET_PULL_REQUEST)({
     number: state.config.number
   })
 
-  if (getters.matchesTaskIndex(1)) {
-    if (!isEqual(state.config.branches.master)(pullRequest.base)) {
-      throw `A hotfix cannot be merged into \`${pullRequest.base}\`!`
-    }
+  if (!isEqual(state.config.branches.master)(pullRequest.base)) {
+    throw `A hotfix cannot be merged into \`${pullRequest.base}\`!`
+  }
 
-    const hotfixBranchesPrefix = (
-      state.config.isDoc
-        ? state.config.branches.doc
-        : state.config.branches.hotfix
-    )
+  const hotfixBranchesPrefix = (
+    state.config.isDoc
+      ? state.config.branches.doc
+      : state.config.branches.hotfix
+  )
 
-    if (!startsWith(hotfixBranchesPrefix)(pullRequest.head)) {
-      throw `A hotfix branch name must start with \`${
-        hotfixBranchesPrefix
-      }\`, your branch name is \`${pullRequest.head}\`!`
-    }
+  if (!startsWith(hotfixBranchesPrefix)(pullRequest.head)) {
+    throw `A hotfix branch name must start with \`${
+      hotfixBranchesPrefix
+    }\`, your branch name is \`${pullRequest.head}\`!`
   }
 
   const pullRequestLabels = (
-    await getters.runOrSkip(1, 2)(GET_PULL_REQUEST_LABELS)({
+    await getters.runOrSkip(1)(GET_PULL_REQUEST_LABELS)({
       number: state.config.number
     })
   )
@@ -81,13 +79,13 @@ const runHotfixFinish = ({ getters, state }) => async () => {
       : state.config.labels.fix
   )
 
-  if (getters.matchesTaskIndex(2, 3) && !flow(
+  if (!flow(
     map('name'),
     includes(fixLabel)
   )(pullRequestLabels)) {
     logWarn(`Missing ${fixLabel} label.\n`)
 
-    await getters.runOrSkip(2, 3)(UPDATE_PULL_REQUEST_LABELS)({
+    await getters.runOrSkip(2)(UPDATE_PULL_REQUEST_LABELS)({
       labels: flow(
         map('name'),
         concat(fixLabel)
@@ -96,31 +94,31 @@ const runHotfixFinish = ({ getters, state }) => async () => {
     })
   }
 
-  await getters.runOrSkip(2, 3, 4)(MERGE_PULL_REQUEST)({
+  await getters.runOrSkip(3)(MERGE_PULL_REQUEST)({
     isMergeable: pullRequest.isMergeable,
     isMerged: pullRequest.isMerged,
     message: `${pullRequest.name} (#${state.config.number})`,
     method: 'squash',
     number: state.config.number
   })
-  await getters.runOrSkip(4, 5)(DELETE_BRANCH)({
+  await getters.runOrSkip(4)(DELETE_BRANCH)({
     name: pullRequest.head
   })
-  const latestRelease = await getters.runOrSkip(5, 6)(GET_LATEST_RELEASE)({
+  const latestRelease = await getters.runOrSkip(5)(GET_LATEST_RELEASE)({
     isPrerelease: false
   })
 
   if (state.config.isRelease) {
-    const hotfixChangelog = await getters.runOrSkip(6, 7)(GET_CHANGELOG)({
+    const hotfixChangelog = await getters.runOrSkip(6)(GET_CHANGELOG)({
       base: latestRelease.tag,
       head: state.config.branches.master
     })
-    const nextRelease = await getters.runOrSkip(7, 8)(GET_NEXT_RELEASE)({
+    const nextRelease = await getters.runOrSkip(7)(GET_NEXT_RELEASE)({
       isBreaking: false,
       isFix: true,
       isPrerelease: false
     })
-    await getters.runOrSkip(8, 9)(CREATE_RELEASE)({
+    await getters.runOrSkip(8)(CREATE_RELEASE)({
       branch: state.config.branches.master,
       changelog: hotfixChangelog.text,
       isPrerelease: false,
@@ -129,7 +127,7 @@ const runHotfixFinish = ({ getters, state }) => async () => {
     })
   }
 
-  const releaseBranch = await getters.runOrSkip(5, 9, 10)(GET_RELEASE_BRANCH)()
+  const releaseBranch = await getters.runOrSkip(9)(GET_RELEASE_BRANCH)()
 
   const branchMatch = new RegExp(
     '^.*?(\\d+)\\.(\\d+)\\.\\d+$'
@@ -142,27 +140,25 @@ const runHotfixFinish = ({ getters, state }) => async () => {
     gt(get(1)(branchMatch))(get(1)(tagMatch)) ||
     gt(get(2)(branchMatch))(get(2)(tagMatch))
   ) {
-    await getters.runOrSkip(10, 11)(MERGE_BRANCHES)({
+    await getters.runOrSkip(10)(MERGE_BRANCHES)({
       base: releaseBranch.name,
       head: state.config.branches.master
     })
 
     if (state.config.isRelease) {
-      const latestPrerelease = (
-        await getters.runOrSkip(11, 12)(GET_LATEST_RELEASE)({
-          isPrerelease: true
-        })
-      )
-      const fixChangelog = await getters.runOrSkip(12, 13)(GET_CHANGELOG)({
+      const latestPrerelease = await getters.runOrSkip(11)(GET_LATEST_RELEASE)({
+        isPrerelease: true
+      })
+      const fixChangelog = await getters.runOrSkip(12)(GET_CHANGELOG)({
         base: latestPrerelease.tag,
         head: releaseBranch.name
       })
-      const nextPrerelease = await getters.runOrSkip(13, 14)(GET_NEXT_RELEASE)({
+      const nextPrerelease = await getters.runOrSkip(13)(GET_NEXT_RELEASE)({
         isBreaking: false,
         isFix: true,
         isPrerelease: true
       })
-      await getters.runOrSkip(14, 15)(CREATE_RELEASE)({
+      await getters.runOrSkip(14)(CREATE_RELEASE)({
         branch: releaseBranch.name,
         changelog: fixChangelog.text,
         isPrerelease: true,
@@ -171,16 +167,16 @@ const runHotfixFinish = ({ getters, state }) => async () => {
       })
     }
 
-    await getters.runOrSkip(11, 15, 16)(MERGE_BRANCHES)({
+    await getters.runOrSkip(15)(MERGE_BRANCHES)({
       base: state.config.branches.develop,
       head: releaseBranch.name
     })
-    await getters.runOrSkip(16, 17)(UPDATE_BRANCH)({
+    await getters.runOrSkip(16)(UPDATE_BRANCH)({
       base: state.config.branches.beta,
       head: releaseBranch.name
     })
   } else {
-    await getters.runOrSkip(10, 18)(MERGE_BRANCHES)({
+    await getters.runOrSkip(17)(MERGE_BRANCHES)({
       base: state.config.branches.develop,
       head: state.config.branches.master
     })

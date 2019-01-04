@@ -17,8 +17,8 @@ const runFixStart = ({ getters, state }) => async () => {
     'tag'
   )
 
-  const releaseBranch = await getters.runOrSkip(0, 1)(GET_RELEASE_BRANCH)()
-  await getters.runOrSkip(1, 2)(CREATE_BRANCH)({
+  const releaseBranch = await getters.runOrSkip(0)(GET_RELEASE_BRANCH)()
+  await getters.runOrSkip(1)(CREATE_BRANCH)({
     base: releaseBranch.name,
     head: `${
       state.config.isDoc

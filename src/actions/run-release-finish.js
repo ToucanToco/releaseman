@@ -28,7 +28,7 @@ const runReleaseFinish = ({ getters, state }) => async () => {
     'tag'
   )
 
-  const nextRelease = await getters.runOrSkip(0, 1)(GET_NEXT_RELEASE)({
+  const nextRelease = await getters.runOrSkip(0)(GET_NEXT_RELEASE)({
     isBreaking: false,
     isFix: false,
     isPrerelease: false
@@ -41,35 +41,35 @@ const runReleaseFinish = ({ getters, state }) => async () => {
 
   const branch = `${state.config.branches.release}${version}`
 
-  const changelog = await getters.runOrSkip(1, 2)(GET_CHANGELOG)({
+  const changelog = await getters.runOrSkip(1)(GET_CHANGELOG)({
     base: state.config.branches.master,
     head: branch
   })
-  const pullRequest = await getters.runOrSkip(2, 3)(FIND_PULL_REQUEST)({
+  const pullRequest = await getters.runOrSkip(2)(FIND_PULL_REQUEST)({
     base: state.config.branches.master,
     head: branch
   })
 
   const pullRequestName = `Release :: ${nextRelease.name}`
 
-  await getters.runOrSkip(3, 4)(UPDATE_PULL_REQUEST)({
+  await getters.runOrSkip(3)(UPDATE_PULL_REQUEST)({
     changelog: changelog.text,
     name: pullRequestName,
     number: pullRequest.number
   })
   const pullRequestLabels = (
-    await getters.runOrSkip(4, 5)(GET_PULL_REQUEST_LABELS)({
+    await getters.runOrSkip(4)(GET_PULL_REQUEST_LABELS)({
       number: pullRequest.number
     })
   )
 
-  if (getters.matchesTaskIndex(5, 6) && !flow(
+  if (!flow(
     map('name'),
     includes(state.config.labels.release)
   )(pullRequestLabels)) {
     logWarn(`Missing ${state.config.labels.release} label.\n`)
 
-    await getters.runOrSkip(5, 6)(UPDATE_PULL_REQUEST_LABELS)({
+    await getters.runOrSkip(5)(UPDATE_PULL_REQUEST_LABELS)({
       labels: flow(
         map('name'),
         concat(state.config.labels.release)
@@ -78,17 +78,17 @@ const runReleaseFinish = ({ getters, state }) => async () => {
     })
   }
 
-  await getters.runOrSkip(5, 6, 7)(MERGE_PULL_REQUEST)({
+  await getters.runOrSkip(6)(MERGE_PULL_REQUEST)({
     isMergeable: pullRequest.isMergeable,
     isMerged: pullRequest.isMerged,
     message: `${pullRequestName} (#${pullRequest.number})`,
     method: undefined,
     number: pullRequest.number
   })
-  await getters.runOrSkip(7, 8)(DELETE_BRANCH)({
+  await getters.runOrSkip(7)(DELETE_BRANCH)({
     name: branch
   })
-  await getters.runOrSkip(8, 9)(CREATE_RELEASE)({
+  await getters.runOrSkip(8)(CREATE_RELEASE)({
     branch: state.config.branches.master,
     changelog: changelog.text,
     isPrerelease: false,
