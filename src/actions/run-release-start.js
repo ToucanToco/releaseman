@@ -31,11 +31,11 @@ const runReleaseStart = ({ getters, state }) => async () => {
     throw 'The <name> param must be the final release name (no beta)!'
   }
 
-  const changelog = await getters.runOrSkip(0, 1)(GET_CHANGELOG)({
+  const changelog = await getters.runOrSkip(0)(GET_CHANGELOG)({
     base: state.config.branches.master,
     head: state.config.branches.develop
   })
-  const nextPrerelease = await getters.runOrSkip(1, 2)(GET_NEXT_RELEASE)({
+  const nextPrerelease = await getters.runOrSkip(1)(GET_NEXT_RELEASE)({
     isBreaking: includes(state.config.labels.breaking)(
       changelog.labels
     ),
@@ -50,18 +50,18 @@ const runReleaseStart = ({ getters, state }) => async () => {
 
   const branch = `${state.config.branches.release}${version}`
 
-  await getters.runOrSkip(2, 3)(CREATE_BRANCH)({
+  await getters.runOrSkip(2)(CREATE_BRANCH)({
     base: state.config.branches.develop,
     head: branch
   })
-  await getters.runOrSkip(3, 4)(CREATE_RELEASE)({
+  await getters.runOrSkip(3)(CREATE_RELEASE)({
     branch: branch,
     changelog: changelog.text,
     isPrerelease: true,
     name: nextPrerelease.name,
     tag: nextPrerelease.tag
   })
-  const pullRequest = await getters.runOrSkip(4, 5)(CREATE_PULL_REQUEST)({
+  const pullRequest = await getters.runOrSkip(4)(CREATE_PULL_REQUEST)({
     base: state.config.branches.master,
     changelog: changelog.text,
     head: branch,
@@ -69,11 +69,11 @@ const runReleaseStart = ({ getters, state }) => async () => {
       new RegExp('^(.*?) beta$').exec(nextPrerelease.name)
     )}`
   })
-  await getters.runOrSkip(5, 6)(UPDATE_PULL_REQUEST_LABELS)({
+  await getters.runOrSkip(5)(UPDATE_PULL_REQUEST_LABELS)({
     labels: [state.config.labels.release],
     number: pullRequest.number
   })
-  await getters.runOrSkip(6, 7)(UPDATE_BRANCH)({
+  await getters.runOrSkip(6)(UPDATE_BRANCH)({
     base: state.config.branches.beta,
     head: branch
   })

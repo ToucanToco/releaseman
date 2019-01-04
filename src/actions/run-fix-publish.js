@@ -27,8 +27,8 @@ const runFixPublish = ({ getters, state }) => async () => {
     'tag'
   )
 
-  const releaseBranch = await getters.runOrSkip(0, 1)(GET_RELEASE_BRANCH)()
-  const pullRequest = await getters.runOrSkip(1, 2)(CREATE_PULL_REQUEST)({
+  const releaseBranch = await getters.runOrSkip(0)(GET_RELEASE_BRANCH)()
+  const pullRequest = await getters.runOrSkip(1)(CREATE_PULL_REQUEST)({
     base: releaseBranch.name,
     changelog: undefined,
     head: `${
@@ -42,7 +42,7 @@ const runFixPublish = ({ getters, state }) => async () => {
         : 'Fix'
     } :: ${state.config.name}`
   })
-  await getters.runOrSkip(2, 3)(UPDATE_PULL_REQUEST_LABELS)({
+  await getters.runOrSkip(2)(UPDATE_PULL_REQUEST_LABELS)({
     labels: [
       (
         state.config.isDoc

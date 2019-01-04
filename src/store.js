@@ -2,11 +2,10 @@ import actions, { RUN_TASK, SKIP_TASK } from './actions'
 import filter from 'lodash/fp/filter'
 import flow from 'lodash/fp/flow'
 import get from 'lodash/fp/get'
-import includes from 'lodash/fp/includes'
+import gte from 'lodash/fp/gte'
 import isEmpty from 'lodash/fp/isEmpty'
 import isUndefined from 'lodash/fp/isUndefined'
 import join from 'lodash/fp/join'
-import last from 'lodash/fp/last'
 import map from 'lodash/fp/map'
 import mutations from './mutations'
 
@@ -32,15 +31,14 @@ const Store = {
   ),
   getters: {
     github: null,
-    matchesTaskIndex: (...indexes) => includes(Store.state.taskIndex)(indexes),
     query: (path) => (payload) => get(path)(Store.getters.github)(payload),
-    runOrSkip: (...indexes) => (action) => (payload) => Store.dispatch((
-      Store.getters.matchesTaskIndex(...indexes)
+    runOrSkip: (index) => (action) => (payload) => Store.dispatch((
+      gte(index)(Store.state.taskIndex)
         ? RUN_TASK
         : SKIP_TASK
     ))({
       action: action,
-      index: last(indexes),
+      index: index,
       payload: payload
     }),
     validateConfig: (...keys) => {
@@ -61,7 +59,7 @@ const Store = {
   state: {
     config: {},
     data: {},
-    taskIndex: 0
+    taskIndex: -1
   }
 }
 

@@ -22,7 +22,7 @@ const runHotfixPublish = ({ getters, state }) => async () => {
     'name'
   )
 
-  const pullRequest = await getters.runOrSkip(0, 1)(CREATE_PULL_REQUEST)({
+  const pullRequest = await getters.runOrSkip(0)(CREATE_PULL_REQUEST)({
     base: state.config.branches.master,
     changelog: undefined,
     head: `${
@@ -36,7 +36,7 @@ const runHotfixPublish = ({ getters, state }) => async () => {
         : 'Hotfix'
     } :: ${state.config.name}`
   })
-  await getters.runOrSkip(1, 2)(UPDATE_PULL_REQUEST_LABELS)({
+  await getters.runOrSkip(1)(UPDATE_PULL_REQUEST_LABELS)({
     labels: [
       (
         state.config.isDoc
