@@ -3,6 +3,7 @@ import flow from 'lodash/fp/flow'
 import includes from 'lodash/fp/includes'
 import isEqual from 'lodash/fp/isEqual'
 import map from 'lodash/fp/map'
+import some from 'lodash/fp/some'
 import startsWith from 'lodash/fp/startsWith'
 import {
   DELETE_BRANCH,
@@ -24,6 +25,7 @@ const runFeatureFinish = ({ getters, state }) => async () => {
         ? ['branches.doc', 'labels.doc']
         : ['branches.feature', 'labels.feature']
     ),
+    'labels.wip',
     'number'
   )
 
@@ -47,29 +49,30 @@ const runFeatureFinish = ({ getters, state }) => async () => {
     }\`, your branch name is \`${pullRequest.head}\`!`
   }
 
-  const pullRequestLabels = (
+  const pullRequestLabelsName = map('name')(
     await getters.runOrSkip(1)(GET_PULL_REQUEST_LABELS)({
       number: state.config.number
     })
   )
 
-  const featureLabel = (
-    state.config.isDoc
-      ? state.config.labels.doc
-      : state.config.labels.feature
-  )
-
+  if (includes(state.config.labels.wip)(pullRequestLabelsName)) {
+    throw 'This feature is still a work in progress!'
+  }
   if (!flow(
-    map('name'),
-    includes(featureLabel)
-  )(pullRequestLabels)) {
-    logWarn(`Missing ${featureLabel} label.\n`)
+    map('label'),
+    concat(state.config.labels.release),
+    some((label) => includes(label)(pullRequestLabelsName))
+  )(state.config.categories)) {
+    const featureLabel = (
+      state.config.isDoc
+        ? state.config.labels.doc
+        : state.config.labels.feature
+    )
+
+    logWarn(`Missing label, defaulting to ${featureLabel}.\n`)
 
     await getters.runOrSkip(2)(UPDATE_PULL_REQUEST_LABELS)({
-      labels: flow(
-        map('name'),
-        concat(featureLabel)
-      )(pullRequestLabels),
+      labels: concat(featureLabel)(pullRequestLabelsName),
       number: state.config.number
     })
   }

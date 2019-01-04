@@ -28,11 +28,11 @@ const runChanges = ({ getters, state }) => async () => {
   let changelogHead = state.config.branches.develop
 
   if (isFinish) {
-    const latestRealease = await getters.runOrSkip(0)(GET_LATEST_RELEASE)({
+    const { tag } = await getters.runOrSkip(0)(GET_LATEST_RELEASE)({
       isPrerelease: true
     })
 
-    changelogHead = latestRealease.tag
+    changelogHead = tag
   }
 
   await getters.runOrSkip(1)(GET_CHANGELOG)({

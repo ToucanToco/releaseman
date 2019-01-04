@@ -36,9 +36,7 @@ const runReleaseStart = ({ getters, state }) => async () => {
     head: state.config.branches.develop
   })
   const nextPrerelease = await getters.runOrSkip(1)(GET_NEXT_RELEASE)({
-    isBreaking: includes(state.config.labels.breaking)(
-      changelog.labels
-    ),
+    isBreaking: includes(state.config.labels.breaking)(changelog.labels),
     isFix: false,
     isPrerelease: true
   })
