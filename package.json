@@ -30,5 +30,5 @@
     "lint": "eslint \"src/**/*.js\" \"*.js\"",
     "postinstall": "del bin && rollup -c --silent"
   },
-  "version": "0.7.1"
+  "version": "1.0.0"
 }
