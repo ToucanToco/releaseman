@@ -80,7 +80,7 @@ const runFeatureFinish = ({ getters, state }) => async () => {
   await getters.runOrSkip(3)(MERGE_PULL_REQUEST)({
     isMergeable: pullRequest.isMergeable,
     isMerged: pullRequest.isMerged,
-    message: `${pullRequest.name} (#${pullRequest.number})`,
+    message: `${pullRequest.name} (#${state.config.number})`,
     method: 'squash',
     number: state.config.number
   })
