@@ -67,7 +67,7 @@ const runReleaseFinish = ({ getters, state }) => async () => {
   if (includes(state.config.labels.wip)(pullRequestLabelsName)) {
     throw 'This release is still a work in progress!'
   }
-  if (!includes(state.config.labels.release)(pullRequestLabels)) {
+  if (!includes(state.config.labels.release)(pullRequestLabelsName)) {
     logWarn(`Missing ${state.config.labels.release} label.\n`)
 
     await getters.runOrSkip(5)(UPDATE_PULL_REQUEST_LABELS)({
