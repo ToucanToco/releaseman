@@ -2,8 +2,7 @@ import commonjs from 'rollup-plugin-commonjs'
 import executable from 'rollup-plugin-executable'
 import json from 'rollup-plugin-json'
 import nodeResolve from 'rollup-plugin-node-resolve'
-import uglify from 'rollup-plugin-uglify'
-import { minify } from 'uglify-es'
+import { terser } from 'rollup-plugin-terser'
 
 export default {
   external: [
@@ -17,14 +16,17 @@ export default {
     format: 'cjs'
   },
   plugins: [
-    json(),
+    json({
+      compact: true,
+      preferConst: true
+    }),
     nodeResolve({
       extensions: ['.js', '.json']
     }),
     commonjs({
       extensions: ['.js', '.json']
     }),
-    uglify({}, minify),
+    terser(),
     executable()
   ]
 }
