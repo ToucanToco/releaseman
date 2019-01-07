@@ -1,6 +1,5 @@
-import includes from 'lodash/fp/includes';
-import isEmpty from 'lodash/fp/isEmpty';
-import { ACTIONS } from '../store';
+import includes from 'lodash/fp/includes'
+import { ACTIONS } from '../store'
 import {
   RUN_CHANGES,
   RUN_CONTINUE,
@@ -10,45 +9,41 @@ import {
   RUN_HOTFIX,
   RUN_INIT,
   RUN_RELEASE
-} from '../actions';
+} from '../actions'
 
-const RUN = 'RUN';
+const RUN = 'RUN'
 
-const run = ({ dispatch, getters, state }) => {
+const run = ({ dispatch, getters, state }) => () => {
   if (!includes(state.config.action)([
     ACTIONS.CONTINUE, ACTIONS.HELP, undefined
   ])) {
-    const configError = getters.configError(
+    getters.validateConfig(
       'owner',
       'repo',
       'token'
-    );
-
-    if (!isEmpty(configError)) {
-      return Promise.reject(configError);
-    }
+    )
   }
   switch (state.config.action) {
     case ACTIONS.CHANGES:
-      return dispatch(RUN_CHANGES);
+      return dispatch(RUN_CHANGES)()
     case ACTIONS.CONTINUE:
-      return dispatch(RUN_CONTINUE);
+      return dispatch(RUN_CONTINUE)()
     case ACTIONS.FEATURE:
-      return dispatch(RUN_FEATURE);
+      return dispatch(RUN_FEATURE)()
     case ACTIONS.FIX:
-      return dispatch(RUN_FIX);
+      return dispatch(RUN_FIX)()
     case ACTIONS.HELP:
-      return dispatch(RUN_HELP);
+      return dispatch(RUN_HELP)()
     case ACTIONS.HOTFIX:
-      return dispatch(RUN_HOTFIX);
+      return dispatch(RUN_HOTFIX)()
     case ACTIONS.INIT:
-      return dispatch(RUN_INIT);
+      return dispatch(RUN_INIT)()
     case ACTIONS.RELEASE:
-      return dispatch(RUN_RELEASE);
+      return dispatch(RUN_RELEASE)()
     default:
-      return dispatch(RUN_HELP);
+      return dispatch(RUN_HELP)()
   }
-};
+}
 
-export { RUN };
-export default run;
+export { RUN }
+export default run

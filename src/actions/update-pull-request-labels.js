@@ -1,27 +1,30 @@
-import { toReadableList } from '../helpers';
-import { logInfo, logTaskStart } from '../log';
+import { toReadableList } from '../helpers'
+import { logInfo, logTaskStart } from '../log'
 
-const UPDATE_PULL_REQUEST_LABELS = 'UPDATE_PULL_REQUEST_LABELS';
+const UPDATE_PULL_REQUEST_LABELS = 'UPDATE_PULL_REQUEST_LABELS'
 
-const updatePullRequestLabels = ({ getters, state }, isSkipped) => {
-  logTaskStart('Update pull request labels');
+const updatePullRequestLabels = ({ getters }) => async ({
+  isSkipped,
+  labels,
+  number
+}) => {
+  logTaskStart('Update pull request labels')
 
   if (isSkipped) {
-    return undefined;
+    return undefined
   }
 
-  logInfo(`Setting pull request #${
-    state.data.number
-  } labels to ${
-    toReadableList(state.data.labels)
-  }...`);
+  logInfo(`Setting pull request #${number} labels to ${
+    toReadableList(labels)
+  }...`)
 
-  return getters.github.pullRequests.setLabels({
-    labels: state.data.labels,
-    number: state.data.number
+  const { url } = await getters.query('pullRequests.setLabels')({
+    labels: labels,
+    number: number
   })
-    .then(({ url }) => logInfo(url));
-};
 
-export { UPDATE_PULL_REQUEST_LABELS };
-export default updatePullRequestLabels;
+  return logInfo(url)
+}
+
+export { UPDATE_PULL_REQUEST_LABELS }
+export default updatePullRequestLabels

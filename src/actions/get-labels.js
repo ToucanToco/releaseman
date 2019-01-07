@@ -1,31 +1,29 @@
-import isEmpty from 'lodash/fp/isEmpty';
-import map from 'lodash/fp/map';
-import { ASSIGN_DATA } from '../mutations';
-import { logInfo, logTaskStart } from '../log';
-import { toReadableList } from '../helpers';
+import isEmpty from 'lodash/fp/isEmpty'
+import map from 'lodash/fp/map'
+import { logInfo, logTaskStart } from '../log'
+import { toReadableList } from '../helpers'
 
-const GET_LABELS = 'GET_LABELS';
+const GET_LABELS = 'GET_LABELS'
 
-const getLabels = ({ commit, getters }, isSkipped) => {
-  logTaskStart('Get labels');
+const getLabels = ({ getters }) => async ({ isSkipped }) => {
+  logTaskStart('Get labels')
 
   if (isSkipped) {
-    return undefined;
+    return undefined
   }
 
-  logInfo('Retrieving labels...');
+  logInfo('Retrieving labels...')
 
-  return getters.github.labels.index()
-    .then((labels) => {
-      if (isEmpty(labels)) {
-        logInfo('No labels');
-      } else {
-        logInfo(toReadableList(map('name')(labels)));
-      }
+  const labels = await getters.query('labels.index')()
 
-      return commit(ASSIGN_DATA, { labels: labels });
-    });
-};
+  logInfo(
+    isEmpty(labels)
+      ? 'No labels'
+      : toReadableList(map('name')(labels))
+  )
 
-export { GET_LABELS };
-export default getLabels;
+  return labels
+}
+
+export { GET_LABELS }
+export default getLabels

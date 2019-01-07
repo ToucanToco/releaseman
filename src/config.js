@@ -1,40 +1,41 @@
-import Defaults from './defaults';
-import drop from 'lodash/fp/drop';
-import flow from 'lodash/fp/flow';
-import fs from 'fs';
-import get from 'lodash/fp/get';
-import gt from 'lodash/fp/gt';
-import identity from 'lodash/fp/identity';
-import isUndefined from 'lodash/fp/isUndefined';
-import join from 'lodash/fp/join';
-import merge from 'lodash/fp/merge';
-import size from 'lodash/fp/size';
+import Defaults from './defaults'
+import drop from 'lodash/fp/drop'
+import flow from 'lodash/fp/flow'
+import fs from 'fs'
+import get from 'lodash/fp/get'
+import gt from 'lodash/fp/gt'
+import identity from 'lodash/fp/identity'
+import isUndefined from 'lodash/fp/isUndefined'
+import join from 'lodash/fp/join'
+import merge from 'lodash/fp/merge'
+import size from 'lodash/fp/size'
 
 const Config = (argv) => {
-  let defaults = Defaults;
+  let defaults = Defaults
 
   if (!isUndefined(argv.defaults)) {
     if (!fs.existsSync(argv.defaults)) {
-      throw 'The <defaults> file doesn\'t exist!';
+      throw 'The <defaults> file doesn\'t exist!'
     }
 
-    defaults = merge(defaults)(JSON.parse(fs.readFileSync(argv.defaults)));
+    defaults = merge(defaults)(JSON.parse(fs.readFileSync(argv.defaults)))
   }
 
   const getArgOrDefault = (key, parseArg = identity) => {
-    const value = get(key)(argv);
+    const value = get(key)(argv)
 
     return (
       isUndefined(value)
         ? get(key)(defaults)
         : parseArg(value)
-    );
-  };
-  const secondArg = get(1)(argv._);
+    )
+  }
+  const secondArg = get(1)(argv._)
 
   return {
     action: get(0)(argv._),
     branches: {
+      beta: getArgOrDefault('branches.beta'),
       develop: getArgOrDefault('branches.develop'),
       doc: getArgOrDefault('branches.doc'),
       feature: getArgOrDefault('branches.feature'),
@@ -72,7 +73,7 @@ const Config = (argv) => {
     repo: getArgOrDefault('repo'),
     tag: getArgOrDefault('tag'),
     token: getArgOrDefault('token')
-  };
-};
+  }
+}
 
-export default Config;
+export default Config

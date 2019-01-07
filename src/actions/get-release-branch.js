@@ -1,38 +1,34 @@
-import get from 'lodash/fp/get';
-import { ASSIGN_DATA } from '../mutations';
-import { logInfo, logTaskStart } from '../log';
+import get from 'lodash/fp/get'
+import { logInfo, logTaskStart } from '../log'
 
-const GET_RELEASE_BRANCH = 'GET_RELEASE_BRANCH';
+const GET_RELEASE_BRANCH = 'GET_RELEASE_BRANCH'
 
-const getReleaseBranch = ({ commit, getters, state }, isSkipped) => {
-  logTaskStart('Get release branch');
+const getReleaseBranch = ({ getters, state }) => async ({ isSkipped }) => {
+  logTaskStart('Get release branch')
 
   if (isSkipped) {
-    return undefined;
+    return undefined
   }
 
-  logInfo('Retrieving latest prerelease tag...');
+  logInfo('Retrieving latest prerelease tag...')
 
-  return getters.github.releases.getLatest({
+  const { tag } = await getters.query('releases.getLatest')({
     isPrerelease: true
   })
-    .then(({ tag }) => {
-      logInfo(tag);
-      logInfo('Parsing release branch...');
 
-      const tagMatch = new RegExp(
-        `^${state.config.tag}(\\d+\\.\\d+\\.\\d+)-beta\\.?\\d*$`
-      ).exec(tag);
+  logInfo(tag)
+  logInfo('Parsing release branch...')
 
-      const branch = `${state.config.branches.release}${get(1)(tagMatch)}`;
+  const tagMatch = new RegExp(
+    `^${state.config.tag}(\\d+\\.\\d+\\.\\d+)-beta\\.?\\d*$`
+  ).exec(tag)
 
-      logInfo(branch);
+  const name = `${state.config.branches.release}${get(1)(tagMatch)}`
 
-      return commit(ASSIGN_DATA, {
-        branch: branch
-      });
-    });
-};
+  logInfo(name)
 
-export { GET_RELEASE_BRANCH };
-export default getReleaseBranch;
+  return { name: name }
+}
+
+export { GET_RELEASE_BRANCH }
+export default getReleaseBranch

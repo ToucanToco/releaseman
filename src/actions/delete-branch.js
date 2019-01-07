@@ -1,18 +1,20 @@
-import { logInfo, logTaskStart } from '../log';
+import { logInfo, logTaskStart } from '../log'
 
-const DELETE_BRANCH = 'DELETE_BRANCH';
+const DELETE_BRANCH = 'DELETE_BRANCH'
 
-const deleteBranch = ({ getters, state }, isSkipped) => {
-  logTaskStart('Delete branch');
+const deleteBranch = ({ getters }) => async ({ isSkipped, name }) => {
+  logTaskStart('Delete branch')
 
   if (isSkipped) {
-    return undefined;
+    return undefined
   }
 
-  logInfo(`Deleting branch \`${state.data.branch}\`...`);
+  logInfo(`Deleting branch \`${name}\`...`)
 
-  return getters.github.branches.delete({ branch: state.data.branch });
-};
+  await getters.query('branches.delete')({ name: name })
 
-export { DELETE_BRANCH };
-export default deleteBranch;
+  return undefined
+}
+
+export { DELETE_BRANCH }
+export default deleteBranch

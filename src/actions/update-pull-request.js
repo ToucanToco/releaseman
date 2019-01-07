@@ -1,23 +1,29 @@
-import { logInfo, logTaskStart } from '../log';
+import { logInfo, logTaskStart } from '../log'
 
-const UPDATE_PULL_REQUEST = 'UPDATE_PULL_REQUEST';
+const UPDATE_PULL_REQUEST = 'UPDATE_PULL_REQUEST'
 
-const updatePullRequest = ({ getters, state }, isSkipped) => {
-  logTaskStart('Update pull request');
+const updatePullRequest = ({ getters }) => async ({
+  changelog,
+  isSkipped,
+  name,
+  number
+}) => {
+  logTaskStart('Update pull request')
 
   if (isSkipped) {
-    return undefined;
+    return undefined
   }
 
-  logInfo(`Updating pull request #${state.data.number}...`);
+  logInfo(`Updating pull request #${number}...`)
 
-  return getters.github.pullRequests.update({
-    changelog: state.data.changelog.text,
-    name: state.data.name,
-    number: state.data.number
+  const { url } = await getters.query('pullRequests.update')({
+    changelog: changelog,
+    name: name,
+    number: number
   })
-    .then(({ url }) => logInfo(url));
-};
 
-export { UPDATE_PULL_REQUEST };
-export default updatePullRequest;
+  return logInfo(url)
+}
+
+export { UPDATE_PULL_REQUEST }
+export default updatePullRequest

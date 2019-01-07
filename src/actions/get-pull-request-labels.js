@@ -1,26 +1,26 @@
-import map from 'lodash/fp/map';
-import { ASSIGN_DATA } from '../mutations';
-import { logInfo, logTaskStart } from '../log';
-import { toReadableList } from '../helpers';
+import map from 'lodash/fp/map'
+import { logInfo, logTaskStart } from '../log'
+import { toReadableList } from '../helpers'
 
-const GET_PULL_REQUEST_LABELS = 'GET_PULL_REQUEST_LABELS';
+const GET_PULL_REQUEST_LABELS = 'GET_PULL_REQUEST_LABELS'
 
-const getPullRequestLabels = ({ commit, getters, state }, isSkipped) => {
-  logTaskStart('Get pull request labels');
+const getPullRequestLabels = ({ getters }) => async ({ isSkipped, number }) => {
+  logTaskStart('Get pull request labels')
 
   if (isSkipped) {
-    return undefined;
+    return undefined
   }
 
-  logInfo(`Retrieving pull request #${state.data.number}'s labels...`);
+  logInfo(`Retrieving pull request #${number}'s labels...`)
 
-  return getters.github.pullRequests.getLabels({ number: state.data.number })
-    .then((labels) => {
-      logInfo(toReadableList(map('name')(labels)));
+  const labels = await getters.query('pullRequests.getLabels')({
+    number: number
+  })
 
-      return commit(ASSIGN_DATA, { labels: labels });
-    });
-};
+  logInfo(toReadableList(map('name')(labels)))
 
-export { GET_PULL_REQUEST_LABELS };
-export default getPullRequestLabels;
+  return labels
+}
+
+export { GET_PULL_REQUEST_LABELS }
+export default getPullRequestLabels

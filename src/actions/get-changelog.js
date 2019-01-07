@@ -1,31 +1,25 @@
-import { ASSIGN_DATA } from '../mutations';
-import { logInfo, logTaskStart } from '../log';
+import { logInfo, logTaskStart } from '../log'
 
-const GET_CHANGELOG = 'GET_CHANGELOG';
+const GET_CHANGELOG = 'GET_CHANGELOG'
 
-const getChangelog = ({ commit, getters, state }, isSkipped) => {
-  logTaskStart('Get changelog');
+const getChangelog = ({ getters }) => async ({ base, head, isSkipped }) => {
+  logTaskStart('Get changelog')
 
   if (isSkipped) {
-    return undefined;
+    return undefined
   }
 
-  logInfo(`Retrieving changelog for \`${
-    state.data.head
-  }\` since \`${
-    state.data.base
-  }\`...`);
+  logInfo(`Retrieving changelog for \`${head}\` since \`${base}\`...`)
 
-  return getters.github.commits.getChangelog({
-    base: state.data.base,
-    head: state.data.head
+  const changelog = await getters.query('commits.getChangelog')({
+    base: base,
+    head: head
   })
-    .then((changelog) => {
-      logInfo(changelog.text);
 
-      return commit(ASSIGN_DATA, { changelog: changelog });
-    });
-};
+  logInfo(changelog.text)
 
-export { GET_CHANGELOG };
-export default getChangelog;
+  return changelog
+}
+
+export { GET_CHANGELOG }
+export default getChangelog

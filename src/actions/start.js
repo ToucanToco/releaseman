@@ -1,32 +1,32 @@
-import Config from '../config';
-import fs from 'fs';
-import isEqual from 'lodash/fp/isEqual';
-import { ACTIONS, STATE_FILE_PATH } from '../store';
-import { RUN, SAVE_STATE } from '../actions';
-import { SET_CONFIG } from '../mutations';
+import Config from '../config'
+import fs from 'fs'
+import isEqual from 'lodash/fp/isEqual'
+import { ACTIONS, STATE_FILE_PATH } from '../store'
+import { RUN, SAVE_STATE } from '../actions'
+import { SET_CONFIG } from '../mutations'
 
-const START = 'START';
+const START = 'START'
 
-const start = ({ commit, dispatch, state }, argv) => {
-  try {
-    commit(SET_CONFIG, Config(argv));
-  } catch (e) {
-    return Promise.reject(e);
-  }
+const start = ({ commit, dispatch, state }) => async (argv) => {
+  commit(SET_CONFIG)(Config(argv))
 
   if (
     !isEqual(state.config.action)(ACTIONS.CONTINUE) &&
     fs.existsSync(STATE_FILE_PATH)
   ) {
-    fs.unlinkSync(STATE_FILE_PATH);
+    fs.unlinkSync(STATE_FILE_PATH)
   }
 
-  return dispatch(RUN)
-    .catch((e) => (
-      dispatch(SAVE_STATE)
-        .then(() => Promise.reject(e))
-    ));
-};
+  try {
+    await dispatch(RUN)()
+  } catch (e) {
+    await dispatch(SAVE_STATE)()
 
-export { START };
-export default start;
+    throw e
+  }
+
+  return undefined
+}
+
+export { START }
+export default start

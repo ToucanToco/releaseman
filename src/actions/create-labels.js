@@ -1,32 +1,29 @@
-import map from 'lodash/fp/map';
-import reject from 'lodash/fp/reject';
-import { ASSIGN_DATA } from '../mutations';
-import { logInfo, logTaskStart } from '../log';
+import map from 'lodash/fp/map'
+import { logInfo, logTaskStart } from '../log'
 
-const CREATE_LABELS = 'CREATE_LABELS';
+const CREATE_LABELS = 'CREATE_LABELS'
 
-const createLabels = ({ commit, getters, state }, isSkipped) => {
-  logTaskStart('Create labels');
+const createLabels = ({ getters }) => async ({ isSkipped, labels }) => {
+  logTaskStart('Create labels')
 
   if (isSkipped) {
-    return undefined;
+    return undefined
   }
 
-  logInfo('Creating labels...');
+  logInfo('Creating labels...')
 
-  return Promise.all(
-    map((label) => (
-      getters.github.labels.create(label)
-        .then(({ name, url }) => {
-          logInfo(`${name}: ${url}`);
+  const createdLabels = await Promise.all(
+    map(async (label) => {
+      const createdLabel = await getters.query('labels.create')(label)
 
-          return commit(ASSIGN_DATA, {
-            labels: reject(['name', name])(state.data.labels)
-          });
-        })
-    ))(state.data.labels)
-  );
-};
+      logInfo(`${createdLabel.name}: ${createdLabel.url}`)
 
-export { CREATE_LABELS };
-export default createLabels;
+      return createdLabel
+    })(labels)
+  )
+
+  return createdLabels
+}
+
+export { CREATE_LABELS }
+export default createLabels

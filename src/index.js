@@ -1,24 +1,24 @@
-import Package from '../package';
-import Store from './store';
-import yargs from 'yargs';
-import { START } from './actions';
-import { logError, logHint } from './log';
+import Package from '../package'
+import Store from './store'
+import yargs from 'yargs'
+import { START } from './actions'
+import { logError, logHint } from './log'
 
 const { argv } = yargs
   .boolean('doc')
   .boolean('release')
   .default('release', true)
   .help(false)
-  .version(Package.version);
+  .version(Package.version)
 
-logHint(`${Package.name} v${Package.version}\n`);
+logHint(`${Package.name} v${Package.version}\n`)
 
 Store
-  .dispatch(START, argv)
-  .catch((e) => (
-    setTimeout(() => {
-      logError(e);
+  .dispatch(START)(argv)
+  .catch((e) => {
+    logError(e)
 
-      throw 1;
+    return setTimeout(() => {
+      throw 1
     }, 0)
-  ));
+  })

@@ -1,27 +1,24 @@
-import lt from 'lodash/fp/lt';
-import { ASSIGN_DATA } from '../mutations';
-import { logInfo, logTaskStart } from '../log';
+import { logInfo, logTaskStart } from '../log'
 
-const GET_BRANCH_EXISTENCE = 'GET_BRANCH_EXISTENCE';
+const GET_BRANCH_EXISTENCE = 'GET_BRANCH_EXISTENCE'
 
-const getBranchExistence = ({ commit, getters, state }, isSkipped) => {
-  logTaskStart('Get branch existence');
+const getBranchExistence = ({ getters }) => async ({ isSkipped, name }) => {
+  logTaskStart('Get branch existence')
 
   if (isSkipped) {
-    return undefined;
+    return undefined
   }
 
-  logInfo(`Retrieving ${state.data.branch} existence...`);
+  logInfo(`Retrieving ${name} existence...`)
 
-  return getters.github.branches.getExistence({
-    name: state.data.branch
+  const isBranchPresent = await getters.query('branches.getExistence')({
+    name: name
   })
-    .then((isBranchPresent) => {
-      logInfo(isBranchPresent);
 
-      return commit(ASSIGN_DATA, { isBranchPresent: isBranchPresent });
-    });
-};
+  logInfo(isBranchPresent)
 
-export { GET_BRANCH_EXISTENCE };
-export default getBranchExistence;
+  return isBranchPresent
+}
+
+export { GET_BRANCH_EXISTENCE }
+export default getBranchExistence
