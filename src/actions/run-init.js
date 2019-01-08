@@ -101,7 +101,7 @@ const runInit = ({ getters, state }) => async () => {
     logWarn(`${state.config.branches.beta} already present.\n`)
   } else {
     await getters.runOrSkip(8)(CREATE_BRANCH)({
-      base: state.config.branches.master,
+      base: state.config.branches.develop,
       head: state.config.branches.beta
     })
   }
