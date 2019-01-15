@@ -119,3 +119,34 @@ It is used only when creating a new beta since the stable release will reuse it'
 | `finish` | Create a new stable release |
 | `start`  | Create a new beta release   |
 | `<name>` | Release name                |
+
+## Typical workflow
+Using releaseman from it's cloned folder without `repo` specified in the `defaults.json`
+
+### Start the release process
+`./bin/releaseman release start <Release Name> --repo <repository-name>`
+
+At this point, if some PRs were mis-labeled, `releaseman` will probably crash.
+Don't worry, the `continue` command is made for this, you can fix the labels
+in GitHub and run
+
+`./bin/releaseman continue`
+
+`releaseman` will skip all the steps before the one it crashed on and runs with the same options as before.
+
+### Deploy release branch and test (optional)
+If some fixes need to be done here, create a fix branch with
+
+`./bin/releaseman fix start <Fix Name> --repo <repository-name>`
+
+It will create a `fix/<fix-name>` branch.
+Make your fixes on it, then create a PR with
+
+`./bin/releaseman fix publish <Fix Name> --repo <repository-name>`
+
+Then merge it using
+
+`./bin/releaseman fix finish <pr-number> --repo <repository-name>`
+
+### Finish the release process.
+`./bin/releaseman release finish --repo <repository-name>`
