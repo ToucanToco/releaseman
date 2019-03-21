@@ -21,15 +21,21 @@ const getNextRelease = ({ getters, state }) => async ({
   }
 
   const isLatestPrerelease = isEqual(isPrerelease)(isFix)
+  const isLatestStable = !isPrerelease && isFix
 
   logInfo(`Retrieving latest ${
     isLatestPrerelease
       ? 'prerelease'
-      : 'release'
+      : (
+        isLatestStable
+          ? 'stable release'
+          : 'release'
+      )
   }...`)
 
   const { name, tag } = await getters.query('releases.getLatest')({
-    isPrerelease: isLatestPrerelease
+    isPrerelease: isLatestPrerelease,
+    isStable: isLatestStable
   })
 
   logInfo(`${tag}: ${name}`)
@@ -65,7 +71,7 @@ const getNextRelease = ({ getters, state }) => async ({
       nextTag = `${get(1)(tagMatch)}.${nextBetaNumber}`
     } else {
       const tagMatch = new RegExp(
-        `^${state.config.tag}(\\d+)\\.(\\d+)\\.\\d+$`
+        `^${state.config.tag}(\\d+)\\.(\\d+)\\.\\d+(-beta\\.?\\d*)?$`
       ).exec(tag)
 
       const major = (

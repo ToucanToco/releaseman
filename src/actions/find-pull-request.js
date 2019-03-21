@@ -1,4 +1,5 @@
-import { logInfo, logTaskStart } from '../log'
+import isUndefined from 'lodash/fp/isUndefined'
+import { logInfo, logTaskStart, logWarn } from '../log'
 
 const FIND_PULL_REQUEST = 'FIND_PULL_REQUEST'
 
@@ -19,6 +20,10 @@ const findPullRequest = ({ getters }) => async ({
     base: base,
     head: head
   })
+
+  if (isUndefined(pullRequest)) {
+    return logWarn('Not Found')
+  }
 
   logInfo(pullRequest.number)
 

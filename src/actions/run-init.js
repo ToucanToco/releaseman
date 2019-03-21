@@ -81,7 +81,7 @@ const runInit = ({ getters, state }) => async () => {
     logWarn('Prerelease already present.\n')
   } else {
     const latestRelease = await getters.runOrSkip(5)(GET_LATEST_RELEASE)({
-      isPrerelease: false
+      isStable: true
     })
 
     await getters.runOrSkip(6)(CREATE_RELEASE)({

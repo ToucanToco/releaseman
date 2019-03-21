@@ -4,7 +4,8 @@ const GET_LATEST_RELEASE = 'GET_LATEST_RELEASE'
 
 const getLatestRelease = ({ getters }) => async ({
   isPrerelease,
-  isSkipped
+  isSkipped,
+  isStable
 }) => {
   logTaskStart('Get latest release')
 
@@ -19,7 +20,8 @@ const getLatestRelease = ({ getters }) => async ({
   }...`)
 
   const latestRelease = await getters.query('releases.getLatest')({
-    isPrerelease: isPrerelease
+    isPrerelease: isPrerelease,
+    isStable: isStable
   })
 
   logInfo(`${latestRelease.tag}: ${latestRelease.name}`)

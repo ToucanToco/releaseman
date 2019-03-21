@@ -1,3 +1,4 @@
+import closePullRequest, { CLOSE_PULL_REQUEST } from './close-pull-request'
 import createBranch, { CREATE_BRANCH } from './create-branch'
 import createLabels, { CREATE_LABELS } from './create-labels'
 import createPullRequest, { CREATE_PULL_REQUEST } from './create-pull-request'
@@ -52,6 +53,7 @@ import updatePullRequestLabels, {
 } from './update-pull-request-labels'
 
 const actions = {
+  [CLOSE_PULL_REQUEST]: closePullRequest,
   [CREATE_BRANCH]: createBranch,
   [CREATE_LABELS]: createLabels,
   [CREATE_PULL_REQUEST]: createPullRequest,
@@ -99,6 +101,7 @@ const actions = {
 }
 
 export {
+  CLOSE_PULL_REQUEST,
   CREATE_BRANCH,
   CREATE_LABELS,
   CREATE_PULL_REQUEST,
