@@ -108,7 +108,7 @@ const runHotfixFinish = ({ getters, state }) => async () => {
     name: pullRequest.head
   })
   const latestRelease = await getters.runOrSkip(5)(GET_LATEST_RELEASE)({
-    isPrerelease: false
+    isStable: true
   })
 
   if (state.config.isRelease) {
