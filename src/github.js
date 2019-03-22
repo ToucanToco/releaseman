@@ -182,6 +182,11 @@ const GitHub = (config) => {
       }
     },
     pullRequests: {
+      close: async ({ number }) => {
+        await fetchGitHub(`pulls/${number}`, 'PATCH', { state: 'closed' })
+
+        return true
+      },
       create: async ({ base, changelog, head, name }) => {
         const { number, html_url } = await fetchGitHub('pulls', 'POST', {
           base: base,
@@ -298,22 +303,26 @@ const GitHub = (config) => {
           url: html_url
         }
       },
-      getLatest: async ({ isPrerelease = false } = {}) => {
+      getLatest: async ({ isPrerelease = false, isStable = false } = {}) => {
         let release
 
-        if (isPrerelease) {
+        if (isStable) {
+          release = await fetchGitHub('releases/latest')
+        } else {
           const releases = await fetchGitHub('releases')
 
           if (isEmpty(releases)) {
             throw 'Not Found'
           }
 
-          release = flow(
-            filter('prerelease'),
-            first
-          )(releases)
-        } else {
-          release = await fetchGitHub('releases/latest')
+          if (isPrerelease) {
+            release = flow(
+              filter('prerelease'),
+              first
+            )(releases)
+          } else {
+            release = first(releases)
+          }
         }
 
         return {
