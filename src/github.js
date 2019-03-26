@@ -173,7 +173,7 @@ const GitHub = (config) => {
         }
       },
       index: async () => {
-        const labels = await fetchGitHub('labels')
+        const labels = await fetchGitHub('labels?per_page=100')
 
         return map(({ color, name }) => ({
           color: color,
