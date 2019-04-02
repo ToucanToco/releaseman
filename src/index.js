@@ -8,6 +8,7 @@ const { argv } = yargs
   .boolean('doc')
   .boolean('release')
   .default('release', true)
+  .boolean('verbose')
   .help(false)
   .version(Package.version)
 
