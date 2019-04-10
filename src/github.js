@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import assign from 'lodash/fp/assign'
 import concat from 'lodash/fp/concat'
 import fetch from 'node-fetch'

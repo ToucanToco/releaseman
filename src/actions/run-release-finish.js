@@ -1,5 +1,4 @@
 import concat from 'lodash/fp/concat'
-import flow from 'lodash/fp/flow'
 import get from 'lodash/fp/get'
 import includes from 'lodash/fp/includes'
 import map from 'lodash/fp/map'
