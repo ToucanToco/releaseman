@@ -37,6 +37,7 @@ Git flow + GitHub PRs = <3
 | `--repo <value>`             | Repository name                                                     |
 | `--tag <value>`              | Tags prefix                                                         |
 | `--token <value>`            | GitHub access token                                                 |
+| `--verbose`                  | Log requests & full errors                                          |
 
 ### Commands
 #### Changes

@@ -35,6 +35,7 @@ Options:
   --repo <value>              Repository name
   --tag <value>               Tags prefix
   --token <value>             GitHub access token
+  --verbose                   Log requests & full errors
 `)
 
   const helpDefault = trim(`

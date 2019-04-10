@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import assign from 'lodash/fp/assign'
 import concat from 'lodash/fp/concat'
 import fetch from 'node-fetch'
@@ -14,6 +15,8 @@ import map from 'lodash/fp/map'
 import reject from 'lodash/fp/reject'
 import size from 'lodash/fp/size'
 import some from 'lodash/fp/some'
+import uniqueId from 'lodash/fp/uniqueId'
+import { logHint } from './log'
 
 const GitHub = (config) => {
   const baseUrl = `https://github.com/${config.owner}/${config.repo}/`
@@ -23,15 +26,28 @@ const GitHub = (config) => {
   }
 
   const fetchGitHub = async (path, method = 'GET', body) => {
-    const res = await fetch(
-      `https://api.github.com/repos/${config.owner}/${config.repo}/${path}`,
-      {
-        body: JSON.stringify(body),
-        headers: headers,
-        method: method
-      }
+    const id = uniqueId()
+    const url = (
+      `https://api.github.com/repos/${config.owner}/${config.repo}/${path}`
     )
 
+    if (config.isVerbose) {
+      logHint(`Fetch #${id}: ${JSON.stringify({
+        url: url,
+        method: method,
+        body: body
+      }, null, 2)}`)
+    }
+
+    const res = await fetch(url, {
+      body: JSON.stringify(body),
+      headers: headers,
+      method: method
+    })
+
+    if (config.isVerbose) {
+      logHint(`Fetch #${id} status: ${res.status}`)
+    }
     if (isEqual(204)(res.status)) {
       return {}
     }
@@ -42,7 +58,11 @@ const GitHub = (config) => {
       return data
     }
 
-    throw data.message
+    throw (
+      config.isVerbose
+        ? `Fetch #${id} error: ${JSON.stringify(data, null, 2)}`
+        : data.message
+    )
   }
 
   const github = {

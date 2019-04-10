@@ -48,6 +48,7 @@ const Config = (argv) => {
     helpOn: secondArg,
     isDoc: argv.doc,
     isRelease: argv.release,
+    isVerbose: argv.verbose,
     labels: {
       breaking: getArgOrDefault('labels.breaking'),
       doc: getArgOrDefault('labels.doc'),
