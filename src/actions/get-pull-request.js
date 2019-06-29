@@ -1,23 +1,20 @@
-import { logInfo, logTaskStart } from '../log'
+import { logInfo, logWarn } from '../log'
 
 const GET_PULL_REQUEST = 'GET_PULL_REQUEST'
 
-const getPullRequest = ({ getters }) => async ({ isSkipped, number }) => {
-  logTaskStart('Get pull request')
-
-  if (isSkipped) {
-    return undefined
-  }
-
+const getPullRequest = ({ getters }) => async ({ number }) => {
   logInfo(`Retrieving pull request #${number}...`)
 
-  const pullRequest = await getters.query('pullRequests.get')({
-    number: number
-  })
+  const pull = await getters.query('pulls.get')({ number })
 
-  logInfo(pullRequest.name)
+  if (pull === undefined) {
+    return logWarn('Not Found')
+  }
 
-  return pullRequest
+  logInfo(pull.number)
+  logInfo(pull.url)
+
+  return pull
 }
 
 export { GET_PULL_REQUEST }

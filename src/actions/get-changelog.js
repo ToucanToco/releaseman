@@ -1,14 +1,8 @@
-import { logInfo, logTaskStart } from '../log'
+import { logInfo } from '../log'
 
 const GET_CHANGELOG = 'GET_CHANGELOG'
 
-const getChangelog = ({ getters }) => async ({ base, head, isSkipped }) => {
-  logTaskStart('Get changelog')
-
-  if (isSkipped) {
-    return undefined
-  }
-
+const getChangelog = ({ getters }) => async ({ base, head }) => {
   logInfo(`Retrieving changelog for \`${head}\` since \`${base}\`...`)
 
   const changelog = await getters.query('commits.getChangelog')({
@@ -16,7 +10,7 @@ const getChangelog = ({ getters }) => async ({ base, head, isSkipped }) => {
     head: head
   })
 
-  logInfo(changelog.text)
+  logInfo(changelog.message)
 
   return changelog
 }

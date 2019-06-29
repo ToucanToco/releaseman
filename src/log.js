@@ -1,8 +1,5 @@
-import flow from 'lodash/fp/flow'
 import padChars from 'lodash/fp/padChars'
 import padCharsEnd from 'lodash/fp/padCharsEnd'
-import replace from 'lodash/fp/replace'
-import upperCase from 'lodash/fp/upperCase'
 
 const _logColor = (color) => (message) => (
   // eslint-disable-next-line no-console
@@ -16,28 +13,25 @@ const logInfo = _logColor('\x1b[36m')
 const logSuccess = _logColor('\x1b[32m')
 const logWarn = _logColor('\x1b[33m')
 
-const logAction = (position) => (action) => {
-  const actionName = flow(
-    replace('RUN_')(''),
-    upperCase
-  )(action)
-
-  const logPad = padChars('#')(79)(`### ${position} ${actionName} SCRIPT ###`)
-
-  return log(`${logPad}\n`)
-}
-const logTaskStart = (description) => log(
-  padCharsEnd('*')(79)(`TASK: [${description}] ***`)
+const logCommand = (position) => (command) => log(`${
+  padChars('#')(79)(`### ${position} ${command.replace(/_/g, ' ')} SCRIPT ###`)
+}\n`)
+const logTaskStart = (task) => log(
+  padCharsEnd('*')(79)(`TASK: [${task[0].toUpperCase()}${
+    task.slice(1)
+      .replace(/_/g, ' ')
+      .toLowerCase()
+  }] ***`)
 )
 
-const logActionEnd = logAction('END')
-const logActionStart = logAction('START')
+const logCommandEnd = logCommand('END')
+const logCommandStart = logCommand('START')
 
 export {
   log,
-  logAction,
-  logActionEnd,
-  logActionStart,
+  logCommand,
+  logCommandEnd,
+  logCommandStart,
   logError,
   logHint,
   logInfo,

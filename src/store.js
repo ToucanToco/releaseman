@@ -1,22 +1,20 @@
 import actions, { RUN_TASK, SKIP_TASK } from './actions'
-import filter from 'lodash/fp/filter'
-import flow from 'lodash/fp/flow'
 import get from 'lodash/fp/get'
-import gte from 'lodash/fp/gte'
-import isEmpty from 'lodash/fp/isEmpty'
-import isUndefined from 'lodash/fp/isUndefined'
-import join from 'lodash/fp/join'
-import map from 'lodash/fp/map'
 import mutations from './mutations'
+import { logTaskStart } from './log'
 
-const ACTIONS = {
-  CHANGES: 'changes',
+const COMMANDS = {
+  ALPHA: 'alpha',
+  BETA: 'beta',
+  COMPARE: 'compare',
   CONTINUE: 'continue',
-  FEATURE: 'feature',
-  FIX: 'fix',
   HELP: 'help',
+  STABLE: 'stable'
+}
+const MODES = {
+  AUTO: 'auto',
+  FIX: 'fix',
   HOTFIX: 'hotfix',
-  INIT: 'init',
   RELEASE: 'release'
 }
 const STATE_FILE_PATH = `${__dirname}/state.json`
@@ -32,23 +30,27 @@ const Store = {
   getters: {
     github: null,
     query: (path) => (payload) => get(path)(Store.getters.github)(payload),
-    runOrSkip: (index) => (action) => (payload) => Store.dispatch((
-      gte(index)(Store.state.taskIndex)
-        ? RUN_TASK
-        : SKIP_TASK
-    ))({
-      action: action,
-      index: index,
-      payload: payload
-    }),
-    validateConfig: (...keys) => {
-      const error = flow(
-        filter((key) => isUndefined(get(key)(Store.state.config))),
-        map((key) => `The <${key}> param is mandatory!`),
-        join('\n')
-      )(keys)
+    runOrSkip: (index) => (action) => (payload) => {
+      logTaskStart(action)
 
-      if (isEmpty(error)) {
+      return Store.dispatch(
+        index >= Store.state.taskIndex
+          ? RUN_TASK
+          : SKIP_TASK
+      )({
+        action,
+        index,
+        payload
+      })
+    },
+    validateConfig: (...keys) => {
+      const error = keys.filter((key) => (
+        get(key)(Store.state.config) === undefined
+      ))
+        .map((key) => `The <${key}> param is mandatory!`)
+        .join('\n')
+
+      if (error.length === 0) {
         return undefined
       }
 
@@ -64,7 +66,8 @@ const Store = {
 }
 
 export {
-  ACTIONS,
+  COMMANDS,
+  MODES,
   STATE_FILE_PATH
 }
 export default Store

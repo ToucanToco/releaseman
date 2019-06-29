@@ -1,7 +1,6 @@
 import fs from 'fs'
-import isEqual from 'lodash/fp/isEqual'
-import { ACTIONS, STATE_FILE_PATH } from '../store'
-import { RUN } from '../actions'
+import { COMMANDS, STATE_FILE_PATH } from '../store'
+import { RUN_COMMAND } from '../actions'
 import { SET_CONFIG, SET_DATA, SET_TASK_INDEX } from '../mutations'
 
 const RUN_CONTINUE = 'RUN_CONTINUE'
@@ -13,7 +12,7 @@ const runContinue = ({ commit, dispatch }) => () => {
 
   const state = JSON.parse(fs.readFileSync(STATE_FILE_PATH, 'utf8'))
 
-  if (isEqual(state.config.action)(ACTIONS.CONTINUE)) {
+  if (state.config.command === COMMANDS.CONTINUE) {
     throw 'There\'s no point in running continue from continue!'
   }
 
@@ -22,7 +21,7 @@ const runContinue = ({ commit, dispatch }) => () => {
   commit(SET_DATA)(state.data)
   commit(SET_TASK_INDEX)(state.taskIndex)
 
-  return dispatch(RUN)()
+  return dispatch(RUN_COMMAND)()
 }
 
 export { RUN_CONTINUE }

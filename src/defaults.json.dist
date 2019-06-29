@@ -1,13 +1,9 @@
 {
   "branches": {
-    "beta": "latest-beta",
+    "alpha": "alpha",
+    "beta": "beta",
     "develop": "develop",
-    "doc": "doc-",
-    "feature": "f-",
-    "fix": "fix-",
-    "hotfix": "hotfix-",
-    "master": "master",
-    "release": "release-"
+    "master": "master"
   },
   "categories": [{
     "label": "<label>",
@@ -15,11 +11,7 @@
   }],
   "labels": {
     "breaking": "<label for breaking changes>",
-    "doc": "<label for documentation pull requests>",
-    "feature": "<label for features pull requests>",
-    "fix": "<label for fixes pull requests>",
-    "release": "<label for releases pull requests>",
-    "wip": "<label for in progress features>"
+    "release": "<label for releases pull requests>"
   },
   "owner": "<repository owner>",
   "repo": "<repository name>",

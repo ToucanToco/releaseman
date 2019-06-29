@@ -1,19 +1,12 @@
 import Defaults from './defaults'
-import drop from 'lodash/fp/drop'
-import flow from 'lodash/fp/flow'
 import fs from 'fs'
 import get from 'lodash/fp/get'
-import gt from 'lodash/fp/gt'
-import identity from 'lodash/fp/identity'
-import isUndefined from 'lodash/fp/isUndefined'
-import join from 'lodash/fp/join'
 import merge from 'lodash/fp/merge'
-import size from 'lodash/fp/size'
 
 const Config = (argv) => {
   let defaults = Defaults
 
-  if (!isUndefined(argv.defaults)) {
+  if (argv.defaults !== undefined) {
     if (!fs.existsSync(argv.defaults)) {
       throw 'The <defaults> file doesn\'t exist!'
     }
@@ -21,56 +14,44 @@ const Config = (argv) => {
     defaults = merge(defaults)(JSON.parse(fs.readFileSync(argv.defaults)))
   }
 
-  const getArgOrDefault = (key, parseArg = identity) => {
+  const getArgOrDefault = (key, parseArg = (value) => value) => {
     const value = get(key)(argv)
 
     return (
-      isUndefined(value)
+      value === undefined
         ? get(key)(defaults)
         : parseArg(value)
     )
   }
-  const secondArg = get(1)(argv._)
 
   return {
-    action: get(0)(argv._),
+    base: argv._[1],
     branches: {
+      alpha: getArgOrDefault('branches.alpha'),
       beta: getArgOrDefault('branches.beta'),
       develop: getArgOrDefault('branches.develop'),
-      doc: getArgOrDefault('branches.doc'),
-      feature: getArgOrDefault('branches.feature'),
-      fix: getArgOrDefault('branches.fix'),
-      hotfix: getArgOrDefault('branches.hotfix'),
-      master: getArgOrDefault('branches.master'),
-      release: getArgOrDefault('branches.release')
+      master: getArgOrDefault('branches.master')
     },
     categories: getArgOrDefault('categories', JSON.parse),
-    helpOn: secondArg,
-    isDoc: argv.doc,
+    command: argv._[0],
+    head: argv._[2],
+    helpOn: argv._[1],
     isRelease: argv.release,
     isVerbose: argv.verbose,
     labels: {
       breaking: getArgOrDefault('labels.breaking'),
-      doc: getArgOrDefault('labels.doc'),
-      feature: getArgOrDefault('labels.feature'),
-      fix: getArgOrDefault('labels.fix'),
-      release: getArgOrDefault('labels.release'),
-      wip: getArgOrDefault('labels.wip')
+      release: getArgOrDefault('labels.release')
     },
+    mode: argv._[1],
     name: (
-      flow(
-        size,
-        gt(3)
-      )(argv._)
+      argv._.length < 3
         ? undefined
-        : flow(
-          drop(2),
-          join(' ')
-        )(argv._)
+        : argv._
+          .slice(2)
+          .join(' ')
     ),
-    number: get(2)(argv._),
+    number: argv._[2],
     owner: getArgOrDefault('owner'),
-    position: secondArg,
     repo: getArgOrDefault('repo'),
     tag: getArgOrDefault('tag'),
     token: getArgOrDefault('token')

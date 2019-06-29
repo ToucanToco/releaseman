@@ -1,38 +1,33 @@
-import { logInfo, logTaskStart } from '../log'
+import { logInfo, logWarn } from '../log'
 
 const CREATE_RELEASE = 'CREATE_RELEASE'
 
 const createRelease = ({ getters }) => async ({
   branch,
-  changelog,
-  isPrerelease,
-  isSkipped,
+  isPrerelease = false,
+  message,
   name,
   tag
 }) => {
-  logTaskStart('Create release')
-
-  if (isSkipped) {
-    return undefined
-  }
-
   logInfo(`Creating new ${
     isPrerelease
       ? 'prerelease'
       : 'release'
   }...`)
 
+  if (message === 'No new PR') {
+    return logWarn('Release already present.')
+  }
+
   const release = await getters.query('releases.create')({
-    branch: branch,
-    changelog: changelog,
-    isPrerelease: isPrerelease,
-    name: name,
-    tag: tag
+    branch,
+    isPrerelease,
+    message,
+    name,
+    tag
   })
 
-  logInfo(release.url)
-
-  return release
+  return logInfo(release.url)
 }
 
 export { CREATE_RELEASE }

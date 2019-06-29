@@ -1,11 +1,10 @@
 import Package from '../package'
 import Store from './store'
 import yargs from 'yargs'
-import { START } from './actions'
 import { logError, logHint } from './log'
+import { START } from './actions'
 
 const { argv } = yargs
-  .boolean('doc')
   .boolean('release')
   .default('release', true)
   .boolean('verbose')

@@ -1,17 +1,17 @@
-import { logInfo, logTaskStart } from '../log'
+import { logInfo, logWarn } from '../log'
 
 const DELETE_BRANCH = 'DELETE_BRANCH'
 
-const deleteBranch = ({ getters }) => async ({ isSkipped, name }) => {
-  logTaskStart('Delete branch')
+const deleteBranch = ({ getters }) => async ({ name }) => {
+  logInfo(`Deleting \`${name}\`...`)
 
-  if (isSkipped) {
-    return undefined
+  const isExisting = await getters.query('branches.getExistence')({ name })
+
+  if (!isExisting) {
+    return logWarn('Branch does not exist.')
   }
 
-  logInfo(`Deleting branch \`${name}\`...`)
-
-  await getters.query('branches.delete')({ name: name })
+  await getters.query('branches.delete')({ name })
 
   return undefined
 }

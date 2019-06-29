@@ -1,149 +1,119 @@
-import closePullRequest, { CLOSE_PULL_REQUEST } from './close-pull-request'
-import createBranch, { CREATE_BRANCH } from './create-branch'
-import createLabels, { CREATE_LABELS } from './create-labels'
+import alphaAuto, { ALPHA_AUTO } from './alpha-auto'
+import alphaAutoFix, { ALPHA_AUTO_FIX } from './alpha-auto-fix'
+import alphaAutoRelease, { ALPHA_AUTO_RELEASE } from './alpha-auto-release'
+import alphaFix, { ALPHA_FIX } from './alpha-fix'
+import alphaRelease, { ALPHA_RELEASE } from './alpha-release'
+import betaAuto, { BETA_AUTO } from './beta-auto'
+import betaAutoFix, { BETA_AUTO_FIX } from './beta-auto-fix'
+import betaAutoRelease, { BETA_AUTO_RELEASE } from './beta-auto-release'
+import betaFix, { BETA_FIX } from './beta-fix'
+import betaRelease, { BETA_RELEASE } from './beta-release'
+import compare, { COMPARE } from './compare'
 import createPullRequest, { CREATE_PULL_REQUEST } from './create-pull-request'
 import createRelease, { CREATE_RELEASE } from './create-release'
 import deleteBranch, { DELETE_BRANCH } from './delete-branch'
 import findPullRequest, { FIND_PULL_REQUEST } from './find-pull-request'
-import getBranchExistence, {
-  GET_BRANCH_EXISTENCE
-} from './get-branch-existence'
+import getBranch, { GET_BRANCH } from './get-branch'
 import getChangelog, { GET_CHANGELOG } from './get-changelog'
-import getLabels, { GET_LABELS } from './get-labels'
+import getHelp, { GET_HELP } from './get-help'
 import getLatestRelease, { GET_LATEST_RELEASE } from './get-latest-release'
-import getNextRelease, { GET_NEXT_RELEASE } from './get-next-release'
+import getLatestTag, { GET_LATEST_TAG } from './get-latest-tag'
 import getPullRequest, { GET_PULL_REQUEST } from './get-pull-request'
-import getPullRequestLabels, {
-  GET_PULL_REQUEST_LABELS
-} from './get-pull-request-labels'
-import getReleaseBranch, { GET_RELEASE_BRANCH } from './get-release-branch'
-import getReleaseExistence, {
-  GET_RELEASE_EXISTENCE
-} from './get-release-existence'
+import getTag, { GET_TAG } from './get-tag'
 import mergeBranches, { MERGE_BRANCHES } from './merge-branches'
 import mergePullRequest, { MERGE_PULL_REQUEST } from './merge-pull-request'
-import run, { RUN } from './run'
-import runChanges, { RUN_CHANGES } from './run-changes'
+import runCommand, { RUN_COMMAND } from './run-command'
 import runContinue, { RUN_CONTINUE } from './run-continue'
-import runFeature, { RUN_FEATURE } from './run-feature'
-import runFeatureFinish, { RUN_FEATURE_FINISH } from './run-feature-finish'
-import runFeaturePublish, { RUN_FEATURE_PUBLISH } from './run-feature-publish'
-import runFeatureStart, { RUN_FEATURE_START } from './run-feature-start'
-import runFix, { RUN_FIX } from './run-fix'
-import runFixFinish, { RUN_FIX_FINISH } from './run-fix-finish'
-import runFixPublish, { RUN_FIX_PUBLISH } from './run-fix-publish'
-import runFixStart, { RUN_FIX_START } from './run-fix-start'
-import runHelp, { RUN_HELP } from './run-help'
-import runHotfix, { RUN_HOTFIX } from './run-hotfix'
-import runHotfixFinish, { RUN_HOTFIX_FINISH } from './run-hotfix-finish'
-import runHotfixPublish, { RUN_HOTFIX_PUBLISH } from './run-hotfix-publish'
-import runHotfixStart, { RUN_HOTFIX_START } from './run-hotfix-start'
-import runInit, { RUN_INIT } from './run-init'
-import runRelease, { RUN_RELEASE } from './run-release'
-import runReleaseFinish, { RUN_RELEASE_FINISH } from './run-release-finish'
-import runReleaseStart, { RUN_RELEASE_START } from './run-release-start'
 import runTask, { RUN_TASK } from './run-task'
 import saveState, { SAVE_STATE } from './save-state'
 import skipTask, { SKIP_TASK } from './skip-task'
+import stableAuto, { STABLE_AUTO } from './stable-auto'
+import stableAutoFix, { STABLE_AUTO_FIX } from './stable-auto-fix'
+import stableAutoRelease, { STABLE_AUTO_RELEASE } from './stable-auto-release'
+import stableFix, { STABLE_FIX } from './stable-fix'
+import stableRelease, { STABLE_RELEASE } from './stable-release'
 import start, { START } from './start'
-import updateBranch, { UPDATE_BRANCH } from './update-branch'
 import updatePullRequest, { UPDATE_PULL_REQUEST } from './update-pull-request'
 import updatePullRequestLabels, {
   UPDATE_PULL_REQUEST_LABELS
 } from './update-pull-request-labels'
 
 const actions = {
-  [CLOSE_PULL_REQUEST]: closePullRequest,
-  [CREATE_BRANCH]: createBranch,
-  [CREATE_LABELS]: createLabels,
+  [ALPHA_AUTO]: alphaAuto,
+  [ALPHA_AUTO_FIX]: alphaAutoFix,
+  [ALPHA_AUTO_RELEASE]: alphaAutoRelease,
+  [ALPHA_FIX]: alphaFix,
+  [ALPHA_RELEASE]: alphaRelease,
+  [BETA_AUTO]: betaAuto,
+  [BETA_AUTO_FIX]: betaAutoFix,
+  [BETA_AUTO_RELEASE]: betaAutoRelease,
+  [BETA_FIX]: betaFix,
+  [BETA_RELEASE]: betaRelease,
+  [COMPARE]: compare,
   [CREATE_PULL_REQUEST]: createPullRequest,
   [CREATE_RELEASE]: createRelease,
   [DELETE_BRANCH]: deleteBranch,
   [FIND_PULL_REQUEST]: findPullRequest,
-  [GET_BRANCH_EXISTENCE]: getBranchExistence,
+  [GET_BRANCH]: getBranch,
   [GET_CHANGELOG]: getChangelog,
-  [GET_LABELS]: getLabels,
+  [GET_HELP]: getHelp,
   [GET_LATEST_RELEASE]: getLatestRelease,
-  [GET_NEXT_RELEASE]: getNextRelease,
+  [GET_LATEST_TAG]: getLatestTag,
   [GET_PULL_REQUEST]: getPullRequest,
-  [GET_PULL_REQUEST_LABELS]: getPullRequestLabels,
-  [GET_RELEASE_BRANCH]: getReleaseBranch,
-  [GET_RELEASE_EXISTENCE]: getReleaseExistence,
+  [GET_TAG]: getTag,
   [MERGE_BRANCHES]: mergeBranches,
   [MERGE_PULL_REQUEST]: mergePullRequest,
-  [RUN]: run,
-  [RUN_CHANGES]: runChanges,
+  [RUN_COMMAND]: runCommand,
   [RUN_CONTINUE]: runContinue,
-  [RUN_FEATURE]: runFeature,
-  [RUN_FEATURE_FINISH]: runFeatureFinish,
-  [RUN_FEATURE_PUBLISH]: runFeaturePublish,
-  [RUN_FEATURE_START]: runFeatureStart,
-  [RUN_FIX]: runFix,
-  [RUN_FIX_FINISH]: runFixFinish,
-  [RUN_FIX_PUBLISH]: runFixPublish,
-  [RUN_FIX_START]: runFixStart,
-  [RUN_HELP]: runHelp,
-  [RUN_HOTFIX]: runHotfix,
-  [RUN_HOTFIX_FINISH]: runHotfixFinish,
-  [RUN_HOTFIX_PUBLISH]: runHotfixPublish,
-  [RUN_HOTFIX_START]: runHotfixStart,
-  [RUN_INIT]: runInit,
-  [RUN_RELEASE]: runRelease,
-  [RUN_RELEASE_FINISH]: runReleaseFinish,
-  [RUN_RELEASE_START]: runReleaseStart,
   [RUN_TASK]: runTask,
   [SAVE_STATE]: saveState,
   [SKIP_TASK]: skipTask,
+  [STABLE_AUTO]: stableAuto,
+  [STABLE_AUTO_FIX]: stableAutoFix,
+  [STABLE_AUTO_RELEASE]: stableAutoRelease,
+  [STABLE_FIX]: stableFix,
+  [STABLE_RELEASE]: stableRelease,
   [START]: start,
-  [UPDATE_BRANCH]: updateBranch,
   [UPDATE_PULL_REQUEST]: updatePullRequest,
   [UPDATE_PULL_REQUEST_LABELS]: updatePullRequestLabels
 }
 
 export {
-  CLOSE_PULL_REQUEST,
-  CREATE_BRANCH,
-  CREATE_LABELS,
+  ALPHA_AUTO,
+  ALPHA_AUTO_FIX,
+  ALPHA_AUTO_RELEASE,
+  ALPHA_FIX,
+  ALPHA_RELEASE,
+  BETA_AUTO,
+  BETA_AUTO_FIX,
+  BETA_AUTO_RELEASE,
+  BETA_FIX,
+  BETA_RELEASE,
+  COMPARE,
   CREATE_PULL_REQUEST,
   CREATE_RELEASE,
   DELETE_BRANCH,
   FIND_PULL_REQUEST,
-  GET_BRANCH_EXISTENCE,
+  GET_BRANCH,
   GET_CHANGELOG,
-  GET_LABELS,
+  GET_HELP,
   GET_LATEST_RELEASE,
-  GET_NEXT_RELEASE,
+  GET_LATEST_TAG,
   GET_PULL_REQUEST,
-  GET_PULL_REQUEST_LABELS,
-  GET_RELEASE_BRANCH,
-  GET_RELEASE_EXISTENCE,
+  GET_TAG,
   MERGE_BRANCHES,
   MERGE_PULL_REQUEST,
-  RUN,
-  RUN_CHANGES,
+  RUN_COMMAND,
   RUN_CONTINUE,
-  RUN_FEATURE,
-  RUN_FEATURE_FINISH,
-  RUN_FEATURE_PUBLISH,
-  RUN_FEATURE_START,
-  RUN_FIX,
-  RUN_FIX_FINISH,
-  RUN_FIX_PUBLISH,
-  RUN_FIX_START,
-  RUN_HELP,
-  RUN_HOTFIX,
-  RUN_HOTFIX_FINISH,
-  RUN_HOTFIX_PUBLISH,
-  RUN_HOTFIX_START,
-  RUN_INIT,
-  RUN_RELEASE,
-  RUN_RELEASE_FINISH,
-  RUN_RELEASE_START,
   RUN_TASK,
   SAVE_STATE,
   SKIP_TASK,
+  STABLE_AUTO,
+  STABLE_AUTO_FIX,
+  STABLE_AUTO_RELEASE,
+  STABLE_FIX,
+  STABLE_RELEASE,
   START,
-  UPDATE_BRANCH,
   UPDATE_PULL_REQUEST,
   UPDATE_PULL_REQUEST_LABELS
 }

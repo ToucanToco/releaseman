@@ -1,32 +1,41 @@
-import { logInfo, logTaskStart } from '../log'
+import { logInfo, logWarn } from '../log'
 
 const CREATE_PULL_REQUEST = 'CREATE_PULL_REQUEST'
 
 const createPullRequest = ({ getters }) => async ({
   base,
-  changelog,
   head,
-  isSkipped,
+  message,
   name
 }) => {
-  logTaskStart('Create pull request')
-
-  if (isSkipped) {
-    return undefined
-  }
-
   logInfo(`Creating pull request for \`${head}\` into \`${base}\`...`)
 
-  const pullRequest = await getters.query('pullRequests.create')({
-    base: base,
-    changelog: changelog,
-    head: head,
-    name: name
+  const existingPull = await getters.query('pulls.find')({
+    base,
+    head
   })
+  let pull
 
-  logInfo(pullRequest.url)
+  if (existingPull === undefined) {
+    pull = await getters.query('pulls.create')({
+      base,
+      head,
+      message,
+      name
+    })
+  } else {
+    logWarn('This pull request already exists.')
 
-  return pullRequest
+    pull = await getters.query('pulls.update')({
+      message,
+      name,
+      number: existingPull.number
+    })
+  }
+
+  logInfo(pull.url)
+
+  return pull
 }
 
 export { CREATE_PULL_REQUEST }

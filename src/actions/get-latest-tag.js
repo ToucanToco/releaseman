@@ -1,8 +1,8 @@
 import { logInfo } from '../log'
 
-const GET_LATEST_RELEASE = 'GET_LATEST_RELEASE'
+const GET_LATEST_TAG = 'GET_LATEST_TAG'
 
-const getLatestRelease = ({ getters }) => async ({
+const getLatestTag = ({ getters }) => async ({
   isPrerelease = false,
   isStable = false
 }) => {
@@ -10,18 +10,18 @@ const getLatestRelease = ({ getters }) => async ({
     isPrerelease
       ? 'prerelease'
       : 'release'
-  }...`)
+  } tag...`)
 
   const latestRelease = await getters.query('releases.getLatest')({
     isPrerelease,
     isStable
   })
 
-  logInfo(`${latestRelease.tag}: ${latestRelease.name}`)
+  logInfo(latestRelease.tag)
   logInfo(latestRelease.url)
 
-  return latestRelease
+  return latestRelease.tag
 }
 
-export { GET_LATEST_RELEASE }
-export default getLatestRelease
+export { GET_LATEST_TAG }
+export default getLatestTag

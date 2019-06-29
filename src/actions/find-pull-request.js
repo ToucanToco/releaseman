@@ -1,33 +1,23 @@
-import isUndefined from 'lodash/fp/isUndefined'
-import { logInfo, logTaskStart, logWarn } from '../log'
+import { logInfo, logWarn } from '../log'
 
 const FIND_PULL_REQUEST = 'FIND_PULL_REQUEST'
 
-const findPullRequest = ({ getters }) => async ({
-  base,
-  head,
-  isSkipped
-}) => {
-  logTaskStart('Find pull request')
-
-  if (isSkipped) {
-    return undefined
-  }
-
+const findPullRequest = ({ getters }) => async ({ base, head }) => {
   logInfo(`Searching pull request for \`${head}\` into \`${base}\`...`)
 
-  const pullRequest = await getters.query('pullRequests.find')({
+  const pull = await getters.query('pulls.find')({
     base: base,
     head: head
   })
 
-  if (isUndefined(pullRequest)) {
+  if (pull === undefined) {
     return logWarn('Not Found')
   }
 
-  logInfo(pullRequest.number)
+  logInfo(pull.number)
+  logInfo(pull.url)
 
-  return pullRequest
+  return pull
 }
 
 export { FIND_PULL_REQUEST }
