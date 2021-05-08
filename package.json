@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "del-cli": "^1.1.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.21",
     "node-fetch": "^2.6.1",
     "rollup": "^1.9.3",
     "rollup-plugin-commonjs": "^9.3.4",
